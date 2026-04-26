@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CinePass - Series Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#a7c8ff",
+                    "surface": "#f8f9fa",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#d3e1f6",
+                    "surface-tint": "#c0000c",
+                    "outline-variant": "#e9bcb6",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#001b3c",
+                    "on-surface-variant": "#5e3f3b",
+                    "tertiary-container": "#0072d7",
+                    "primary-fixed": "#ffdad5",
+                    "on-surface": "#191c1d",
+                    "primary": "#b8000b",
+                    "on-secondary-fixed-variant": "#3a4859",
+                    "on-error": "#ffffff",
+                    "on-background": "#191c1d",
+                    "on-tertiary-container": "#f8f9ff",
+                    "inverse-surface": "#2e3132",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "on-primary-container": "#fff7f6",
+                    "secondary-fixed": "#d6e4f9",
+                    "on-secondary-container": "#566475",
+                    "surface-variant": "#e1e3e4",
+                    "on-primary-fixed-variant": "#930007",
+                    "secondary-fixed-dim": "#bac8dc",
+                    "surface-container-high": "#e7e8e9",
+                    "primary-fixed-dim": "#ffb4aa",
+                    "tertiary-fixed": "#d5e3ff",
+                    "outline": "#936e69",
+                    "error": "#ba1a1a",
+                    "secondary": "#525f71",
+                    "primary-container": "#e50914",
+                    "on-primary-fixed": "#410001",
+                    "background": "#f8f9fa",
+                    "tertiary": "#005aab",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-tertiary-fixed-variant": "#004689",
+                    "surface-dim": "#d9dadb",
+                    "surface-container": "#edeeef",
+                    "on-primary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f3f4f5",
+                    "inverse-primary": "#ffb4aa",
+                    "on-secondary-fixed": "#0f1c2c",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "body": ["Be Vietnam Pro"],
+                    "label": ["Be Vietnam Pro"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-40 bg-[#f8f9fa] flex justify-between items-center py-4 w-full px-4"><div class="w-full max-w-4xl mx-auto flex items-center justify-between relative">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors absolute left-0">
+<span class="material-symbols-outlined text-on-surface">chevron_left</span>
+</button>
+<h1 class="text-2xl font-display font-bold tracking-tight text-on-surface mx-auto">Series</h1>
+</div></header>
+<main class="pb-32">
+<!-- 1. Full-width Trailer Player -->
+<section class="relative w-full aspect-video bg-black overflow-hidden md:rounded-lg md:max-w-6xl md:mx-auto md:mt-4 shadow-xl">
+<div class="absolute inset-0 flex items-center justify-center bg-black/20 group">
+<img class="w-full h-full object-cover opacity-80" data-alt="cinematic wide shot of a futuristic neon city in the rain with flying vehicles and glowing advertisements" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATT6sFJnP0etcLO1BX9VUtbNDOX0XBf4zuwpUQuM_pZh1HHoQ-7dA8kA8dZqp0-5hmApxvCZlvAdQpv2w9_qZHNuSvALXe6zM0rZ5ApRvjmQkQLThTNFI4t6NFd5a4DF4SzevYAq7EctFMqutlQYnSCVeQZjxeVC5S6XpDGjgjYjz3S-7iS_4jzNbhXDlRxspymR3Z0AI5O0IukgkSBqODD2EcN_n32hCSOVCsrn-_SmPOUmwW8N-ug24S5X9T4L7rzwuB37vCdw"/>
+<button class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-20 h-20 bg-primary/90 text-white rounded-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 active:scale-90">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<div class="absolute bottom-4 right-6 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-label">
+                    Trailer • 2:14
+                </div>
+</div>
+</section>
+<!-- 2. Centered Series Info -->
+<section class="px-6 -mt-8 relative z-10 text-center max-w-4xl mx-auto">
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_12px_32px_rgba(25,28,29,0.06)]">
+<h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight text-on-surface mb-3">Neon Genesis</h2>
+<div class="flex flex-wrap items-center justify-center gap-2 mb-8">
+<span class="px-4 py-1.5 bg-surface-container-low rounded-full text-sm font-medium text-secondary">Sci-Fi</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="px-4 py-1.5 bg-surface-container-low rounded-full text-sm font-medium text-secondary">Cyberpunk</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<span class="px-4 py-1.5 bg-surface-container-low rounded-full text-sm font-medium text-secondary">2 Seasons</span>
+</div>
+<button class="w-full py-4 bg-gradient-to-br from-[#b8000b] to-[#e50914] text-white rounded-full font-display font-bold text-lg flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                    Watch Now
+                </button>
+</div>
+</section>
+<!-- 3. Description & Details -->
+<section class="px-6 py-10 max-w-4xl mx-auto">
+<h3 class="font-display font-bold text-xl mb-3">Storyline</h3>
+<p class="text-secondary font-body leading-relaxed mb-4">
+                In a world where digital consciousness can be harvested, a renegade data-thief uncovers a conspiracy that spans the floating cities of Neo-Tokyo. As the lines between human and machine blur, the survival of the species rests on a single encrypted code.
+            </p>
+<button class="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
+                All details
+                <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</button>
+</section>
+<!-- 4. Series and Episodes Card -->
+<section class="px-6 mb-10 max-w-4xl mx-auto">
+<div class="bg-secondary-container/30 rounded-lg p-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary">video_library</span>
+</div>
+<div>
+<p class="font-display font-bold text-lg">Series and episodes</p>
+<p class="text-sm text-secondary font-medium">2 Seasons, 24 Episodes</p>
+</div>
+</div>
+<button class="bg-white text-on-surface px-6 py-2 rounded-full font-bold shadow-sm hover:bg-surface-container transition-colors">
+                    All
+                </button>
+</div>
+</section>
+<!-- 5. Rating Section -->
+<section class="px-6 py-8 bg-surface-container-low mb-10">
+<div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-1 mb-1">
+<span class="material-symbols-outlined text-yellow-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-yellow-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-yellow-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-yellow-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-yellow-500" style="font-variation-settings: 'FILL' 0;">star</span>
+</div>
+<p class="font-display font-bold text-2xl">4.8 <span class="text-sm font-body text-secondary font-normal">/ 5.0</span></p>
+<p class="text-xs text-secondary uppercase tracking-widest font-bold">12k Reviews</p>
+</div>
+<button class="bg-primary text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-[#e50914] transition-colors active:scale-95">
+                    Rate This Series
+                </button>
+</div>
+</section>
+<!-- 6. Actors List -->
+<section class="mb-12">
+<div class="flex justify-between items-center px-6 mb-6 max-w-4xl mx-auto">
+<h3 class="font-display font-bold text-xl">Main Cast</h3>
+<button class="text-primary font-bold text-sm">See All</button>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-6 px-6 max-w-4xl mx-auto">
+<div class="flex-shrink-0 w-24 text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
+<img class="w-full h-full object-cover" data-alt="professional headshot of an actor with short dark hair and intense expression on a blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3VHu7SObNBsj13lYi_p1vdvT3vcOluFDF0h6Nl1b5vF8jvESl2H-XStOPU0GeKKpeoXrdjZC4HiUJ30-fBXX-Mgsqop2LiG6hSb78Oy8sTbd_3QtKtVcajRrPCrTBlcCUD-OOCk4VPSTT84ERlce7ajgdGh0pAlrt8nTdI5sz95jpENOdcys7AB6JZRN9eCGYMWm7tSJBzliyAPS2maUfPAUp-BZRJ--N-wxA4B9Ze12erfgsD7lSIDMReSzwwfGPq4dFlpqBXg"/>
+</div>
+<p class="font-bold text-sm leading-tight">Marcus Vane</p>
+<p class="text-[10px] text-secondary font-medium uppercase mt-1">Kaelen</p>
+</div>
+<div class="flex-shrink-0 w-24 text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
+<img class="w-full h-full object-cover" data-alt="close-up studio portrait of a woman with braided hair and minimal makeup smiling warmly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6eaOtXeJupgeQ18tlnTFTc5t-IrLJy_AFoh87w0lGyz1lV4gK5cwq-1dQ_ty0Y7NYJoixOHNrbzXkEOFvoWqZYWbbCa5CF-MdiIACKu4VlpxGwJ-gwsWB1ByB_NlqgVNBuLAI-D_CCnBjFsPk-I2qGzZMjFL_synr7HW3NSb4J-qeOkZ_W93TxjpQ4L-rr0c2KZ3h5B9I40oRXZ8q1GVK8jsu1VTazyQ7XtWeID0GQ530KZXmvJLyF0TivaHoabQ9Jt8GIOR3Eg"/>
+</div>
+<p class="font-bold text-sm leading-tight">Sarah Chen</p>
+<p class="text-[10px] text-secondary font-medium uppercase mt-1">Lyra</p>
+</div>
+<div class="flex-shrink-0 w-24 text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
+<img class="w-full h-full object-cover" data-alt="square portrait of a man with spectacles and a beard looking thoughtfully into the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAResWVqIDAJGvPhYPJ90pqes93XeSxiHPZx7CPFGAgGKYNS65LWFZRxMzAt93txBj38-7tt57-SVjcoECXit1ifzHeqlyBmqKoG7TL_MUEFsJTgICF-rdv0NdVrMOAm5LEIS924PinsRCoAIzoPX9jeb7tiKZ-kwy_VsYI6AoLkcd277o7Cbr6LHdo3oH-XMUFh6joxA6Ux5FpixHP01wFLy4LBEsZ-oii3CzSKSqnkPjqQtPAj_HV2d58vxtFpwn3Wj5vAxIgcQ"/>
+</div>
+<p class="font-bold text-sm leading-tight">David Rossi</p>
+<p class="text-[10px] text-secondary font-medium uppercase mt-1">Vosh</p>
+</div>
+<div class="flex-shrink-0 w-24 text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
+<img class="w-full h-full object-cover" data-alt="vibrant portrait of a young woman with neon lighting reflecting on her face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTMfgADzbjGJizixFnEmT5bggRpr_sNcjqMCOJRuhz6qSf9clhvsCag-jejnB60oFydXt4hiQMwdqAeMJuR8A8d0qCCdCj4Eo6-FbdwU9A_POc-2BnFmSZjZhxWME2g5SHzE4IJQF3S-yocvYbWIhoIGcv2NnRWiR4Mkj5gd2sd9txeFzMF6S_YQ9b6rtqEFxttxHifeLpfz-GJilyYGCDIm4-uFbLvn0ggpX-0gUupTfUUkcvvXYnjPsostB2H3rKOfBsRk-UZA"/>
+</div>
+<p class="font-bold text-sm leading-tight">Aria Thorne</p>
+<p class="text-[10px] text-secondary font-medium uppercase mt-1">Neon</p>
+</div>
+<div class="flex-shrink-0 w-24 text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-3 border-4 border-white shadow-md">
+<img class="w-full h-full object-cover" data-alt="moody portrait of a man with striking features in a black turtleneck" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwpl79753KZltI7ZN1S4rQN2Wix1ym4wgRn4Qpgm03aTeTvUaY6UgmCnd6YQOLoW9WIVTd7jkI48pOhFyQ4QlWnU_WT_hXyvhuJ6Jvsz3BCwvVgGFqI5LzQsampKsHZM7brDAZ0T1n9fLv1roZjIASLtC_5TeMvgeUhINFl4iKT48L_88mcI4Ns-LuTDmNLpRP9nGxbJp5gz4JX0FgUwU3-VuTqvDoqQSq63FAlMJuTnABpPgTmajnVQfXMvssI-v9R213zRn8fw"/>
+</div>
+<p class="font-bold text-sm leading-tight">Julian Black</p>
+<p class="text-[10px] text-secondary font-medium uppercase mt-1">Zero</p>
+</div>
+</div>
+</section>
+<!-- 7. Comments Header -->
+<section class="flex justify-between items-center px-6 mb-6 max-w-4xl mx-auto">
+<h3 class="font-display font-bold text-xl">User Reviews</h3>
+<button class="bg-surface-container-high px-4 py-1.5 rounded-full text-xs font-bold hover:bg-surface-container-highest transition-colors">
+                All
+            </button>
+</section>
+<!-- 8. User Reviews Carousel -->
+<section class="flex overflow-x-auto no-scrollbar gap-4 px-6 max-w-4xl mx-auto">
+<div class="flex-shrink-0 w-[300px] bg-surface-container-lowest p-6 rounded-lg shadow-sm border-b-2 border-primary/10">
+<div class="flex items-center gap-3 mb-4">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="circular avatar of a smiling man with a beard and baseball cap" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQByJmHJGft51NA56ikUPwfCOvSlTZXoVRVAv5Gg3kVL1V3WhROau5V0ygZTksb6_v0jdhcQz4JhYrb-kPTiJ8z4eKNSjNxEm67YzBFiRE4pskkLUMt8bYt7MF4U9ScnbymRDLtUtfac19CMY7kMviyS-vihxBsDiB0CaC5-E8WGrHJMSKXrdd27AFW_P8hSZSU6s-f2uVop4uL8ydTMsY4qZddNUrgkmmyiBKqRhfRKJ74nTXUT9z9mY02a_-v8gcMBC_HLP4yw"/>
+<div>
+<p class="font-bold text-sm">Alex Rivera</p>
+<div class="flex text-[10px] text-yellow-500">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-secondary line-clamp-3 italic">"The visual direction of this show is unmatched. I haven't seen world-building this detailed in years. The season finale left me speechless!"</p>
+</div>
+<div class="flex-shrink-0 w-[300px] bg-surface-container-lowest p-6 rounded-lg shadow-sm border-b-2 border-primary/10">
+<div class="flex items-center gap-3 mb-4">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="circular avatar of a woman with short hair wearing glasses and a denim jacket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmWMmmrSScIgi5ya7wMa8x_VyXeppFcZBOInz_YPYOVXsuuhiF-5TOjOt9uaT36BXbs8pwKQvsFxd4yd7ZM1pCWQ4gCGp28vuN_E4vY1hoEyctC4enpOHW_UBAiVGFHUEV-QGRJa79qcvRKPsfKF6di9zxM306MJBz4-oZe5-whfwTrgF4XTVG71lg-uf8mojEk8ZnR-jMm3gV2zVaqTUAdLXywSIEbLcYdLU3LjGazp-E3zVp0WBOCmXmyKPnc97WcJ14D7jkFQ"/>
+<div>
+<p class="font-bold text-sm">Maya Patel</p>
+<div class="flex text-[10px] text-yellow-500">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 0;">star</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-secondary line-clamp-3 italic">"Brilliant performance by Sarah Chen. Her character arc is so compelling and the pacing keeps you on your toes the whole time."</p>
+</div>
+<div class="flex-shrink-0 w-[300px] bg-surface-container-lowest p-6 rounded-lg shadow-sm border-b-2 border-primary/10">
+<div class="flex items-center gap-3 mb-4">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="circular avatar of a young man with curly hair and a green hoodie" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwheitKDS5H8-vszfqOCtAm47fjJlzG2cMJ6x12DVF5WOmCLfXVaa_QqIkgVONnF5K3G_5thac3T0BAiTB9y7V-JpftXtlPAz_9xsE9qynevtlzx4F8VNJPSa_2PR_amukZ9xtUQCPnLY1lhN9a8heqth-Cu3Cw6Yz426fOu6GRkJw_Yf6-Stz7tKhU1VSyN62zJfTYnxRjJg8UMu1JjFQEeFivllcOZKM9ZNVi78Ft-hHXpAe9mjGcvNSYj2klMSXImZxDAzgtQ"/>
+<div>
+<p class="font-bold text-sm">James Wilson</p>
+<div class="flex text-[10px] text-yellow-500">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="text-sm text-secondary line-clamp-3 italic">"Cyberpunk at its best. It doesn't rely purely on tropes; it actually tries to say something meaningful about technology."</p>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_-12px_32px_rgba(25,28,29,0.06)] rounded-t-[2rem]">
+<a class="flex flex-col items-center justify-center text-gray-500 px-6 py-2 hover:text-[#e50914] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium tracking-wide">Movies</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#b8000b] text-white rounded-full px-6 py-2 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="tv" style="font-variation-settings: 'FILL' 1;">tv</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium tracking-wide">Series</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-500 px-6 py-2 hover:text-[#e50914] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium tracking-wide">Tickets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-500 px-6 py-2 hover:text-[#e50914] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

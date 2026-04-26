@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CinePass - All Concerts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#E50914",
+                        background: "#ffffff",
+                        surface: "#ffffff",
+                        "on-surface": "#1A1C1E",
+                        "on-surface-variant": "#44474E",
+                        outline: "#74777F",
+                        "surface-container-low": "#F7F9FF",
+                        "surface-container-high": "#EFF1F8",
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.25rem",
+                        lg: "2rem",
+                        xl: "2.5rem",
+                        full: "9999px"
+                    },
+                    fontFamily: {
+                        sans: ["Plus Jakarta Sans", "sans-serif"],
+                        headline: ["Plus Jakarta Sans", "sans-serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ffffff;
+            color: #1A1C1E;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .active-nav-indicator {
+            position: relative;
+        }
+        .active-nav-indicator::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #E50914;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen pb-32">
+<!-- Header -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl px-6 py-4 flex items-center">
+<div class="flex items-center w-full relative h-10">
+<button class="absolute left-0 text-on-surface p-1 hover:bg-zinc-100 rounded-full transition-colors">
+<span class="material-symbols-outlined text-[28px]">chevron_left</span>
+</button>
+<h1 class="w-full text-center text-lg font-bold text-on-surface">All Concerts</h1>
+</div>
+</header>
+<main class="pt-24 px-6">
+<!-- Page Title & Search Bar -->
+<div class="mb-8">
+<h2 class="text-2xl font-bold mb-6 tracking-tight">Browse Concerts</h2>
+<div class="flex gap-3">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">search</span>
+<input class="w-full bg-zinc-100 border-none rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-zinc-400 font-medium text-sm" placeholder="Search concerts or artists" type="text"/>
+</div>
+<button class="bg-zinc-100 aspect-square w-12 rounded-2xl flex items-center justify-center active:scale-95 transition-transform text-primary">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</div>
+<!-- Categories / Chips -->
+<div class="flex gap-2.5 overflow-x-auto no-scrollbar mb-8">
+<button class="bg-primary text-white px-6 py-2 rounded-full font-semibold text-sm whitespace-nowrap shadow-lg shadow-primary/20">All Concerts</button>
+<button class="bg-zinc-100 text-zinc-500 px-6 py-2 rounded-full font-semibold text-sm whitespace-nowrap hover:bg-zinc-200 transition-colors">Now Showing</button>
+<button class="bg-zinc-100 text-zinc-500 px-6 py-2 rounded-full font-semibold text-sm whitespace-nowrap hover:bg-zinc-200 transition-colors">Rock</button>
+<button class="bg-zinc-100 text-zinc-500 px-6 py-2 rounded-full font-semibold text-sm whitespace-nowrap hover:bg-zinc-200 transition-colors">Electronic</button>
+</div>
+<!-- Concert Grid: 1 Column for Landscape layout as requested -->
+<div class="grid grid-cols-1 gap-8">
+<!-- Concert Item 1 -->
+<div class="flex flex-col group">
+<div class="relative aspect-[16/9] rounded-[2rem] overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1">
+<img alt="Neon Dreams Tour concert stage with vibrant lighting" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ahZ9buK3RYD8lsqHgZr675L8WQSGuYXSVtzPTUYCpZy-c3WKdPBqHMkJ06RmT5oYkx2Q3nmURv3ecbcmZRqc036cgf9LWI01MoUa-dXhTwlvgxXjEZiueZkPMKmMuOcY_XfbvFncLiEdxM2t_o5ZM1FukUd9JWQohqS12bkpUqHtZLcOJ7EMOQYxxprehSNqeMhwyYd2W6VjVlr0J-TBCwjz3UJE5lMx-gJpdbTJ13AP7S-v59Q-grTtDXPti9vk644Epv3-PA"/>
+<div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-amber-500 text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[11px] font-bold text-on-surface">9.5</span>
+</div>
+</div>
+<h3 class="font-bold text-lg leading-tight mb-1 text-on-surface group-hover:text-primary transition-colors px-1">Neon Dreams Tour</h3>
+<p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold px-1">ELECTRONIC POP • 2H 45M</p>
+</div>
+<!-- Concert Item 2 -->
+<div class="flex flex-col group">
+<div class="relative aspect-[16/9] rounded-[2rem] overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1">
+<img alt="Electric Pulse concert crowd with laser beams" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz-ftL_4Na5jLLfh3ZpidOzNa5Klo6tEkX5rIfvFkDf5T-HaCzT6sQThaSBD-5u9pJuF9s0QXq9rRPwM-BVm1gMrwdAF0Cns6_P30sJIudKP3FenmBZbDRt0gVvpeyXpszmY73qWxh_hpIGAi3J3nDAiLGOHqM6jJgy9l2XdLSIAMsXubLhrfa8yzbeyXwm3n8KQ4fEbPhvwNuXzwAsZjWBvGHXPmnRKejpUEOxCSBvcSI0MD4Y7uYSrTFOlgsvsWjFLK4VMiS2Q"/>
+<div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-amber-500 text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[11px] font-bold text-on-surface">9.2</span>
+</div>
+</div>
+<h3 class="font-bold text-lg leading-tight mb-1 text-on-surface group-hover:text-primary transition-colors px-1">Electric Pulse</h3>
+<p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold px-1">TECHNO HOUSE • 3H 20M</p>
+</div>
+<!-- Concert Item 3 -->
+<div class="flex flex-col group">
+<div class="relative aspect-[16/9] rounded-[2rem] overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1">
+<img alt="Vocal Legends performing on stage with spotlights" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfxKhLiVbxVopvUaLr5ok_OQatb4tAxFnNECHEhc_kAankDT5JMR6vRMxAZjW-SN7AhXWVRXoYeaL73m1c_kgVPWd0cKosaBNUNPGV4_a0h0VUQTb0TS1d88uAD4USmUK9j4bNIFgkv9wmh3aUsmghND3U7NJJg0K9fYIKr8YuNnFonyOsUTasYzLc8iYBo_DNsKlTNJ51zw0buKbWPOkXBum_I4WfIteJOmyAk5ImkEjAcn3HRJQzvd6EFnBdE6g6S_JhmLNlYA"/>
+<div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-amber-500 text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[11px] font-bold text-on-surface">9.8</span>
+</div>
+</div>
+<h3 class="font-bold text-lg leading-tight mb-1 text-on-surface group-hover:text-primary transition-colors px-1">Vocal Legends</h3>
+<p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold px-1">CLASSIC JAZZ • 2H 15M</p>
+</div>
+<!-- Concert Item 4 -->
+<div class="flex flex-col group">
+<div class="relative aspect-[16/9] rounded-[2rem] overflow-hidden mb-4 shadow-sm group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1">
+<img alt="Midnight Rebellion rock concert with smoke machines" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDex-Gabx37N8xUq2GI5iht-hqif0n-8hkKosmKhghPi1EhH-OFMfsKFU1h8-6lf80-q9l2mneGL0Pn15iS-1Pxd4se4t-3GsgpibMdVXR3FdwnVNmF3yjU2KwpowanPl4FfLqKJ_7fiXszQvfZMOlZtn6T3wiw3AAq4r430AE52tsSQ4OLlin8HAXagQiVWF8eSyHW0eh92rLI044iH-Oq3qFUkHBM1C82U5Hih8yAtiVEkzVEk7jq3yFIe6pk5TFeldYvYgrwsQ"/>
+<div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-amber-500 text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[11px] font-bold text-on-surface">8.9</span>
+</div>
+</div>
+<h3 class="font-bold text-lg leading-tight mb-1 text-on-surface group-hover:text-primary transition-colors px-1">Midnight Rebellion</h3>
+<p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold px-1">ALT ROCK • 1H 50M</p>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-10 pt-4 bg-white/90 backdrop-blur-2xl z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
+<!-- Concerts (Active) -->
+<a class="flex flex-col items-center justify-center text-primary group" href="#">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">movie</span>
+<span class="text-[10px] font-bold uppercase tracking-wider mt-1.5 active-nav-indicator">Movies</span>
+</a>
+<!-- Movies -->
+<a class="flex flex-col items-center justify-center text-zinc-400 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[28px]">live_tv</span>
+<span class="text-[10px] font-bold uppercase tracking-wider mt-1.5">Series</span>
+</a>
+<!-- Tickets -->
+<a class="flex flex-col items-center justify-center text-zinc-400 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[28px]">confirmation_number</span>
+<span class="text-[10px] font-bold uppercase tracking-wider mt-1.5">Tickets</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-zinc-400 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[28px]">person</span>
+<span class="text-[10px] font-bold uppercase tracking-wider mt-1.5">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Watch Series - CinePass Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#ffb4aa",
+                        "surface-variant": "#e1e3e4",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e7e8e9",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#ffdad5",
+                        "secondary-container": "#d3e1f6",
+                        "inverse-on-surface": "#f0f1f2",
+                        "inverse-surface": "#2e3132",
+                        "outline-variant": "#e9bcb6",
+                        "on-surface": "#191c1d",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#566475",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed": "#001b3c",
+                        "surface-tint": "#c0000c",
+                        "on-tertiary-container": "#f8f9ff",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#d6e4f9",
+                        "tertiary-container": "#0072d7",
+                        "on-secondary-fixed-variant": "#3a4859",
+                        "surface-container": "#edeeef",
+                        "primary-fixed-dim": "#ffb4aa",
+                        "on-surface-variant": "#5e3f3b",
+                        "on-tertiary-fixed-variant": "#004689",
+                        "surface-bright": "#f8f9fa",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "outline": "#936e69",
+                        "on-secondary-fixed": "#0f1c2c",
+                        "tertiary": "#005aab",
+                        "tertiary-fixed-dim": "#a7c8ff",
+                        "secondary": "#525f71",
+                        "primary": "#b8000b",
+                        "on-primary-fixed-variant": "#930007",
+                        "background": "#f8f9fa",
+                        "primary-container": "#e50914",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "on-primary-container": "#fff7f6",
+                        "tertiary-fixed": "#d5e3ff",
+                        "secondary-fixed-dim": "#bac8dc",
+                        "on-primary-fixed": "#410001",
+                        "on-background": "#191c1d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { background-color: #f8f9fa; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body text-on-surface antialiased pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#f8f9fa] dark:bg-[#121212] shadow-[0_12px_32px_rgba(25,28,29,0.06)] flex items-center justify-between px-8 py-6 w-full sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface active:scale-95 duration-200 cursor-pointer" data-icon="menu" style="">menu</span>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold tracking-tighter text-4xl text-[#e50914] dark:text-[#ff1a25]" style="">CinePass</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-on-surface active:scale-95 duration-200 cursor-pointer" data-icon="search" style="">search</span>
+<span class="material-symbols-outlined text-on-surface active:scale-95 duration-200 cursor-pointer ml-4" data-icon="account_circle" style="">account_circle</span></div>
+</header>
+<main class="max-w-7xl mx-auto px-6 mt-8 space-y-12">
+<!-- Search & Filter Bar -->
+<h2 class="font-headline font-bold text-4xl text-on-surface mb-6" style="">Watch Series</h2><section class="flex items-center gap-4">
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-60" style="">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50 font-medium" placeholder="Search series, genres, or actors" type="text"/>
+</div>
+<button class="bg-surface-container-low p-4 rounded-full text-on-surface active:scale-95 transition-transform" style="">
+<span class="material-symbols-outlined block" style="">tune</span>
+</button>
+</section>
+<!-- Trending Series Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline font-bold text-2xl tracking-tight" style="">Trending Series</h2>
+<button class="text-primary font-bold text-sm hover:opacity-80 transition-opacity" style="">See All</button>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-6 pb-4 -mx-6 px-6">
+<!-- Series Card 1 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Dark dramatic movie poster aesthetic with neon blue lighting and a silhouette of a person in a futuristic city" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5_RM8pszja4uvMS_qi8eSQr4MhB5-2r-NG2-ea2cKQ2wgi8rzlARBpAYCFBeNHQPwuCqgL_K1W8MF6X2qeBRw0LJSEfzlTRwGXzxpTes2QWTXZMhyvQSbK5qFXWW7hyqnCgaBT5byQScHSjuhMqidJsOhS9AWYAy4G0iOTx_GXYlyikpjcZi_R_p_feWZLKrV8m-bLAG2lkdK2Bbfnp8V-C6hKBCWPz3BiRszLuq16NhtI055bAdC8bHwp_PiQsg1iBdYQgoisg" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">8.9</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Neon Horizon</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Sci-Fi • Thriller</p>
+</div>
+<!-- Series Card 2 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Classic cinematic portrait of a period drama protagonist in a lavish royal ballroom with warm candle lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-3RFYvHCbJn2Ku2KoV-Z084Bk3IJCPcFIpp6ZLKsW1BTtJha4QYHvEWKoNGdDmt9elPv7OvwpD6-KTJT3ebJxNrEp47psGhNJgVcPln1h9tnE61XGeVcqofgqswH7Za7JxzzAqT1dDfkeajBIyY3A6aGyvwMXfLE3VfMKcBiORMYViRQLefKQDXGusqNWsv8-ZzUChKH4OWlc3KpTsTaJLXTkgF9nZJoSRLV_XPVd28ERpBJr0VEYVPyPAYcrollSIwyaT1ruQg" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">8.5</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">The Crown Legacy</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Drama • History</p>
+</div>
+<!-- Series Card 3 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Moody mystery scene with a detective standing in the rain under a street lamp at night in a noir style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAcu0CVMn4Te7SqcilJpIoVtLwS7Z1JBNjCP2FR4KuM7r3vhxqmBeJ6CPUPDVegSkoosFiGrH-WJaCELhvIRWv-tnCVDGCIuaeYHc5_0RC3DyiWV3SJWQtEFosWB2qcSA4ZwS1yv4X1E4uJLKZkR9n_L6ggiPqtuc_a4qZaf7GEzNAVBFv_7qx2MRey8He_sMdFyX5z55QnNK8TBw_l75XQzbb53myQZ9MpvUhn4GDP15tV1GvFJMQWoBO3KzxJDUf2kX_Ulh8wg" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">9.2</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Midnight Echoes</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Mystery • Crime</p>
+</div>
+<!-- Series Card 4 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Abstract colorful light trails representing a fast-paced action movie speed and energy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuerBuzVDfI9cEpiOhjhZW5xDl5kQJGSvwnKDDc5C7tXmP_C901GMlTIY-IabKY0Qz52a96kZTRtqhpuBb7lsvCWp5S5xMYFiLmRoU0ByGuLEBrRkc227mxv_jE8ZvXWhk8_nmee8G9HVapFqQFuHdApKm7PHr6lp_7jJHFossIZpdmJ0mKWNUZEkM3-C6NKC4LHvo8gjrk-p8TivKKKhQ1TxQoD6ZVkf4AAbWRMW1Y8YAYwbkjH6emECQPIVkwU0amPmH1-BnrQ" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">8.1</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Velocity Prime</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Action • Adventure</p>
+</div>
+</div>
+</section>
+<!-- New Releases Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline font-bold text-2xl tracking-tight" style="">New Releases</h2>
+<button class="text-primary font-bold text-sm hover:opacity-80 transition-opacity" style="">See All</button>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-6 pb-4 -mx-6 px-6">
+<!-- Series Card 1 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Surreal landscape with floating islands and purple skies, magical fantasy world aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq02ZIkElczpL9hp6b8Equ8bjHwkxEU8B3L5sBbiuImSWK9hzzBYNDsxYAFgSTXnL9nXf8J2SQGy4VQY8JK3rf82qtHvoYSt4HqQFy65bacs4-2rVlLNApdQxV5cu-cx4bZ6e_P7x1igNSJw5Ob4t1bnR2dEfFU-9v6ql1xtMpqF8ZHPUFw4j7qmDENlAOcP5Iq8jcGhmkw5U9wIlj93cQSAz-aGhkeon00KBpIhgdU1xxz5nVmtY5l4nJkhc_bVIqxciwZEU8Og" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">7.8</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Aetheria</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Fantasy • Epic</p>
+</div>
+<!-- Series Card 2 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Vibrant pop art style poster for a modern romantic comedy with pastel colors and playful shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB04y7ErKXbfyYd1aRg3947523J4lVUK-y2qDK0rAhc7vis6TS96J0do1w3j2yhvcNVcgIi6f6XavEUWeqzG8aOgfA1D-zhLl-LbK2U2pLooZG08JFpWwamYTw5InwLO_DrnFobOTm-bgPcMbyRfveWwHjY-vS-2Z5Sb8f9vWT4oNYGIxSgNCiuS5kHLwMvUSwN_3WTg7KT3PNyxh08UGMm78mN89tCkBfeOk3yFyuTLbFZOQWt9qa_DCZepyuDOVgOnghuhoNG2g" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">8.3</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Summer in Seoul</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Romance • Comedy</p>
+</div>
+<!-- Series Card 3 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="High-contrast black and white photography of architectural shadows, modern thriller mood" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRlQV2qLKTU0SHFdt7hwLgRYuL7aJbAAR0_pzCnWCM0OCXH4wBEPG_2xYLobxQIEru3CuDIm276Zo-yMd11PcLlTVDY3VZda7SYGulij6T9SE8QJqbzaInIYE_D1sSJGzhG8LMemtoAFW6fg8Kip2EE8UuohHT8SmaYIu1ppsrivB6YUM9xSBCedtdHzdKYAtPpxRvP9xj-dUobT3Oc_93iBW2CICd3g09FfZATBiDf7e9PL9hAd0H3nFZPEfUIGO0Mt_oA-ZVPQ" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">8.7</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Monolith</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Psychological • Horror</p>
+</div>
+<!-- Series Card 4 -->
+<div class="flex-none w-48 group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-all duration-300">
+<img class="object-cover w-full h-full" data-alt="Cyberpunk city alleyway with glowing red lanterns and wet pavement reflecting colorful signs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtaLQv5U8PgXtewEtuBeNLGaW3sV2IV64yXKJJJh4yPt5gxrcIrwECbdm9QfjsDUUDoTghzurolLBoWSX2jamvg4Tu3hErcHrDvAr9XZHautj4F54sVWIpanK8bCOpFlH_JfiblMr7owxPoCvuYBpTs4VdgUeTN20QP4pHAtWg561-CxaGonPHMiNl-gehassh2R4kZzGujQ9U6K9JQHgXOdS-e2sA-l2bWWNxjLRfkQrr1fR6HDEZNBlFGSw-R_FTWc7Nqzi8NA" style=""/>
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-white" style='font-variation-settings: "FILL" 1;'>star</span>
+<span class="text-white text-[10px] font-bold" style="">9.0</span>
+</div>
+</div>
+<h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate" style="">Ghost Protocol</h3>
+<p class="text-xs text-on-surface-variant opacity-70" style="">Cyberpunk • Sci-Fi</p>
+</div>
+</div>
+</section>
+<!-- Bento Featured Section (Extra value component) -->
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-8 bg-[#f8f9fa]/95 dark:bg-[#121212]/95 backdrop-blur-xl border-t border-surface-variant/20">
+<a class="flex flex-col items-center justify-center text-[#191c1d] dark:text-gray-400 px-4 py-2 hover:bg-[#f3f4f5] dark:hover:bg-[#1c1c1c] rounded-full active:scale-90 transition-transform duration-300" href="#" style="">
+<span class="material-symbols-outlined" style="">movie</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] uppercase tracking-widest font-bold mt-1" style="">Movies</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#e50914] text-white rounded-full px-8 py-2 shadow-lg shadow-primary/20 transition-all active:scale-90 duration-300" href="#" style="">
+<span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>live_tv</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] uppercase tracking-widest font-bold mt-1" style="">Series</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#191c1d] dark:text-gray-400 px-4 py-2 hover:bg-[#f3f4f5] dark:hover:bg-[#1c1c1c] rounded-full active:scale-90 transition-transform duration-300" href="#" style="">
+<span class="material-symbols-outlined" style="">confirmation_number</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] uppercase tracking-widest font-bold mt-1" style="">Tickets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#191c1d] dark:text-gray-400 px-4 py-2 hover:bg-[#f3f4f5] dark:hover:bg-[#1c1c1c] rounded-full active:scale-90 transition-transform duration-300" href="#" style="">
+<span class="material-symbols-outlined" style="">person</span>
+<span class="font-['Be_Vietnam_Pro'] text-[10px] uppercase tracking-widest font-bold mt-1" style="">Profile</span>
+</a>
+</nav>
+</body></html>

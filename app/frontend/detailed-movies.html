@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CinePass - Odyssey Horizon</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#E50914",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#ffdad5",
+                        "on-primary-container": "#410001",
+                        "surface": "#ffffff",
+                        "on-surface": "#1a1c1e",
+                        "surface-container-low": "#f7f9fa",
+                        "surface-container": "#f1f3f4",
+                        "surface-container-high": "#ebeef0",
+                        "surface-container-highest": "#e5e8ea",
+                        "secondary": "#525f71",
+                        "outline": "#73777f",
+                        "outline-variant": "#c3c7cf"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "sans": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                        "label": ["Plus Jakarta Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen relative pb-32">
+<!-- Top Navigation (Component Selection: TopAppBar) -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-900 text-2xl hover:opacity-70 transition-opacity active:scale-95 duration-200 cursor-pointer" data-icon="arrow_back">arrow_back</span>
+<span class="text-2xl font-black text-[#E50914] tracking-tighter font-headline">Cinema</span>
+</div>
+</header>
+<main class="pt-16">
+<!-- Video Player Section -->
+<section class="relative w-full aspect-video md:aspect-[21/9] overflow-hidden bg-zinc-900 group">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBHuamTXLTK0L_w1bqi4n9h3OeKQiv0dID9_gnlSOzIkX5r8h22Pqv8p9kOMLf6Hg4X1TPeo44pP2d-K4oxUOCDP1dVr3LlIwjuU3UDeA-9kZbpEgS-wz6G6KnMkj3ASxlc_jmy9GF8RPQqroVgJj9c02jEyJD_TkTjj4AEUnJ4idFrjWa1Tk7RJ-UMdtlC5RyGLENCgRbK1tCPfPpyGe1Xaz_3GRwObLBVLnbUfwzGbN1yPZjYj9z1RIzumHH9_9tlbJj44IL3dA');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+<!-- Mobile Back Arrow -->
+<div class="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white cursor-pointer hover:bg-white/30 transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</div>
+<!-- Play Button Center -->
+<div class="absolute inset-0 flex items-center justify-center z-10">
+<div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#E50914] flex items-center justify-center text-white shadow-2xl transform group-hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined text-3xl fill" data-icon="play_arrow">play_arrow</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="absolute bottom-0 w-full h-1 bg-white/20">
+<div class="h-full bg-[#E50914] w-1/3"></div>
+</div>
+</section>
+<!-- Movie Details Header -->
+<section class="px-6 py-8 -mt-6 relative z-20 bg-surface rounded-t-3xl shadow-[0_-12px_32px_rgba(0,0,0,0.08)]">
+<div class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="text-center md:text-left">
+<h1 class="font-headline font-black text-3xl md:text-5xl tracking-tighter text-on-surface mb-3">Odyssey Horizon</h1>
+<div class="flex items-center justify-center md:justify-start gap-3 text-sm font-semibold">
+<span class="px-4 py-1.5 bg-zinc-100 rounded-full text-zinc-600">Sci-Fi</span>
+<span class="px-4 py-1.5 bg-zinc-100 rounded-full text-zinc-600">Action</span>
+<span class="flex items-center gap-1.5 text-zinc-500">
+<span class="material-symbols-outlined text-lg" data-icon="schedule">schedule</span> 
+                            2h 14m
+                        </span>
+</div>
+</div>
+<div class="flex flex-col items-center md:items-end gap-1">
+<div class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">CineScore</div>
+<div class="font-headline font-black text-3xl text-[#E50914] flex items-center gap-1">
+<span class="material-symbols-outlined fill text-2xl" data-icon="star">star</span>
+                        8.7
+                    </div>
+</div>
+</div>
+</section>
+<!-- Tabs Navigation -->
+<nav class="sticky top-16 z-30 bg-white/90 backdrop-blur-md border-b border-zinc-100">
+<div class="max-w-4xl mx-auto flex px-6 overflow-x-auto no-scrollbar gap-8">
+<button class="tab-btn font-bold text-[#E50914] border-b-2 border-[#E50914] py-4 whitespace-nowrap text-sm uppercase tracking-wider" id="tab-tickets" onclick="switchTab('tickets')">Tickets</button>
+<button class="tab-btn font-semibold text-zinc-400 hover:text-on-surface transition-colors py-4 whitespace-nowrap text-sm uppercase tracking-wider" id="tab-about" onclick="switchTab('about')">About Movie</button>
+<button class="tab-btn font-semibold text-zinc-400 hover:text-on-surface transition-colors py-4 whitespace-nowrap text-sm uppercase tracking-wider" id="tab-comments" onclick="switchTab('comments')">Comments</button>
+</div>
+</nav>
+<!-- Tickets Tab Content -->
+<section class="max-w-4xl mx-auto px-6 py-8" id="section-tickets">
+<!-- Date Selection -->
+<div class="mb-10">
+<h2 class="font-headline font-extrabold text-xl mb-5 text-on-surface">Select Date</h2>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<button class="flex flex-col items-center justify-center min-w-[72px] py-4 rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 transition-colors">
+<span class="text-[10px] font-bold uppercase tracking-widest">Thu</span>
+<span class="font-bold text-xl mt-1">16</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] py-4 rounded-full bg-[#E50914] text-white shadow-xl shadow-[#E50914]/20 transform scale-105 transition-all">
+<span class="text-[10px] font-bold uppercase tracking-widest opacity-80">Fri</span>
+<span class="font-bold text-xl mt-1">17</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] py-4 rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 transition-colors">
+<span class="text-[10px] font-bold uppercase tracking-widest">Sat</span>
+<span class="font-bold text-xl mt-1">18</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] py-4 rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 transition-colors">
+<span class="text-[10px] font-bold uppercase tracking-widest">Sun</span>
+<span class="font-bold text-xl mt-1">19</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] py-4 rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 transition-colors">
+<span class="text-[10px] font-bold uppercase tracking-widest">Mon</span>
+<span class="font-bold text-xl mt-1">20</span>
+</button>
+</div>
+</div>
+<!-- Session Filter -->
+<div class="flex gap-2 mb-8">
+<button class="px-6 py-2 rounded-full bg-on-surface text-white text-xs font-bold uppercase tracking-widest">Daily</button>
+<button class="px-6 py-2 rounded-full bg-zinc-100 text-zinc-500 text-xs font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors">Evening</button>
+<button class="px-6 py-2 rounded-full bg-zinc-100 text-zinc-500 text-xs font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors">All</button>
+</div>
+<!-- Sessions Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Session Card 1 -->
+<div class="bg-zinc-50 p-6 rounded-3xl flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-all border border-transparent">
+<div>
+<div class="font-headline font-black text-2xl text-on-surface mb-1 group-hover:text-[#E50914] transition-colors">14:30</div>
+<div class="text-xs font-semibold text-zinc-400 flex items-center gap-2">
+<span>Hall B</span>
+<span class="w-1 h-1 rounded-full bg-zinc-300"></span>
+<span class="text-blue-600">112 Seats Left</span>
+</div>
+</div>
+<div class="font-semibold text-lg text-on-surface/80 tracking-tight">$15.00</div></div>
+<!-- Session Card 2 (Active/Selected) -->
+<div class="bg-zinc-50 p-6 rounded-3xl flex items-center justify-between group cursor-pointer border-2 border-[#E50914] shadow-lg shadow-[#E50914]/5">
+<div>
+<div class="font-headline font-black text-2xl text-[#E50914] mb-1">17:15</div>
+<div class="text-xs font-semibold text-zinc-400 flex items-center gap-2">
+<span>IMAX 3D</span>
+<span class="w-1 h-1 rounded-full bg-zinc-300"></span>
+<span class="text-[#E50914]">45 Seats Left</span>
+</div>
+</div>
+<div class="font-bold text-lg text-[#E50914] tracking-tight">$22.50</div></div>
+<!-- Session Card 3 (Sold Out) -->
+<div class="bg-zinc-50 p-6 rounded-3xl flex items-center justify-between opacity-50 grayscale cursor-not-allowed">
+<div>
+<div class="font-headline font-black text-2xl text-on-surface mb-1">20:00</div>
+<div class="text-xs font-semibold text-zinc-400 flex items-center gap-2">
+<span>Hall A</span>
+<span class="w-1 h-1 rounded-full bg-zinc-300"></span>
+<span class="text-red-500 font-bold">SOLD OUT</span>
+</div>
+</div>
+<div class="font-semibold text-lg text-zinc-400 tracking-tight">$15.00</div></div>
+<!-- Session Card 4 -->
+<div class="bg-zinc-50 p-6 rounded-3xl flex items-center justify-between group cursor-pointer hover:bg-zinc-100 transition-all border border-transparent">
+<div>
+<div class="font-headline font-black text-2xl text-on-surface mb-1 group-hover:text-[#E50914] transition-colors">22:45</div>
+<div class="text-xs font-semibold text-zinc-400 flex items-center gap-2">
+<span>Hall C</span>
+<span class="w-1 h-1 rounded-full bg-zinc-300"></span>
+<span class="text-blue-600">80 Seats Left</span>
+</div>
+</div>
+<div class="font-semibold text-lg text-on-surface/80 tracking-tight">$15.00</div></div>
+</div>
+</section><section class="max-w-4xl mx-auto px-6 py-8 hidden" id="section-about">
+<!-- Description Section -->
+<div class="mb-10">
+<h2 class="font-headline font-extrabold text-xl mb-4 text-on-surface">Description</h2>
+<p class="text-zinc-600 leading-relaxed text-sm">
+            In the year 2145, humanity's last hope rests on a rogue crew of scientists and explorers as they venture into a mysterious horizon at the edge of the galaxy. Odyssey Horizon explores the thin line between reality and the unknown, blending breathtaking visuals with a deeply emotional journey into what it means to be human in an infinite universe.
+        </p>
+</div>
+<!-- Starring Section -->
+<div class="mb-10">
+<h2 class="font-headline font-extrabold text-xl mb-4 text-on-surface">Starring</h2>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<div class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="w-16 h-16 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Actor 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/ALy-l9ySjO_Y3A5E5g8R5_mN3B_W-y5LpZqU6v7rMv5-Vn4=s200"/>
+</div>
+<span class="text-[10px] font-bold text-zinc-800 text-center">Julian Thorne</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="w-16 h-16 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Actor 2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/ALy-l9xM2m6O_v4B7g8R5_mN3B_W-y5LpZqU6v7rMv5-Vn4=s200"/>
+</div>
+<span class="text-[10px] font-bold text-zinc-800 text-center">Elena Vance</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="w-16 h-16 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Actor 3" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/ALy-l9zK3n7O_w3B6g8R5_mN3B_W-y5LpZqU6v7rMv5-Vn4=s200"/>
+</div>
+<span class="text-[10px] font-bold text-zinc-800 text-center">Markus Reeds</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[80px]">
+<div class="w-16 h-16 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="Actor 4" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/ALy-l9vX4p8O_x2B5g8R5_mN3B_W-y5LpZqU6v7rMv5-Vn4=s200"/>
+</div>
+<span class="text-[10px] font-bold text-zinc-800 text-center">Sarah Croft</span>
+</div>
+</div>
+</div>
+<!-- Details Section -->
+<div>
+<h2 class="font-headline font-extrabold text-xl mb-4 text-on-surface">Details</h2>
+<div class="space-y-0 text-sm">
+<div class="flex justify-between py-3.5 border-b border-zinc-100">
+<span class="text-zinc-500 font-medium">Movie</span>
+<span class="text-on-surface font-bold">Odyssey Horizon</span>
+</div>
+<div class="flex justify-between py-3.5 border-b border-zinc-100">
+<span class="text-zinc-500 font-medium">Duration</span>
+<span class="text-on-surface font-bold">2h 14m</span>
+</div>
+<div class="flex justify-between py-3.5 border-b border-zinc-100">
+<span class="text-zinc-500 font-medium">Premiere</span>
+<span class="text-on-surface font-bold">March 15, 2024</span>
+</div>
+<div class="flex justify-between py-3.5 border-b border-zinc-100">
+<span class="text-zinc-500 font-medium">Production</span>
+<span class="text-on-surface font-bold">Nova Studios</span>
+</div>
+<div class="flex justify-between py-3.5">
+<span class="text-zinc-500 font-medium">Producer</span>
+<span class="text-on-surface font-bold">Christopher Nolan</span>
+</div>
+</div>
+</div>
+</section><section class="max-w-4xl mx-auto px-6 py-8 hidden" id="section-comments">
+<!-- Rating Summary Section -->
+<div class="mb-10 bg-zinc-50 rounded-3xl p-8 flex flex-col md:flex-row items-center gap-8 border border-zinc-100">
+<div class="text-center md:pr-8 md:border-r md:border-zinc-200">
+<div class="font-headline font-black text-6xl text-on-surface leading-none mb-2">8.7</div>
+<div class="flex items-center justify-center gap-0.5 text-amber-400 mb-1">
+<span class="material-symbols-outlined fill text-lg">star</span>
+<span class="material-symbols-outlined fill text-lg">star</span>
+<span class="material-symbols-outlined fill text-lg">star</span>
+<span class="material-symbols-outlined fill text-lg">star</span>
+<span class="material-symbols-outlined fill text-lg">star_half</span>
+</div>
+<div class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">2.4k Reviews</div>
+</div>
+<div class="flex-1 w-full space-y-2">
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-zinc-500 w-2">5</span>
+<div class="flex-1 h-2 bg-zinc-200 rounded-full overflow-hidden">
+<div class="h-full bg-[#E50914] w-[75%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-zinc-500 w-2">4</span>
+<div class="flex-1 h-2 bg-zinc-200 rounded-full overflow-hidden">
+<div class="h-full bg-[#E50914] w-[15%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-zinc-500 w-2">3</span>
+<div class="flex-1 h-2 bg-zinc-200 rounded-full overflow-hidden">
+<div class="h-full bg-[#E50914] w-[6%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-zinc-500 w-2">2</span>
+<div class="flex-1 h-2 bg-zinc-200 rounded-full overflow-hidden">
+<div class="h-full bg-[#E50914] w-[2%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-zinc-500 w-2">1</span>
+<div class="flex-1 h-2 bg-zinc-200 rounded-full overflow-hidden">
+<div class="h-full bg-[#E50914] w-[2%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reviews List -->
+<div class="space-y-6">
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-headline font-extrabold text-xl text-on-surface">User Reviews</h2>
+<button class="text-xs font-bold text-[#E50914] uppercase tracking-widest flex items-center gap-1">
+            Newest <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Buy Button (Mobile Fixed) -->
+<div class="fixed bottom-28 left-0 w-full px-6 z-40 md:hidden">
+<button class="w-full bg-[#E50914] text-white font-headline font-black py-5 rounded-full shadow-2xl shadow-[#E50914]/40 hover:opacity-90 active:scale-95 transition-all text-lg flex items-center justify-center gap-3 uppercase tracking-tighter">
+            Confirm Booking <span class="material-symbols-outlined text-xl" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Bottom Navigation (Component Selection: BottomNavBar) -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-around items-center pb-8 pt-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl">
+<div class="mx-auto w-[90%] flex justify-around items-center rounded-full px-4 py-2 shadow-[0_12px_32px_rgba(25,28,29,0.06)]">
+<a class="flex flex-col items-center justify-center bg-[#E50914] text-white rounded-full px-5 py-2 active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-xl fill">movie</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wide uppercase mt-0.5">Movies</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 px-5 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-xl">tv</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wide uppercase mt-0.5">Series</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 px-5 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-xl">confirmation_number</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wide uppercase mt-0.5">Tickets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 px-5 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-xl">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold tracking-wide uppercase mt-0.5">Profile</span>
+</a>
+</div>
+</footer>
+<script>
+function switchTab(tab) {
+    // Hide all sections
+    document.getElementById('section-tickets').classList.add('hidden');
+    document.getElementById('section-about').classList.add('hidden');
+    document.getElementById('section-comments').classList.add('hidden');
+
+    // Reset all tab styles
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(t => {
+        t.classList.remove('font-bold', 'text-[#E50914]', 'border-b-2', 'border-[#E50914]');
+        t.classList.add('font-semibold', 'text-zinc-400');
+    });
+
+    // Show selected section and set active tab style
+    const activeTab = document.getElementById('tab-' + tab);
+    const activeSection = document.getElementById('section-' + tab);
+
+    activeSection.classList.remove('hidden');
+    activeTab.classList.add('font-bold', 'text-[#E50914]', 'border-b-2', 'border-[#E50914]');
+    activeTab.classList.remove('font-semibold', 'text-zinc-400');
+}
+</script></body></html>

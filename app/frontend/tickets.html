@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Tickets - CinePass</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#E50914",
+                        surface: "#F8F9FA",
+                        "on-surface": "#191C1D",
+                        "on-surface-variant": "#5E3F3B",
+                        "surface-container-low": "#F3F4F5",
+                        "surface-container-highest": "#E1E3E4",
+                        outline: "#936E69",
+                        "outline-variant": "#E9BCB6",
+                    },
+                    borderRadius: {
+                        DEFAULT: "2rem",
+                        lg: "2.5rem",
+                        xl: "3rem",
+                        full: "9999px",
+                    },
+                    fontFamily: {
+                        headline: ["Plus Jakarta Sans", "sans-serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .filled-icon { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface pb-32">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl sticky top-0 z-50 flex items-center px-6 py-4 w-full justify-center"><h1 class="text-xl font-headline font-bold text-on-surface">My tickets</h1>
+</header>
+<main class="max-w-2xl mx-auto px-6 pt-8">
+<!-- Editorial Header -->
+<section class="mb-8">
+<div class="flex flex-col gap-1">
+<h2 class="font-headline font-extrabold text-4xl tracking-tight text-on-surface">Your Collection</h2>
+<p class="font-body text-on-surface-variant text-sm font-medium">Ready for your next experience?</p>
+</div>
+</section>
+<!-- Segmented Control Tabs -->
+<div class="flex gap-2 p-1 bg-surface-container-low rounded-full mb-8">
+<button class="flex-1 py-3 px-6 rounded-full font-headline font-bold text-sm bg-white text-primary shadow-sm transition-all">Upcoming</button>
+<button class="flex-1 py-3 px-6 rounded-full font-headline font-bold text-sm text-zinc-500 hover:bg-zinc-100 transition-all">Past</button>
+</div>
+<!-- Ticket List -->
+<div class="flex flex-col gap-6">
+<!-- Ticket Card 1 -->
+<div class="group relative bg-white rounded-DEFAULT p-5 flex gap-6 items-center transition-all hover:shadow-xl border border-zinc-50">
+<div class="relative w-28 h-40 flex-shrink-0">
+<img alt="Odyssey Horizon poster" class="w-full h-full object-cover rounded-3xl shadow-md group-hover:scale-[1.02] transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6hohSKO9VWsQIvlgPV60xMt9DTc71Hqr5D7XGnxUSralpvhKbql3-O1gBpdhX6FfFcREp0pzUbr5bS-4AYxm2uRkAl6kaWyym7znOAG7FwJ5Y7mViKGROp-B4AXt1YdOkmdwGss2jRPGLx9M-2tpNPY_gQRz70d5-mk3DoY0_WPKMQrcN2AKvczoUGnLkHsxTbq-K3WoRTlqjpmaJcXfQ3hnZnLthe75Cixz-XiMbIKlGuMfNXRd6pUpBaW4bqkVeCeKgkQoqZQ"/>
+<div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Cinema</div>
+</div>
+<div class="flex-grow flex flex-col justify-between h-36">
+<div>
+<h3 class="font-headline font-bold text-xl leading-tight mb-2 text-on-surface">Odyssey Horizon</h3>
+<div class="flex items-center gap-2 text-zinc-500 text-sm font-medium mb-1">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Fri, Apr 17 • 20:00</span>
+</div>
+<div class="flex items-center gap-2 text-zinc-500 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Grand Cinema • Hall A</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<button class="bg-primary text-white font-headline font-bold text-xs rounded-full active:scale-95 transition-all py-2 px-4 hover:shadow-md">View Ticket</button>
+<div class="w-10 h-10 bg-zinc-50 p-1.5 rounded-xl border border-zinc-100 flex items-center justify-center opacity-60">
+<img alt="QR code" class="w-full h-full grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoi3rbcgMspVjxyhcJENrzIXyShrKy6dLzfmnttvAumSijSGLqHCywFFUhet3eXGxV6vlmBsHPxqXj3jfABDbUjeY1Y-Z6k4PjMEMg2wytFVJCrFNF3hMNn_LO4DXy2j4xBNaey7MXglz7NFjiacws4bXk4MRevtnyAYc1DUZpYU01AItWOtAj9HrtXu1wO5NLE6aMKIsFiw_XE-xbMZJRX4Btczw623y6u5lWjnBdHo3YOOqBAinyG0kf0StJPqcIv5naYVQBDA"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Ticket Card 2 -->
+<div class="group relative bg-white rounded-DEFAULT p-5 flex gap-6 items-center transition-all hover:shadow-xl border border-zinc-50">
+<div class="relative w-28 h-40 flex-shrink-0">
+<img alt="Electric Pulse Tour" class="w-full h-full object-cover rounded-3xl shadow-md group-hover:scale-[1.02] transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNgamzi_ceghZWGjagV2gu_JQHiGAb-5rrYFghgnr7YyJFgLR0XPRuTn0sEpEqNuiGGvuphjGX7MYldnvz7uGd-MkMu_oDEZWq8raAACoEeRC8q9Kv90t9WW5S8Xzh0hfYg319KBK66QvUhrviuUikh4GD5pjZxQC7phrE_QImQ_wdhT6rJ-VAcERVh7AZBEObVFmK7SwRQyoQ8_6hl9IOCj9JLlU0BdPkw8hx3CQ_H8QKEydn5-4rVWDN-1ErVUhxfZ2VnKNZ_A"/>
+<div class="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Concert</div>
+</div>
+<div class="flex-grow flex flex-col justify-between h-36">
+<div>
+<h3 class="font-headline font-bold text-xl leading-tight mb-2 text-on-surface">Electric Pulse Tour</h3>
+<div class="flex items-center gap-2 text-zinc-500 text-sm font-medium mb-1">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Sat, Apr 18 • 22:30</span>
+</div>
+<div class="flex items-center gap-2 text-zinc-500 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>City Arena • Main Stage</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<button class="bg-primary text-white font-headline font-bold text-xs rounded-full active:scale-95 transition-all py-2 px-4 hover:shadow-md">View Ticket</button>
+<div class="w-10 h-10 bg-zinc-50 p-1.5 rounded-xl border border-zinc-100 flex items-center justify-center opacity-60">
+<img alt="QR code" class="w-full h-full grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ7uWVNvbAaDgsZtpkQYmMH1GVYQRYWK9lAR-jrMiW5FWCtRCbCSuqdIH0iFxBIlMS_hAH9iMSbzvWb23FI2Q6_bMaG9xQzsA3C88p4A_ysp4NJghs2HUweN_8fxbtUBeNT5ePeaGtogstaItcM1kHBph7YMQ4sM71UpSAhcFr7Pz5-bhZD4WlHEv5Bl8fDfH3dxb_t5ZAW_UwdoO70Ez4Ce70mDJ4sH3YZGMMUXSrTTtdNDiWS6NAuEjnPWhOD2SgW5_ZOA8oeg"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Ticket Card 3 -->
+<div class="group relative bg-white rounded-DEFAULT p-5 flex gap-6 items-center transition-all hover:shadow-xl border border-zinc-50">
+<div class="relative w-28 h-40 flex-shrink-0">
+<img alt="Midnight Laughs" class="w-full h-full object-cover rounded-3xl shadow-md group-hover:scale-[1.02] transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARb_Ih7KBem0VMS_QTrGA9pzRbC4OIgULiJTvtD6AGsc5L9JL3zOyk-PGLRTEgSgu0uIcJdwlG9b0GkbnzD7n-ycta79blQ9rx95otBX3-3GLz9n1wbmrLaHVb4I3U_kDK9uKrHqBLaBM1M8XpWhzKZja37iwCm4L6uJYPg8V9OzuhnxHN74_LOkOhmOvFY59soDLN-RvZLg0AMfrtP8gzVRoylfpJyf-f6oRWMRelhWT41pIa2MDCz8i1UzHdiCprNRqqISlCQA"/>
+<div class="absolute -top-2 -right-2 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">Stand-Up</div>
+</div>
+<div class="flex-grow flex flex-col justify-between h-36">
+<div>
+<h3 class="font-headline font-bold text-xl leading-tight mb-2 text-on-surface">Midnight Laughs</h3>
+<div class="flex items-center gap-2 text-zinc-500 text-sm font-medium mb-1">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Sun, Apr 19 • 21:00</span>
+</div>
+<div class="flex items-center gap-2 text-zinc-500 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>The Laugh Factory • Room 2</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between">
+<button class="bg-primary text-white font-headline font-bold text-xs rounded-full active:scale-95 transition-all py-2 px-4 hover:shadow-md">View Ticket</button>
+<div class="w-10 h-10 bg-zinc-50 p-1.5 rounded-xl border border-zinc-100 flex items-center justify-center opacity-60">
+<img alt="QR code" class="w-full h-full grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx2JGYu4jlVdoAxaN2EdJDYvcliissHKQaSqqIG0slT5o2HMYNDSVLFMGgwouHsNSRxAIE-PQlZ0_LcV7hXC-WfqqOpUcL4Aq-LzF73k_pqFq4Ru3TSKstuEDzLuCXSluTeIw35ik3a500l5W0R_4vX9NbtxzYdkWEH7A5-HRERnobGcw9_yIN0HinfRIaIOH3Ew0Zcf0dwDuuOgV87Xa5nNyY5KPBCwSK20IT1IOIRT0bo8YC04xxjc_-EFuwzHiYXcC1pcUifg"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center pb-8 pt-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl">
+<div class="mx-auto w-[92%] flex justify-around items-center bg-white/50 dark:bg-zinc-800/50 rounded-full px-2 py-2 shadow-2xl border border-white/20">
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-4 py-1.5">
+<span class="material-symbols-outlined text-lg" data-icon="movie">movie</span>
+<span class="font-headline text-[10px] font-bold tracking-wide uppercase mt-0.5">Poster</span>
+</button>
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-4 py-1.5">
+<span class="material-symbols-outlined text-lg" data-icon="tv">tv</span>
+<span class="font-headline text-[10px] font-bold tracking-wide uppercase mt-0.5">Series</span>
+</button>
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center bg-[#E50914] text-white rounded-full px-4 py-1.5">
+<span class="material-symbols-outlined text-lg filled-icon" data-icon="confirmation_number">confirmation_number</span>
+<span class="font-headline text-[10px] font-bold tracking-wide uppercase mt-0.5">Tickets</span>
+</button>
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-4 py-1.5">
+<span class="material-symbols-outlined text-lg" data-icon="person">person</span>
+<span class="font-headline text-[10px] font-bold tracking-wide uppercase mt-0.5">Profile</span>
+</button>
+</div>
+</nav>
+</body></html>

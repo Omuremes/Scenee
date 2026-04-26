@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>CinePass - Premium Cinema Experience</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#E50914",
+                        surface: "#F8F9FA",
+                        "on-surface": "#191C1D",
+                        "on-surface-variant": "#5E3F3B",
+                        "surface-container-low": "#F3F4F5",
+                        "surface-container-highest": "#E1E3E4",
+                        outline: "#936E69",
+                        "outline-variant": "#E9BCB6",
+                    },
+                    borderRadius: {
+                        DEFAULT: "2rem",
+                        lg: "2.5rem",
+                        xl: "3rem",
+                        full: "9999px",
+                    },
+                    fontFamily: {
+                        headline: ["Plus Jakarta Sans", "sans-serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .filled-icon { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface pb-32">
+<!-- TopAppBar (COMPONENTS_16) -->
+<header class="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl sticky top-0 z-50 flex justify-between items-center px-6 py-4 w-full">
+    <div class="flex items-center gap-4">
+        <button class="active:scale-95 transition-transform hover:opacity-70">
+            <span class="material-symbols-outlined text-zinc-500" data-icon="menu">menu</span>
+        </button>
+        <h1 class="text-2xl font-black text-[#E50914] tracking-tighter font-headline">CinePass</h1>
+    </div>
+    <div class="flex items-center gap-4">
+        <button class="active:scale-95 transition-transform hover:opacity-70">
+            <span class="material-symbols-outlined text-zinc-500" data-icon="search">search</span>
+        </button>
+        <div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-primary/10">
+            <img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdecNqmBCuECOF96iXEhBr2vksJFzm2lJWSAfXTbHBeha5IPEEwMXc6ZqbM62kY22ziiQgnvput9pmmDxvFjEvHryaysdVsEWSCN0HDRaKWNPaIsJhz-EhXSIJ9FsjYpPRTuGK1CWpQjloAbOhPJNaoWtUwxhwhRezlSaYch3pieY3shwid9OmSaNdogPjQCSZuEBsaDErB9A-3RvqNbXbp8RrRb3RtJSvshlKBtq74an-yc200YzS1uJ2qBvSA3tOGwtTZIJdWQ"/>
+        </div>
+    </div>
+</header>
+<main class="max-w-7xl mx-auto space-y-10 pt-6 overflow-hidden">
+    <!-- Search Bar Section -->
+    <div class="px-6">
+        <section class="w-full">
+            <div class="relative bg-white rounded-full flex items-center px-6 py-4 shadow-sm border border-zinc-100 focus-within:border-primary/30 transition-all">
+                <span class="material-symbols-outlined text-zinc-400 mr-3" data-icon="search">search</span>
+                <input class="w-full bg-transparent border-none focus:ring-0 text-md font-medium text-on-surface placeholder-zinc-400 p-0" placeholder="Search movies, concerts, shows…" type="text"/>
+            </div>
+        </section>
+    </div>
+    <!-- Category Grid Section -->
+    <div class="px-6">
+        <section>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                <button class="flex flex-col items-center justify-center bg-white rounded-3xl p-5 transition-all hover:shadow-lg hover:-translate-y-1 border border-zinc-50">
+                    <span class="material-symbols-outlined text-primary mb-2 text-3xl filled-icon" data-icon="movie">movie</span>
+                    <span class="text-xs font-bold text-on-surface uppercase tracking-wider">Cinema</span>
+                </button>
+                <button class="flex flex-col items-center justify-center bg-white rounded-3xl p-5 transition-all hover:shadow-lg hover:-translate-y-1 border border-zinc-50">
+                    <span class="material-symbols-outlined text-zinc-400 mb-2 text-3xl" data-icon="tv">tv</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Series</span>
+                </button>
+                <button class="flex flex-col items-center justify-center bg-white rounded-3xl p-5 transition-all hover:shadow-lg hover:-translate-y-1 border border-zinc-50">
+                    <span class="material-symbols-outlined text-zinc-400 mb-2 text-3xl" data-icon="music_note">music_note</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Concerts</span>
+                </button>
+                <button class="flex flex-col items-center justify-center bg-white rounded-3xl p-5 transition-all hover:shadow-lg hover:-translate-y-1 border border-zinc-50">
+                    <span class="material-symbols-outlined text-zinc-400 mb-2 text-3xl" data-icon="mic">mic</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Stand-Up</span>
+                </button>
+                <button class="flex flex-col items-center justify-center bg-white rounded-3xl p-5 transition-all hover:shadow-lg hover:-translate-y-1 border border-zinc-50">
+                    <span class="material-symbols-outlined text-zinc-400 mb-2 text-3xl" data-icon="child_care">child_care</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Kids</span>
+                </button>
+                <button class="flex flex-col items-center justify-center bg-white rounded-3xl p-5 transition-all hover:shadow-lg hover:-translate-y-1 border border-zinc-50">
+                    <span class="material-symbols-outlined text-zinc-400 mb-2 text-3xl" data-icon="stadium">stadium</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Events</span>
+                </button>
+            </div>
+        </section>
+    </div>
+    <!-- Cinema Section -->
+    <section>
+        <div class="px-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold font-headline text-on-surface">Cinema</h2>
+                <a class="bg-primary/5 text-primary px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-white transition-colors" href="#">See All</a>
+            </div>
+        </div>
+        <div class="flex overflow-x-auto no-scrollbar gap-6 pb-4 px-6 snap-x">
+            <!-- Movie Card 1 -->
+            <div class="w-[180px] md:w-[240px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-[2/3] rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl group-hover:-translate-y-2 transition-all duration-500">
+                    <img alt="Movie Poster" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsbEzH_vyiTq1msquPhxolW1lrcITz1GbKYLG8YQkRV18_E1l22oyrVMwcdCWlquLmECMWtRLdz-Zp_KKnaf_mH0fdnmPwM8vRtxPD-20vCt6pmbu8rc708MZyBNFYsD-k1LB-zVyFR2MbG2iemaVn3B4x8idrgiexqoBcJ0HO5KOWnFKsTRcYNrWu4sjpoWyhOHU55TbZUvH4oJD4lwsqSLnTc7ucNu1nez2gNKkvaqvmbzk26HuWnGLazTDsAKzyncChBDW8Yw"/>
+                    <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-full px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
+                        <span class="material-symbols-outlined text-xs text-yellow-500 filled-icon" data-icon="star">star</span>
+                        <span class="text-[11px] font-black font-headline">8.4</span>
+                    </div>
+                </div>
+                <div class="mt-4 px-1">
+                    <h3 class="text-lg font-bold font-headline text-on-surface leading-tight truncate">Odyssey Horizon</h3>
+                    <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wide mt-1">Sci-Fi • 2h 14m</p>
+                </div>
+            </div>
+            <!-- Movie Card 2 -->
+            <div class="w-[180px] md:w-[240px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-[2/3] rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl group-hover:-translate-y-2 transition-all duration-500">
+                    <img alt="Movie Poster" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkNLgy5p6-q6D4iyzgl9rXxrbHMWmZQgwCDv6R_GuQV2Tie0LVi9vdU7Paf2YPhWuyyU1AWgt5NBk5WRONOkw7LH6wHCNWy-rbhoxcrVkawjXeGxtDYpfHYeHjtjA1JiMqyckx9ef05Ui6Ma9lorM5NeJzUWbeoKcUkZ4qoq-tXeGVRwTWD9wdxD-RzM1jKMt3Em16GoctIiO0s2sc_isdQKV7sS9-ylg15IsmB7IAs0h5ZyB7HnTW1kxNGwj3pzuZGt6so4jWeQ"/>
+                    <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-full px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
+                        <span class="material-symbols-outlined text-xs text-yellow-500 filled-icon" data-icon="star">star</span>
+                        <span class="text-[11px] font-black font-headline">9.1</span>
+                    </div>
+                </div>
+                <div class="mt-4 px-1">
+                    <h3 class="text-lg font-bold font-headline text-on-surface leading-tight truncate">The Director's Cut</h3>
+                    <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wide mt-1">Drama • 1h 58m</p>
+                </div>
+            </div>
+            <!-- Movie Card 3 -->
+            <div class="w-[180px] md:w-[240px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-[2/3] rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl group-hover:-translate-y-2 transition-all duration-500">
+                    <img alt="Movie Poster" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBE_x76sLPWsz8e6Fehaa662_NbDv70PfRyH39qFZiaS8X3aXFlgan1WgbGxShQHCV9RYxr_V5Q1s7PPrMwxWfU_3kzqeZKpOvNUqg1jK7qOQ3n8nyuL87K_1ENmj548Hqggd5uU0r241gb5Fqu1DTPcN-t33DfN3-3sHKnbdtL9DEWknW1QA-4-RHarqflbi-bCxQemkjeBPW4Zmw677hJQFQzMLsjhByhLeLjLoZdH6S7ogw06XZuYhk_rpARr6MDd4EP9CVtrQ"/>
+                    <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-full px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
+                        <span class="material-symbols-outlined text-xs text-yellow-500 filled-icon" data-icon="star">star</span>
+                        <span class="text-[11px] font-black font-headline">7.8</span>
+                    </div>
+                </div>
+                <div class="mt-4 px-1">
+                    <h3 class="text-lg font-bold font-headline text-on-surface leading-tight truncate">Neon Pursuit</h3>
+                    <p class="text-xs font-semibold text-zinc-500 uppercase tracking-wide mt-1">Action • 2h 05m</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Concerts Section -->
+    <section>
+        <div class="px-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold font-headline text-on-surface">Concerts</h2>
+                <a class="bg-primary/5 text-primary px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-white transition-colors" href="#">See All</a>
+            </div>
+        </div>
+        <div class="flex overflow-x-auto no-scrollbar gap-6 pb-4 px-6 snap-x">
+            <!-- Concert Card 1 -->
+            <div class="w-[300px] md:w-[400px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-video rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500">
+                    <img alt="Concert Stage" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR5nvf4o7yTvgGmD-B9-EdghtcK48kXzrUIz_7LrI0LfwO-Lp_Y8_E5kDSMLxupsf3NAah87RiVWuljAdBG9qQ7aKs_gtfGNXimM-xbyQcIEF_bv0dIj_CcUJKd4A7F9vxjNJoDSE3nIoD2Yenk17lRAljTI5nlXxQ2CtHDqebLVpjVOKUNXSm1WyIQlTYWOYbpq3DAB-wYtIh_9G9JYr8jiu6Xlg89HCpNLgNe5WjqUfkcj29QiSCKdgDFMV6dsYZfdHE7XHGRQ"/>
+                </div>
+                <div class="mt-5 px-1">
+                    <h3 class="text-xl font-bold font-headline text-on-surface">Electric Pulse Tour</h3>
+                    <p class="text-md font-medium text-zinc-600">The Synthetics</p>
+                    <p class="text-xs font-bold text-primary mt-2 uppercase tracking-widest">Oct 12 • City Arena</p>
+                </div>
+            </div>
+            <!-- Concert Card 2 -->
+            <div class="w-[300px] md:w-[400px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-video rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500">
+                    <img alt="Concert Stage" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADceA9CJ-hyKYUGEZo-KjNLmlty47oJ2quYKGradlO8oHFTbeTV6vNqSmaiw-WdoJ83XRjPNEGTTiFOqxlFrzVxyTxfwlMNqD-crW9p4726e16Uu1gW-SlR0xz26sY7XFt17epe_qNLm40cB20iNhTr84t3xi1W2kcGMvw_dCAfa7BPaDKfEiZ8F1TWwA4e0P0LhG7cUSzKCN5AlxG-IP8FXV492qpf8UnIyXoMe-oly3Vp2Io0QMwCzaWlAzOeQBcLdGgGlz5uQ"/>
+                </div>
+                <div class="mt-5 px-1">
+                    <h3 class="text-xl font-bold font-headline text-on-surface">Acoustic Sessions</h3>
+                    <p class="text-md font-medium text-zinc-600">Elena Rivers</p>
+                    <p class="text-xs font-bold text-primary mt-2 uppercase tracking-widest">Nov 05 • Symphony Hall</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Stand-Up Section -->
+    <section>
+        <div class="px-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold font-headline text-on-surface">Stand-Up</h2>
+                <a class="bg-primary/5 text-primary px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-white transition-colors" href="#">See All</a>
+            </div>
+        </div>
+        <div class="flex overflow-x-auto no-scrollbar gap-6 pb-4 px-6 snap-x">
+            <!-- Stand-Up Card 1 -->
+            <div class="w-[260px] md:w-[320px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-[4/3] rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500">
+                    <img alt="Comedian" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2Mk0dJWb59JBMfkAUMw4FMOaLC3iZALx70jYKyZL1AIx7DaQKr46639Or7AbelOOGzMGAs1RuN6VPZA2ikm4teVi3_0xt0G7OQG3AZAMpkwMHfkc41CGx8wz_8yqEcSw4m1iXxr2KWj1tnsD3EKoefOqxcPZuS4Ukv0E599FBF4EJxVif9_kwWKw0bqIj5C6ADAjPNmeRs560A7U8gJ1EHzOAIVHrKViNBfi4Uwh3U4GaRUwRbMlUWj7OJHcDIYGtqdaQyBPNkA"/>
+                </div>
+                <div class="mt-4 px-1">
+                    <h3 class="text-lg font-bold font-headline text-on-surface">Laughs &amp; Lore</h3>
+                    <p class="text-md font-semibold text-zinc-600">Marcus Webb</p>
+                    <p class="text-xs font-medium text-zinc-400 mt-2 italic">"Unfiltered and hilarious."</p>
+                </div>
+            </div>
+            <!-- Stand-Up Card 2 -->
+            <div class="w-[260px] md:w-[320px] flex-shrink-0 flex flex-col group cursor-pointer relative snap-start">
+                <div class="w-full aspect-[4/3] rounded-3xl bg-zinc-200 overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500">
+                    <img alt="Comedian" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYjr0zxrNLLpQ8RDH_0u6OGMZA08ittjBM25nwUwNFuQBlI9RpjaW5odSMRqUUrK33kj6IJdKkOD4YNTYO-tnlKShA_fsg5DLkDdl2gVH7ZLhhv8iHfibIJjfkBcy9pVQVCsnSU-pwq5GqgGGdLThAONt311Gy4SCxaxBUhmHe3fIRgxuYcTEzM0VwbZemeX4sbjRyTHxAAcoEXxIKagN7J8H6X3i4ZOvbN-o4T9qJbiuJqmEE9lmYQWyy1p9I0B9GIhzC9p4iRA"/>
+                </div>
+                <div class="mt-4 px-1">
+                    <h3 class="text-lg font-bold font-headline text-on-surface">Modern Problems</h3>
+                    <p class="text-md font-semibold text-zinc-600">Sarah Jenkins</p>
+                    <p class="text-xs font-medium text-zinc-400 mt-2 italic">"A fresh take on daily life."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<!-- BottomNavBar (COMPONENTS_16) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center pb-8 pt-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl">
+    <div class="mx-auto w-[92%] flex justify-around items-center bg-white/50 dark:bg-zinc-800/50 rounded-full px-2 py-2 shadow-2xl border border-white/20">
+        <button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center bg-[#E50914] text-white rounded-full px-6 py-2.5">
+            <span class="material-symbols-outlined text-lg filled-icon" data-icon="movie">movie</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Poster</span>
+        </button>
+        <button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-6 py-2.5">
+            <span class="material-symbols-outlined text-lg" data-icon="tv">tv</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Series</span>
+        </button>
+        <button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-6 py-2.5">
+            <span class="material-symbols-outlined text-lg" data-icon="confirmation_number">confirmation_number</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Tickets</span>
+        </button>
+        <button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full px-6 py-2.5">
+            <span class="material-symbols-outlined text-lg" data-icon="person">person</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Profile</span>
+        </button>
+    </div>
+</nav>
+</body></html>
