@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile - CinePass</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2e3132",
+                    "outline-variant": "#e9bcb6",
+                    "on-surface": "#191c1d",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#ffdad5",
+                    "inverse-on-surface": "#f0f1f2",
+                    "secondary-container": "#d3e1f6",
+                    "surface-variant": "#e1e3e4",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#ffb4aa",
+                    "surface-container-high": "#e7e8e9",
+                    "secondary-fixed": "#d6e4f9",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#c0000c",
+                    "on-tertiary-fixed": "#001b3c",
+                    "on-tertiary-container": "#f8f9ff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#566475",
+                    "surface-container-highest": "#e1e3e4",
+                    "tertiary": "#005aab",
+                    "tertiary-fixed-dim": "#a7c8ff",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#0f1c2c",
+                    "outline": "#936e69",
+                    "surface-bright": "#f8f9fa",
+                    "on-tertiary-fixed-variant": "#004689",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#edeeef",
+                    "tertiary-container": "#0072d7",
+                    "on-secondary-fixed-variant": "#3a4859",
+                    "primary-fixed-dim": "#ffb4aa",
+                    "on-surface-variant": "#5e3f3b",
+                    "secondary-fixed-dim": "#bac8dc",
+                    "on-primary-fixed": "#410001",
+                    "on-background": "#191c1d",
+                    "on-primary-container": "#fff7f6",
+                    "tertiary-fixed": "#d5e3ff",
+                    "surface-dim": "#d9dadb",
+                    "surface-container-low": "#f3f4f5",
+                    "surface": "#ffffff",
+                    "primary-container": "#e50914",
+                    "secondary": "#525f71",
+                    "primary": "#e50914",
+                    "background": "#ffffff",
+                    "on-primary-fixed-variant": "#930007"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1.5rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon { font-variation-settings: 'FILL' 1; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar (Matched with Main Page SCREEN_2) -->
+<header class="bg-white sticky top-0 z-50 flex justify-between items-center px-6 w-full border-b border-zinc-100 h-16">
+<div class="flex items-center w-full relative">
+<div class="w-full text-center">
+<h1 class="text-xl font-extrabold text-zinc-900 tracking-tight font-display">My Profile</h1>
+</div>
+<div class="absolute right-0 w-6"></div> <!-- Spacer for balance -->
+</div>
+</header>
+<main class="pt-8 px-6 max-w-2xl mx-auto">
+<!-- Hero Profile Section -->
+<section class="flex flex-col items-center mb-10">
+<div class="relative">
+<div class="w-32 h-32 rounded-full overflow-hidden shadow-xl ring-4 ring-surface-container-low transition-transform duration-300">
+<img alt="Alex Johnson" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMbUpCr60iLlRrfCcMrm9IG9cAgDhjdu54OgP_Vinvxz00LBcrRTftS7lGTC5uQyMuBFIgKVhDrVlyZ0PeXsBymCCG7CQXwQBz3yy5Nl3B3SQ3S3yvb6D8p1nS4AuImdJqzDixDYAG_tQyj7DKUEfyFRwJQf3HQSghKPNvIj3Wyk6L_oyq5vdEDbkXHjtOO1d7ioUqhWCaV-Tpfz8UaUxcpniAkvJJu4BPJa4zgbzfVbIoCxy5KwRIR2ai3alWXz5bJpCUMg2j3w"/>
+</div>
+<button class="absolute bottom-1 right-1 bg-primary text-on-primary p-2 rounded-full shadow-lg active:scale-90 transition-transform flex items-center justify-center border-4 border-white">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="text-center mt-6">
+<h2 class="text-3xl font-bold tracking-tight mb-1 font-display">Alex Johnson</h2>
+<p class="text-on-surface-variant font-medium opacity-70">alex.j@example.com</p>
+</div>
+</section>
+<!-- Profile Content -->
+<div class="space-y-8">
+<!-- Section 1: Account -->
+<div class="space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant px-4">Account</h3>
+<div class="bg-surface-container-low rounded-lg p-2">
+<div class="flex items-center justify-between p-4 hover:bg-white rounded-DEFAULT transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<span class="font-bold">Personal Info</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white rounded-DEFAULT transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+</div>
+<span class="font-bold">Payment Methods</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-white rounded-DEFAULT transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="history">history</span>
+</div>
+<span class="font-bold">Order History</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Logout Button -->
+<div class="pt-6 pb-12">
+<button class="w-full py-4 px-6 border-2 border-primary/20 text-primary font-bold rounded-full hover:bg-primary/5 transition-all active:scale-[0.98]">
+                Logout
+            </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-6 uppercase tracking-widest opacity-50">CinePass v2.4.1 (Build 890)</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Matched with Main Page SCREEN_2 style, Profile active) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center pb-8 pt-2 bg-white/90 backdrop-blur-xl">
+<div class="mx-auto w-[92%] flex justify-around items-center bg-white/50 rounded-full px-2 py-2 shadow-2xl border border-white/20">
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 rounded-full px-6 py-2.5">
+<span class="material-symbols-outlined text-lg" data-icon="movie">movie</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Poster</span>
+</button>
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 rounded-full px-6 py-2.5">
+<span class="material-symbols-outlined text-lg" data-icon="tv">tv</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Series</span>
+</button>
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center text-zinc-500 hover:bg-zinc-100 rounded-full px-6 py-2.5">
+<span class="material-symbols-outlined text-lg" data-icon="confirmation_number">confirmation_number</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Tickets</span>
+</button>
+<button class="active:scale-90 transition-all duration-300 flex flex-col items-center justify-center bg-[#E50914] text-white rounded-full px-6 py-2.5">
+<span class="material-symbols-outlined text-lg filled-icon" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-bold tracking-wide uppercase mt-0.5">Profile</span>
+</button>
+</div>
+</nav>
+</body></html>

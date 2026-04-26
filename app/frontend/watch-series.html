@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be_Vietnam_Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#5e3f3b",
+                        "on-primary-container": "#fff7f6",
+                        "outline": "#936e69",
+                        "on-primary-fixed": "#410001",
+                        "surface-container-highest": "#e1e3e4",
+                        "primary": "#b8000b",
+                        "on-surface": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#d5e3ff",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f8f9fa",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#005aab",
+                        "on-secondary-fixed-variant": "#3a4859",
+                        "on-secondary-container": "#566475",
+                        "on-tertiary-container": "#f8f9ff",
+                        "on-tertiary-fixed": "#001b3c",
+                        "on-secondary-fixed": "#0f1c2c",
+                        "surface-tint": "#c0000c",
+                        "primary-fixed-dim": "#ffb4aa",
+                        "surface-variant": "#e1e3e4",
+                        "on-primary-fixed-variant": "#930007",
+                        "secondary-fixed": "#d6e4f9",
+                        "on-background": "#191c1d",
+                        "secondary-container": "#d3e1f6",
+                        "surface": "#f8f9fa",
+                        "background": "#f8f9fa",
+                        "secondary": "#525f71",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#ffb4aa",
+                        "inverse-on-surface": "#f0f1f2",
+                        "tertiary-fixed-dim": "#a7c8ff",
+                        "inverse-surface": "#2e3132",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#e50914",
+                        "outline-variant": "#e9bcb6",
+                        "tertiary-container": "#0072d7",
+                        "primary-fixed": "#ffdad5",
+                        "on-tertiary-fixed-variant": "#004689",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#bac8dc",
+                        "surface-dim": "#d9dadb",
+                        "surface-container": "#edeeef"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl fixed top-0 w-full z-50">
+<div class="relative flex items-center justify-center px-6 py-4 w-full">
+<div class="absolute left-6">
+<button class="hover:opacity-70 transition-opacity active:scale-95 duration-200 flex items-center">
+<span class="material-symbols-outlined text-[#E50914]" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl text-on-surface">Episodes</h1>
+<div class="absolute right-6">
+</div>
+</div>
+</header>
+<main class="pt-20 pb-32 px-6">
+<!-- Hero Title Section -->
+<div class="mb-8">
+<p class="text-primary font-bold tracking-widest text-[10px] font-label mb-1 uppercase">Now Playing</p>
+<h2 class="font-display text-4xl font-extrabold tracking-tight leading-none text-on-surface">Neon Genesis</h2>
+</div>
+<!-- Season Selector Chips -->
+<section class="mb-10 overflow-x-auto hide-scrollbar -mx-6 px-6">
+<div class="flex gap-3 whitespace-nowrap">
+<!-- Active Chip -->
+<button class="bg-primary-container text-on-primary text-sm font-semibold px-6 py-3 rounded-full shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                    Season 1
+                </button>
+<!-- Inactive Chips -->
+<button class="bg-surface-container-high text-on-surface-variant text-sm font-medium px-6 py-3 rounded-full hover:bg-surface-container-highest transition-colors active:scale-95">
+                    Season 2
+                </button>
+<button class="bg-surface-container-high text-on-surface-variant text-sm font-medium px-6 py-3 rounded-full hover:bg-surface-container-highest transition-colors active:scale-95">
+                    Season 3
+                </button>
+<button class="bg-surface-container-high text-on-surface-variant text-sm font-medium px-6 py-3 rounded-full hover:bg-surface-container-highest transition-colors active:scale-95">
+                    Season 4
+                </button>
+</div>
+</section>
+<!-- Episodes List -->
+<section class="space-y-6">
+<!-- Episode Card 1 -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden flex items-center p-3 gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-shadow">
+<div class="relative w-32 h-20 flex-shrink-0 overflow-hidden rounded">
+<img alt="Cinematic landscape" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="dramatic cinematic wide shot of a futuristic cyberpunk city skyline at night with neon red lighting and hazy atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnnF-pc8lM8DmzUeYqfqyHr8buT0_9DxNGCf80K2FId0dXE1AMjCWla52UaYrWPYZqSqxPjz0Wl9HX3-852UfL_kdgfryJgRqd-_22qrnUCqP0OBnF9t0-pA1i-VizUzURtuSUwdWuhdb5oxa65UdzgHgw9jVDT36UUm2ZNa8I0RwA0H_D1tSHEcvwwKh09UbJDdqI5iIYO5SNwkw5jhx14T2X-uM0NEFWuAimh2Xgin6N7tFZW6BTDGka5Yn3MoU4peUnlyKQAw"/>
+<div class="absolute inset-0 bg-on-surface/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<span class="text-primary font-bold text-[10px] font-label">EPISODE 1</span>
+<h3 class="font-headline font-bold text-lg text-on-surface leading-tight mb-1">The Beginning</h3>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="schedule">schedule</span>
+<span class="text-on-surface-variant text-xs font-medium">45m</span>
+</div>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Episode Card 2 -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden flex items-center p-3 gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-shadow">
+<div class="relative w-32 h-20 flex-shrink-0 overflow-hidden rounded">
+<img alt="Outer space shot" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="stunning orbital view of a planet with glowing blue atmosphere against the vast dark void of space and distant stars" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKa5H68pZp5tVp3q_3XGwmksgTgQhfJNRdlgoV3qRmH-O9DBWYelCn6wG0V9UZ_eDgLtedf-trpEjEWEzqED3Zv9_15odt05qpY1im2hI7cP0aMbEJdXFtpFZ5anqVe7cDfUrnXyDS2IRA_S1_I9qGXzDFz9DP8vQ147YV6XQPr_xrA64XwUqZkgLVBZ-mrKMs1edr1-5CpSuVZOclehyqIZRR50lNSQGAG0OolpKayDOZPxPD5PBkamj-ZdHbmU2nMOdQ_H0sFA"/>
+<div class="absolute inset-0 bg-on-surface/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<span class="text-primary font-bold text-[10px] font-label">EPISODE 2</span>
+<h3 class="font-headline font-bold text-lg text-on-surface leading-tight mb-1">Celestial Rift</h3>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="schedule">schedule</span>
+<span class="text-on-surface-variant text-xs font-medium">48m</span>
+</div>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Episode Card 3 -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden flex items-center p-3 gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-shadow">
+<div class="relative w-32 h-20 flex-shrink-0 overflow-hidden rounded">
+<img alt="Futuristic laboratory" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="highly detailed close-up of a sleek silver robotic hand touching a holographic interface in a cool blue lab setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApCDGVyZ_pxJhwRX6i-vGDuLWSio15nAlaZZoIDYncWNGjtdnUm-VVmhK1GslsMG-bOirLW7IdWy2NiR_c6Eo_iT-P-iXzqatjishsfIq87soHtrHXx7Dc5FzhZOn5fPhrm8INr41pnMBmUutkGzM18lLGpa2mEmGlS4UFYrwHcPoF3yNoxao_w_9N5SJa0BSXAiM4YB8UHN_rv1dEy3_9_cgN4XjXgwslqRuAZ20ofjb3glZByK5yaGM62IaL9H0rdkvpcslnZg"/>
+<div class="absolute inset-0 bg-on-surface/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<span class="text-primary font-bold text-[10px] font-label">EPISODE 3</span>
+<h3 class="font-headline font-bold text-lg text-on-surface leading-tight mb-1">The Synthesis</h3>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="schedule">schedule</span>
+<span class="text-on-surface-variant text-xs font-medium">52m</span>
+</div>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Episode Card 4 -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden flex items-center p-3 gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-shadow">
+<div class="relative w-32 h-20 flex-shrink-0 overflow-hidden rounded">
+<img alt="Nebula clouds" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="swirling purple and red cosmic nebula clouds with small bright stars scattered throughout, ethereal and painterly style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRLQnL9UE6auKKfem6ZJDJsVTZF6ZqLx1jh8MECDfoFzXYj_PHhKyicz3cYQ4knWFRq5YZ2Ylkj31CBpo7tBaMvi1w7IJLvDIW3fOGYpboIqm5HQKR-2HHD3T5XYgrHKt9whHIWDV4kzl-DlPSXecGCnNtBZ7KRPt8YNPW-ugukHMvJRNSsYSgULJJTfOQBZFLnE0RyzYvoKx-eLiaOWZCOkOQ5zYSIyRpW4QxrtHwtBI8sfHujEymvtk1B7mGcHcc1vijQymI4A"/>
+<div class="absolute inset-0 bg-on-surface/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<span class="text-primary font-bold text-[10px] font-label">EPISODE 4</span>
+<h3 class="font-headline font-bold text-lg text-on-surface leading-tight mb-1">Horizon's Edge</h3>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="schedule">schedule</span>
+<span class="text-on-surface-variant text-xs font-medium">45m</span>
+</div>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Episode Card 5 -->
+<div class="group relative bg-surface-container-lowest rounded-lg overflow-hidden flex items-center p-3 gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-shadow">
+<div class="relative w-32 h-20 flex-shrink-0 overflow-hidden rounded">
+<img alt="Dark silhouette" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="shadowy silhouette of a protagonist standing against a massive glowing portal, dramatic backlight and high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDB0xB02t-m6OplDQqAJXERfLRQXTwLlji__1-2KUC6tylIpC2QVApjroAmPhZKa5WCs103tIHkkN-Qw3V_ZDEX672rNDpoGrGVrPbvwXhU3fNKovUgoKAYvgu3GPEVPQqmKYnL-Ta3yoLt4nkviN6i-q7qt0ZU8-EnOAy1MlJrTAvkv_jDufjBf-HoChpMheND7nVhOWYmCCHvnXhpDjS9wnhkOiZrG-sz0Nxhleu3-en4OrN4m1jJKSZYIK0EQcpqEE8hx3jY5Q"/>
+<div class="absolute inset-0 bg-on-surface/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+<div class="flex-grow">
+<span class="text-primary font-bold text-[10px] font-label">EPISODE 5</span>
+<h3 class="font-headline font-bold text-lg text-on-surface leading-tight mb-1">Parallel Echoes</h3>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="schedule">schedule</span>
+<span class="text-on-surface-variant text-xs font-medium">50m</span>
+</div>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-8 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-2xl rounded-t-[2rem] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+<!-- Home -->
+<a class="flex flex-col items-center gap-1 text-zinc-400 dark:text-zinc-600 hover:text-red-500 transition-colors active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] tracking-wide font-medium">Poster</span>
+</a>
+<!-- Browse (Active) -->
+<a class="flex flex-col items-center gap-1 text-red-600 dark:text-red-500 font-bold hover:text-red-500 transition-colors active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="tv" style="font-variation-settings: 'FILL' 1;">tv</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] tracking-wide font-bold">Series</span>
+</a>
+<!-- Downloads -->
+<a class="flex flex-col items-center gap-1 text-zinc-400 dark:text-zinc-600 hover:text-red-500 transition-colors active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] tracking-wide font-medium">Tickets</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center gap-1 text-zinc-400 dark:text-zinc-600 hover:text-red-500 transition-colors active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] tracking-wide font-medium">Profile</span>
+</a>
+</nav>
+</body></html>
