@@ -1,6 +1,5 @@
 package com.example.cinescope.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,34 +8,42 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Blush,
+    onPrimary = Ink,
+    secondary = SurfaceMuted,
+    onSecondary = SurfaceHigh,
+    tertiary = Warning,
+    background = Ink,
+    onBackground = Surface,
+    surface = Color(0xFF202328),
+    onSurface = Surface,
+    surfaceVariant = Color(0xFF2A2E34),
+    onSurfaceVariant = Color(0xFFBCC2CA),
+    outline = Color(0xFF3A4048)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Crimson,
+    onPrimary = SurfaceHigh,
+    secondary = SurfaceMuted,
+    onSecondary = Ink,
+    tertiary = Warning,
+    background = Surface,
+    onBackground = Ink,
+    surface = SurfaceHigh,
+    onSurface = Ink,
+    surfaceVariant = SurfaceMuted,
+    onSurfaceVariant = Slate,
+    outline = Outline
 )
 
 @Composable
 fun CineScopeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
