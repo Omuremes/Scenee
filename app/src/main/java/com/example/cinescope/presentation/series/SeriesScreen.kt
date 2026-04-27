@@ -40,33 +40,9 @@ fun SeriesScreen(
     onSeriesClick: () -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-        item { SeriesTopBar() }
-        item {
-            Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 10.dp)) {
-                Text("Watch Series", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold)
-            }
-        }
         item { SearchRow("Search series, genres, or actors", true) }
         items(sections) { section ->
             SeriesSectionBlock(section, onSeriesClick)
-        }
-    }
-}
-
-@Composable
-private fun SeriesTopBar() {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Menu, contentDescription = null)
-            Text("CinePass", style = MaterialTheme.typography.displayLarge, color = Crimson, fontWeight = FontWeight.Bold)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(Icons.Filled.Search, contentDescription = null)
-            Icon(Icons.Outlined.AccountCircle, contentDescription = null)
         }
     }
 }

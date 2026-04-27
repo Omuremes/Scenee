@@ -22,27 +22,39 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cinescope.data.CineScopeRepository
 import com.example.cinescope.presentation.models.CineScopeUiState
+import com.example.cinescope.ui.components.CineScopeTopBar
+import com.example.cinescope.ui.navigation.AppRoute
 import com.example.cinescope.ui.navigation.BottomNavRoute
 import com.example.cinescope.ui.navigation.CineScopeNavGraph
 import com.example.cinescope.ui.navigation.bottomNavRouteSet
 import com.example.cinescope.ui.navigation.navigateToBottomRoute
 import com.example.cinescope.ui.theme.Crimson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
 class CineScopeViewModel @Inject constructor(
     private val repository: CineScopeRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(repository.loadInitialState())
-    val uiState: StateFlow<CineScopeUiState> = _uiState
+    val uiState: StateFlow<CineScopeUiState> = repository.getAuthToken()
+        .map { token ->
+            repository.loadInitialState(isAuthenticated = token != null)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = repository.loadInitialState(isAuthenticated = false)
+        )
 }
 
 @Composable
@@ -53,6 +65,11 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
+        topBar = {
+            if (currentRoute != AppRoute.Login.route && currentRoute != AppRoute.Signup.route) {
+                AppHeader(currentRoute, navController)
+            }
+        },
         bottomBar = {
             if (currentRoute in bottomNavRouteSet) {
                 BottomNavigationBar(navController, currentRoute)
@@ -62,8 +79,25 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
         CineScopeNavGraph(
             navController = navController,
             appState = uiState,
+            startDestination = if (uiState.isAuthenticated) BottomNavRoute.Home.route else AppRoute.Login.route,
             modifier = Modifier.padding(innerPadding)
         )
+    }
+}
+
+@Composable
+private fun AppHeader(currentRoute: String?, navController: NavHostController) {
+    when (currentRoute) {
+        BottomNavRoute.Home.route -> CineScopeTopBar(showLogo = true, showMenu = true, showSearch = true, showProfile = true)
+        BottomNavRoute.Series.route -> CineScopeTopBar(showLogo = true, showMenu = true, showSearch = true, showProfile = true)
+        BottomNavRoute.Tickets.route -> CineScopeTopBar(title = "My tickets", centeredTitle = true)
+        BottomNavRoute.Profile.route -> CineScopeTopBar(title = "Profile", centeredTitle = true)
+        
+        AppRoute.MovieDetail.route -> CineScopeTopBar(title = "Cinema", showBack = true, onBackClick = { navController.popBackStack() })
+        AppRoute.ConcertDetail.route -> CineScopeTopBar(title = "Concert", showBack = true, onBackClick = { navController.popBackStack() })
+        AppRoute.StandupDetail.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, onBackClick = { navController.popBackStack() })
+        AppRoute.SeriesDetail.route -> CineScopeTopBar(title = "Series", showBack = true, onBackClick = { navController.popBackStack() })
+        AppRoute.WatchSeries.route -> CineScopeTopBar(title = "Episodes", showBack = true, onBackClick = { navController.popBackStack() })
     }
 }
 

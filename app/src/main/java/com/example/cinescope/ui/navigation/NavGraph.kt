@@ -48,11 +48,12 @@ val bottomNavRouteSet = setOf(
 fun CineScopeNavGraph(
     navController: NavHostController,
     appState: CineScopeUiState,
+    startDestination: String,
     modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavRoute.Home.route,
+        startDestination = startDestination,
         modifier = modifier
     ) {
         composable(BottomNavRoute.Home.route) {
@@ -87,7 +88,9 @@ fun CineScopeNavGraph(
                     navController.navigate(AppRoute.Signup.route)
                 },
                 onSuccess = { _ ->
-                    navController.popBackStack()
+                    navController.navigate(BottomNavRoute.Home.route) {
+                        popUpTo(AppRoute.Login.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -99,7 +102,9 @@ fun CineScopeNavGraph(
                     navController.navigate(AppRoute.Login.route)
                 },
                 onSuccess = { _ ->
-                    navController.popBackStack()
+                    navController.navigate(BottomNavRoute.Home.route) {
+                        popUpTo(AppRoute.Signup.route) { inclusive = true }
+                    }
                 }
             )
         }

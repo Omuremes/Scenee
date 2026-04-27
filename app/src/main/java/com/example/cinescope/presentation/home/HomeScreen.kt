@@ -51,41 +51,10 @@ fun HomeScreen(
     onSeriesOpen: () -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-        item { HomeTopBar() }
         item { SearchRow("Search movies, concerts, shows...") }
         item { CategoryGrid(categories, onSeriesOpen) }
         items(sections) { section ->
             HomeSectionBlock(section, onMovieClick, onConcertClick, onStandupClick)
-        }
-    }
-}
-
-@Composable
-private fun HomeTopBar() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.85f))
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Menu, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("CinePass", style = MaterialTheme.typography.headlineMedium, color = Crimson, fontWeight = FontWeight.Black)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(2.dp, Crimson.copy(alpha = 0.1f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("AJ", color = Crimson, fontWeight = FontWeight.Bold)
-            }
         }
     }
 }

@@ -46,15 +46,9 @@ fun TicketsScreen(tabs: List<String>, tickets: List<TicketSummary>) {
     var selectedTab by remember { mutableStateOf(tabs.first()) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, top = 0.dp, end = 24.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        item {
-            Box(
-                modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.85f)).padding(top = 16.dp, bottom = 8.dp),
-                contentAlignment = Alignment.Center
-            ) { Text("My tickets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
-        }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text("Your Collection", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold)

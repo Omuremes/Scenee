@@ -3,6 +3,7 @@ package com.example.cinescope.presentation.models
 import androidx.compose.ui.graphics.Color
 
 data class CineScopeUiState(
+    val isAuthenticated: Boolean = false,
     val homeSections: List<HomeSection>,
     val categories: List<HomeCategory>,
     val seriesSections: List<SeriesSection>,

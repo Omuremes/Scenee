@@ -62,14 +62,6 @@ import com.example.cinescope.ui.theme.Crimson
 fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
     var selectedTab by remember { mutableStateOf(MovieTab.Tickets) }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.85f)).padding(horizontal = 24.dp, vertical = 16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Icon(Icons.Outlined.ArrowBack, contentDescription = null, modifier = Modifier.clickable { onBack() })
-                    Text("Cinema", style = MaterialTheme.typography.headlineMedium, color = Crimson, fontWeight = FontWeight.Black)
-                }
-            }
-        }
         item { HeroMediaBlock() }
         item {
             Column(
@@ -134,22 +126,6 @@ fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
 fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .border(BorderStroke(1.dp, Color(0xFFF1F1F1)))
-                    .padding(horizontal = 24.dp, vertical = 18.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.ArrowBack, contentDescription = null, modifier = Modifier.clickable { onBack() })
-                    Spacer(Modifier.weight(1f))
-                    Text(data.screenTitle, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.weight(1f))
-                }
-            }
-        }
-        item {
             Box(modifier = Modifier.fillMaxWidth().aspectRatio(4f / 5f)) {
                 PosterBox(modifier = Modifier.fillMaxSize(), theme = data.theme)
                 Box(
@@ -211,16 +187,6 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
 @Composable
 fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesClick: () -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.ArrowBack, contentDescription = null, modifier = Modifier.clickable { onBack() })
-                    Spacer(Modifier.weight(1f))
-                    Text("Series", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.weight(1f))
-                }
-            }
-        }
         item {
             Box(modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) {
                 PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
@@ -293,12 +259,6 @@ fun WatchSeriesScreen(data: SeriesDetailData, onBack: () -> Unit) {
         contentPadding = PaddingValues(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 110.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Icon(Icons.Outlined.ArrowBack, contentDescription = null, tint = Crimson, modifier = Modifier.align(Alignment.CenterStart).clickable { onBack() })
-                Text("Episodes", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            }
-        }
         item {
             Column {
                 Text("NOW PLAYING", style = MaterialTheme.typography.labelSmall, color = Crimson)

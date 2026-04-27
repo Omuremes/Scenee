@@ -28,8 +28,9 @@ class CineScopeRepository @Inject constructor(
     fun getAuthToken() = sessionManager.authToken
     suspend fun logout() = sessionManager.clearSession()
 
-    fun loadInitialState(): CineScopeUiState {
+    fun loadInitialState(isAuthenticated: Boolean = false): CineScopeUiState {
         return CineScopeUiState(
+            isAuthenticated = isAuthenticated,
             homeSections = listOf(
                 HomeSection(
                     title = "Cinema",
