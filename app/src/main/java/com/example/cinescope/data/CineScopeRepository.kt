@@ -1,19 +1,33 @@
 package com.example.cinescope.data
 
 import androidx.compose.ui.graphics.Color
-import com.example.cinescope.app.CineScopeUiState
-import com.example.cinescope.app.EpisodeItem
-import com.example.cinescope.app.MovieDateChip
-import com.example.cinescope.app.MovieDetailData
-import com.example.cinescope.app.MovieSession
-import com.example.cinescope.app.MovieTab
-import com.example.cinescope.app.EventDetailData
-import com.example.cinescope.app.ProfileAction
-import com.example.cinescope.app.ProfileSummary
-import com.example.cinescope.app.ReviewItem
-import com.example.cinescope.app.SeriesDetailData
+import com.example.cinescope.data.local.SessionManager
+import com.example.cinescope.data.remote.AuthApiService
+import com.example.cinescope.data.remote.dto.LoginRequest
+import com.example.cinescope.data.remote.dto.RegisterRequest
+import com.example.cinescope.data.remote.dto.UserDto
+import com.example.cinescope.presentation.models.*
+import kotlinx.coroutines.flow.first
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class CineScopeRepository {
+@Singleton
+class CineScopeRepository @Inject constructor(
+    private val authApiService: AuthApiService,
+    private val sessionManager: SessionManager
+) {
+    suspend fun register(request: RegisterRequest) = authApiService.register(request)
+    suspend fun login(request: LoginRequest) = authApiService.login(request)
+
+    suspend fun getMe(): UserDto {
+        val token = sessionManager.authToken.first() ?: throw Exception("Not authenticated")
+        return authApiService.getMe("Bearer $token")
+    }
+
+    suspend fun saveToken(token: String) = sessionManager.saveAuthToken(token)
+    fun getAuthToken() = sessionManager.authToken
+    suspend fun logout() = sessionManager.clearSession()
+
     fun loadInitialState(): CineScopeUiState {
         return CineScopeUiState(
             homeSections = listOf(
@@ -207,68 +221,4 @@ class CineScopeRepository {
             )
         )
     }
-}
-
-data class HomeSection(
-    val title: String,
-    val items: List<MediaPoster>
-)
-
-data class MediaPoster(
-    val title: String,
-    val subtitle: String,
-    val meta: String,
-    val theme: PosterTheme
-)
-
-data class HomeCategory(
-    val label: String,
-    val icon: CategoryIcon,
-    val selected: Boolean
-)
-
-data class SeriesSection(
-    val title: String,
-    val items: List<SeriesPoster>
-)
-
-data class SeriesPoster(
-    val title: String,
-    val genre: String,
-    val rating: String,
-    val theme: PosterTheme
-)
-
-data class TicketSummary(
-    val title: String,
-    val category: String,
-    val dateTime: String,
-    val venue: String,
-    val accent: Color,
-    val posterTheme: PosterTheme
-)
-
-enum class CategoryIcon {
-    Movie,
-    Series,
-    Music,
-    Mic,
-    Kids,
-    Stadium,
-    Person,
-    Payments,
-    History
-}
-
-enum class PosterTheme(
-    val start: Color,
-    val end: Color
-) {
-    CrimsonNight(Color(0xFF65141A), Color(0xFFE50914)),
-    GoldenStage(Color(0xFF523014), Color(0xFFE7A93C)),
-    CobaltRush(Color(0xFF112742), Color(0xFF2F80ED)),
-    UltraBlue(Color(0xFF143153), Color(0xFF3769F5)),
-    SoftAmber(Color(0xFF6A4320), Color(0xFFF4B860)),
-    MonoSmoke(Color(0xFF25282D), Color(0xFF707784)),
-    VioletPop(Color(0xFF46265C), Color(0xFFA855F7))
 }
