@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,9 +43,19 @@ import com.example.cinescope.ui.theme.Crimson
 
 @Composable
 fun ProfileScreen(
+    isAuthenticated: Boolean,
     onLoginClick: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
+    if (!isAuthenticated) {
+        ProfileContent(
+            profile = null,
+            isAuthenticated = false,
+            onAction = onLoginClick
+        )
+        return
+    }
+
     val uiState by viewModel.uiState.collectAsState()
 
     when (val state = uiState) {
@@ -52,16 +65,57 @@ fun ProfileScreen(
             }
         }
         is ProfileUiState.Error -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(state.message, color = Crimson)
+            Column(
+                modifier = Modifier.fillMaxSize().background(Color.White).padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    Icons.Outlined.ErrorOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = Crimson
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = "Oops! Something went wrong.",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = state.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(24.dp))
+                Button(
+                    onClick = { viewModel.loadProfile() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Crimson)
+                ) {
+                    Text("Retry", color = Color.White)
+                }
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        viewModel.logout {
+                            onLoginClick() // Still navigating to login after sign out
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEF2F2))
+                ) {
+                    Text("Sign Out", color = Color(0xFFEF4444))
+                }
             }
         }
         is ProfileUiState.Success -> {
             ProfileContent(
                 profile = state.profile,
-                onLogout = {
+                isAuthenticated = true,
+                onAction = {
                     viewModel.logout {
-                        onLoginClick()
+                        // Do nothing, appState will update and ProfileScreen will re-compose as not authenticated
                     }
                 }
             )
@@ -70,7 +124,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileContent(profile: ProfileSummary, onLogout: () -> Unit) {
+private fun ProfileContent(profile: ProfileSummary?, isAuthenticated: Boolean, onAction: () -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(Color.White)
     ) {
@@ -88,15 +142,23 @@ private fun ProfileContent(profile: ProfileSummary, onLogout: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        profile.name.take(2).uppercase(),
+                        if (isAuthenticated) profile?.name?.take(2)?.uppercase() ?: "U" else "?",
                         style = MaterialTheme.typography.displaySmall,
                         color = Crimson,
                         fontWeight = FontWeight.Black
                     )
                 }
                 Spacer(Modifier.height(20.dp))
-                Text(profile.name, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold)
-                Text(profile.email, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    if (isAuthenticated) profile?.name ?: "User" else "Guest",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    if (isAuthenticated) profile?.email ?: "" else "Sign in to access your profile",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
         item {
@@ -107,25 +169,36 @@ private fun ProfileContent(profile: ProfileSummary, onLogout: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        items(profile.actions) { action ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { }
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(18.dp)
-            ) {
-                Icon(
-                    action.icon.toImageVector(),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(action.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                Icon(Icons.AutoMirrored.Outlined.ArrowForwardIos, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+        if (isAuthenticated && profile != null) {
+            items(profile.actions) { action ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { }
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    Icon(
+                        action.icon.toImageVector(),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(action.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    Icon(Icons.AutoMirrored.Outlined.ArrowForwardIos, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                }
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
             }
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
+        } else {
+            // Show disabled-looking items or skip them
+            item {
+                Text(
+                    "Sign in to view account settings and history.",
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
         }
         item {
             Spacer(Modifier.height(24.dp))
@@ -134,12 +207,17 @@ private fun ProfileContent(profile: ProfileSummary, onLogout: () -> Unit) {
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFFFEF2F2))
-                    .clickable { onLogout() }
+                    .background(if (isAuthenticated) Color(0xFFFEF2F2) else Crimson)
+                    .clickable { onAction() }
                     .padding(vertical = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Sign Out", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    if (isAuthenticated) "Sign Out" else "Sign In",
+                    color = if (isAuthenticated) Color(0xFFEF4444) else Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }

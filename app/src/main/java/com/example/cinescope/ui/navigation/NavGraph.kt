@@ -95,10 +95,20 @@ fun CineScopeNavGraph(
             )
         }
         composable(BottomNavRoute.Tickets.route) {
-            TicketsScreen(appState.ticketTabs, appState.tickets)
+            if (appState.isAuthenticated) {
+                TicketsScreen(appState.ticketTabs, appState.tickets)
+            } else {
+                // Show empty/placeholder or just route them? Let's just show login for tickets for now,
+                // this prompt only explicitly requested profile to show signin.
+                // Or maybe we can just redirect if they really want it back? Let's not touch Tickets.
+                LaunchedEffect(Unit) {
+                    navController.navigate(AppRoute.Login.route)
+                }
+            }
         }
         composable(BottomNavRoute.Profile.route) {
             ProfileScreen(
+                isAuthenticated = appState.isAuthenticated,
                 onLoginClick = { navController.navigate(AppRoute.Login.route) }
             )
         }
@@ -244,10 +254,16 @@ fun CineScopeNavGraph(
 
             when (val state = detailState) {
                 is DetailUiState.SuccessSeries -> {
-                    WatchSeriesScreen(
-                        data = state.data,
-                        onBack = { navController.popBackStack() }
-                    )
+                    if (appState.isAuthenticated) {
+                        WatchSeriesScreen(
+                            data = state.data,
+                            onBack = { navController.popBackStack() }
+                        )
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(AppRoute.Login.route)
+                        }
+                    }
                 }
                 else -> { /* Handle other states */ }
             }

@@ -100,7 +100,7 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
         CineScopeNavGraph(
             navController = navController,
             appState = uiState,
-            startDestination = if (uiState.isAuthenticated) BottomNavRoute.Home.route else AppRoute.Login.route,
+            startDestination = BottomNavRoute.Home.route,
             modifier = Modifier.padding(innerPadding)
         )
     }

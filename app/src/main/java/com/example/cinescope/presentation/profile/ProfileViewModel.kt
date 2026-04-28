@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 sealed class ProfileUiState {
@@ -47,6 +48,12 @@ class ProfileViewModel @Inject constructor(
                     )
                 )
                 _uiState.value = ProfileUiState.Success(profileSummary)
+            } catch (e: HttpException) {
+                if (e.code() == 401) {
+                    repository.logout()
+                } else {
+                    _uiState.value = ProfileUiState.Error("Network error: ${e.code()}")
+                }
             } catch (e: Exception) {
                 _uiState.value = ProfileUiState.Error(e.message ?: "Failed to load profile")
             }
