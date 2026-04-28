@@ -125,6 +125,7 @@ class CineScopeRepository @Inject constructor(
                 title = "The Synthetics:",
                 accentTitle = "Electric Pulse Tour",
                 venue = "City Arena, Metropolis",
+                description = "A high-voltage night of synthwave, neon visuals, and immersive stagecraft featuring the Electric Pulse Tour with full live band and cinematic lighting.",
                 confirmLabel = "Confirm Booking",
                 dates = listOf(
                     MovieDateChip("Thu", "16", false),
@@ -147,6 +148,7 @@ class CineScopeRepository @Inject constructor(
                 title = "Midnight Laughs:",
                 accentTitle = "Live & Uncut",
                 venue = "The Laugh Factory, Metropolis",
+                description = "An unfiltered late-night set packed with improv, crowd work, and sharp punchlines from the city's top comics.",
                 confirmLabel = "Confirm Selection",
                 dates = listOf(
                     MovieDateChip("Thu", "16", false),

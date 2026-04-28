@@ -126,6 +126,7 @@ fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
 
 @Composable
 fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
+    var selectedTab by remember { mutableStateOf(EventTab.Tickets) }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 190.dp)) {
             item {
@@ -184,12 +185,23 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Text("Tickets", color = Crimson, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                    Text("About event", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                    EventTab.values().forEach { tab ->
+                        val isSelected = selectedTab == tab
+                        Text(
+                            text = if (tab == EventTab.Tickets) "Tickets" else "About event",
+                            modifier = Modifier.clickable { selectedTab = tab },
+                            color = if (isSelected) Crimson else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold
+                        )
+                    }
                 }
             }
             item { HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) }
-            item { EventTicketsTab(data) }
+            when (selectedTab) {
+                EventTab.Tickets -> item { EventTicketsTab(data) }
+                EventTab.About -> item { EventAboutTab(data) }
+            }
         }
         Box(
             modifier = Modifier
@@ -213,6 +225,8 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
         }
     }
 }
+
+private enum class EventTab { Tickets, About }
 
 @Composable
 fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesClick: () -> Unit) {
@@ -377,6 +391,15 @@ private fun EventTicketsTab(data: EventDetailData) {
             SessionCard(session)
             Spacer(Modifier.height(12.dp))
         }
+    }
+}
+
+@Composable
+private fun EventAboutTab(data: EventDetailData) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)) {
+        Text("About event", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+        Spacer(Modifier.height(10.dp))
+        Text(data.description, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
