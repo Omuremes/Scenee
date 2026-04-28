@@ -127,6 +127,22 @@ fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
 @Composable
 fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
     var selectedTab by remember { mutableStateOf(EventTab.Tickets) }
+    val initialDateIndex = remember(data.dates) {
+        val selected = data.dates.indexOfFirst { it.selected }
+        if (selected >= 0) selected else 0
+    }
+    var selectedDateIndex by remember(data.dates) { mutableStateOf(initialDateIndex) }
+    var selectedFilter by remember { mutableStateOf(EventSessionFilter.Daily) }
+    var selectedSessionIndex by remember { mutableStateOf<Int?>(null) }
+
+    val dates = data.dates.mapIndexed { index, chip ->
+        chip.copy(selected = index == selectedDateIndex)
+    }
+    val sessions = data.sessions.mapIndexed { index, session ->
+        SessionDisplay(index, session.copy(selected = index == selectedSessionIndex))
+    }.filter { sessionMatchesFilter(it.session, selectedFilter) }
+    val isConfirmEnabled = selectedSessionIndex != null
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 190.dp)) {
             item {
@@ -199,7 +215,22 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
             }
             item { HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) }
             when (selectedTab) {
-                EventTab.Tickets -> item { EventTicketsTab(data) }
+                EventTab.Tickets -> item {
+                    EventTicketsTab(
+                        dates = dates,
+                        selectedFilter = selectedFilter,
+                        sessions = sessions,
+                        onDateSelect = { selectedDateIndex = it },
+                        onFilterSelect = {
+                            selectedFilter = it
+                            val current = selectedSessionIndex
+                            if (current != null && !sessionMatchesFilter(data.sessions[current], it)) {
+                                selectedSessionIndex = null
+                            }
+                        },
+                        onSessionSelect = { selectedSessionIndex = it }
+                    )
+                }
                 EventTab.About -> item { EventAboutTab(data) }
             }
         }
@@ -209,7 +240,8 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 28.dp)
                 .clip(RoundedCornerShape(999.dp))
-                .background(Crimson)
+                .background(if (isConfirmEnabled) Crimson else Crimson.copy(alpha = 0.5f))
+                .clickable(enabled = isConfirmEnabled) { }
                 .padding(vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -227,6 +259,18 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
 }
 
 private enum class EventTab { Tickets, About }
+private enum class EventSessionFilter { Daily, Evening, All }
+
+private data class SessionDisplay(val index: Int, val session: MovieSession)
+
+private fun sessionMatchesFilter(session: MovieSession, filter: EventSessionFilter): Boolean {
+    val hour = session.time.substringBefore(':').toIntOrNull() ?: return true
+    return when (filter) {
+        EventSessionFilter.All -> true
+        EventSessionFilter.Daily -> hour in 6..17
+        EventSessionFilter.Evening -> hour !in 6..17
+    }
+}
 
 @Composable
 fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesClick: () -> Unit) {
@@ -349,12 +393,12 @@ private fun MovieTicketsTab(data: MovieDetailData) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterPill("Daily", true)
-            FilterPill("Evening", false)
-            FilterPill("All", false)
+            FilterPill("Daily", true) { }
+            FilterPill("Evening", false) { }
+            FilterPill("All", false) { }
         }
         data.sessions.forEach { session ->
-            SessionCard(session)
+            SessionCard(session) { }
             Spacer(Modifier.height(12.dp))
         }
         Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(999.dp)).background(Crimson).padding(vertical = 20.dp), contentAlignment = Alignment.Center) {
@@ -364,15 +408,26 @@ private fun MovieTicketsTab(data: MovieDetailData) {
 }
 
 @Composable
-private fun EventTicketsTab(data: EventDetailData) {
+private fun EventTicketsTab(
+    dates: List<MovieDateChip>,
+    selectedFilter: EventSessionFilter,
+    sessions: List<SessionDisplay>,
+    onDateSelect: (Int) -> Unit,
+    onFilterSelect: (EventSessionFilter) -> Unit,
+    onSessionSelect: (Int) -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         Column {
             Text("Select Date", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
             Spacer(Modifier.height(14.dp))
             Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                data.dates.forEach { chip ->
+                dates.forEachIndexed { index, chip ->
                     Column(
-                        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (chip.selected) Crimson else MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 18.dp, vertical = 16.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(if (chip.selected) Crimson else MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { onDateSelect(index) }
+                            .padding(horizontal = 18.dp, vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(chip.day.uppercase(), style = MaterialTheme.typography.labelSmall, color = if (chip.selected) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant)
@@ -383,12 +438,12 @@ private fun EventTicketsTab(data: EventDetailData) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterPill("Daily", true)
-            FilterPill("Evening", false)
-            FilterPill("All", false)
+            FilterPill("Daily", selectedFilter == EventSessionFilter.Daily) { onFilterSelect(EventSessionFilter.Daily) }
+            FilterPill("Evening", selectedFilter == EventSessionFilter.Evening) { onFilterSelect(EventSessionFilter.Evening) }
+            FilterPill("All", selectedFilter == EventSessionFilter.All) { onFilterSelect(EventSessionFilter.All) }
         }
-        data.sessions.forEach { session ->
-            SessionCard(session)
+        sessions.forEach { session ->
+            SessionCard(session.session) { onSessionSelect(session.index) }
             Spacer(Modifier.height(12.dp))
         }
     }
@@ -566,18 +621,27 @@ private fun MovieCommentsTab(data: MovieDetailData) {
     }
 }
 
-@Composable private fun FilterPill(text: String, selected: Boolean) {
+@Composable private fun FilterPill(text: String, selected: Boolean, onClick: () -> Unit) {
     Text(
         text,
-        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 18.dp, vertical = 10.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant)
+            .clickable { onClick() }
+            .padding(horizontal = 18.dp, vertical = 10.dp),
         color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.labelSmall
     )
 }
 
-@Composable private fun SessionCard(session: MovieSession) {
+@Composable private fun SessionCard(session: MovieSession, onClick: () -> Unit) {
     val border = if (session.selected) BorderStroke(2.dp, Crimson) else BorderStroke(0.dp, Color.Transparent)
-    Card(shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8)), border = border) {
+    Card(
+        modifier = Modifier.clickable(enabled = !session.soldOut) { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8)),
+        border = border
+    ) {
         Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Column {
                 Text(session.time, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, color = if (session.selected) Crimson else MaterialTheme.colorScheme.onSurface)
