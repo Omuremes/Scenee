@@ -36,25 +36,46 @@ import com.example.cinescope.ui.navigation.bottomNavRouteSet
 import com.example.cinescope.ui.navigation.navigateToBottomRoute
 import com.example.cinescope.ui.theme.Crimson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
 class CineScopeViewModel @Inject constructor(
     private val repository: CineScopeRepository
 ) : ViewModel() {
-    val uiState: StateFlow<CineScopeUiState> = repository.getAuthToken()
-        .map { token ->
-            repository.loadInitialState(isAuthenticated = token != null)
+
+    private val authFlow = repository.getAuthToken()
+    private val refreshTrigger = MutableStateFlow(Unit)
+
+    val uiState: StateFlow<CineScopeUiState> = combine(
+        authFlow,
+        refreshTrigger
+    ) { token: String?, _: Unit ->
+        val popular = try {
+            repository.getPopularMovies().map { repository.mapToSeriesPoster(it) }
+        } catch (e: Exception) {
+            emptyList()
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = repository.loadInitialState(isAuthenticated = false)
+        val new = try {
+            repository.getNewMovies().map { repository.mapToSeriesPoster(it) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+        
+        repository.loadInitialState(
+            isAuthenticated = token != null,
+            popularSeries = popular,
+            newSeries = new
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = repository.loadInitialState(isAuthenticated = false)
+    )
+    
+    fun refresh() {
+        refreshTrigger.value = Unit
+    }
 }
 
 @Composable
@@ -93,11 +114,20 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController) {
         BottomNavRoute.Tickets.route -> CineScopeTopBar(title = "My tickets", centeredTitle = true)
         BottomNavRoute.Profile.route -> CineScopeTopBar(title = "Profile", centeredTitle = true)
         
-        AppRoute.MovieDetail.route -> CineScopeTopBar(title = "Cinema", showBack = true, onBackClick = { navController.popBackStack() })
-        AppRoute.ConcertDetail.route -> CineScopeTopBar(title = "Concert", showBack = true, onBackClick = { navController.popBackStack() })
-        AppRoute.StandupDetail.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, onBackClick = { navController.popBackStack() })
-        AppRoute.SeriesDetail.route -> CineScopeTopBar(title = "Series", showBack = true, onBackClick = { navController.popBackStack() })
-        AppRoute.WatchSeries.route -> CineScopeTopBar(title = "Episodes", showBack = true, onBackClick = { navController.popBackStack() })
+        // Handling dynamic routes for detail screens
+        else -> {
+            if (currentRoute?.startsWith("movie_detail") == true) {
+                CineScopeTopBar(title = "Cinema", showBack = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("concert_detail") == true) {
+                CineScopeTopBar(title = "Concert", showBack = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("standup_detail") == true) {
+                CineScopeTopBar(title = "Stand-Up", showBack = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("series_detail") == true) {
+                CineScopeTopBar(title = "Series", showBack = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("watch_series") == true) {
+                CineScopeTopBar(title = "Episodes", showBack = true, onBackClick = { navController.popBackStack() })
+            }
+        }
     }
 }
 

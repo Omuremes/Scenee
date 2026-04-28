@@ -39,6 +39,7 @@ class ProfileViewModel @Inject constructor(
                 val profileSummary = ProfileSummary(
                     name = user.username ?: "User",
                     email = user.email,
+                    initials = (user.username ?: "U").take(2).uppercase(),
                     actions = listOf(
                         ProfileAction("Personal Info", CategoryIcon.Person),
                         ProfileAction("Payment Methods", CategoryIcon.Payments),

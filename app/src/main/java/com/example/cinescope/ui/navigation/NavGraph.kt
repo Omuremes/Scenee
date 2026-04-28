@@ -1,24 +1,27 @@
 package com.example.cinescope.ui.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ListAlt
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.cinescope.presentation.auth.AuthScreen
-import com.example.cinescope.presentation.details.EventDetailScreen
-import com.example.cinescope.presentation.details.MovieDetailScreen
-import com.example.cinescope.presentation.details.SeriesDetailScreen
-import com.example.cinescope.presentation.details.WatchSeriesScreen
+import com.example.cinescope.presentation.details.*
 import com.example.cinescope.presentation.home.HomeScreen
 import com.example.cinescope.presentation.models.CineScopeUiState
 import com.example.cinescope.presentation.profile.ProfileScreen
 import com.example.cinescope.presentation.series.SeriesScreen
 import com.example.cinescope.presentation.tickets.TicketsScreen
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ListAlt
-import androidx.compose.material.icons.outlined.Payments
-import androidx.compose.material3.Icon
 
 sealed class BottomNavRoute(val route: String, val label: String) {
     data object Home : BottomNavRoute("home", "Poster")
@@ -30,11 +33,21 @@ sealed class BottomNavRoute(val route: String, val label: String) {
 sealed class AppRoute(val route: String) {
     data object Login : AppRoute("login")
     data object Signup : AppRoute("signup")
-    data object MovieDetail : AppRoute("movie_detail")
-    data object ConcertDetail : AppRoute("concert_detail")
-    data object StandupDetail : AppRoute("standup_detail")
-    data object SeriesDetail : AppRoute("series_detail")
-    data object WatchSeries : AppRoute("watch_series")
+    data object MovieDetail : AppRoute("movie_detail/{movieId}") {
+        fun createRoute(id: String) = "movie_detail/$id"
+    }
+    data object ConcertDetail : AppRoute("concert_detail/{eventId}") {
+        fun createRoute(id: String) = "concert_detail/$id"
+    }
+    data object StandupDetail : AppRoute("standup_detail/{eventId}") {
+        fun createRoute(id: String) = "standup_detail/$id"
+    }
+    data object SeriesDetail : AppRoute("series_detail/{movieId}") {
+        fun createRoute(id: String) = "series_detail/$id"
+    }
+    data object WatchSeries : AppRoute("watch_series/{movieId}") {
+        fun createRoute(id: String) = "watch_series/$id"
+    }
 }
 
 val bottomNavRouteSet = setOf(
@@ -60,16 +73,16 @@ fun CineScopeNavGraph(
             HomeScreen(
                 categories = appState.categories,
                 sections = appState.homeSections,
-                onMovieClick = { navController.navigate(AppRoute.MovieDetail.route) },
-                onConcertClick = { navController.navigate(AppRoute.ConcertDetail.route) },
-                onStandupClick = { navController.navigate(AppRoute.StandupDetail.route) },
+                onMovieClick = { id -> navController.navigate(AppRoute.MovieDetail.createRoute(id)) },
+                onConcertClick = { id -> navController.navigate(AppRoute.ConcertDetail.createRoute(id)) },
+                onStandupClick = { id -> navController.navigate(AppRoute.StandupDetail.createRoute(id)) },
                 onSeriesOpen = { navController.navigateToBottomRoute(BottomNavRoute.Series.route) }
             )
         }
         composable(BottomNavRoute.Series.route) {
             SeriesScreen(
                 sections = appState.seriesSections,
-                onSeriesClick = { navController.navigate(AppRoute.SeriesDetail.route) }
+                onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) }
             )
         }
         composable(BottomNavRoute.Tickets.route) {
@@ -108,36 +121,87 @@ fun CineScopeNavGraph(
                 }
             )
         }
-        composable(AppRoute.MovieDetail.route) {
-            MovieDetailScreen(
-                data = appState.movieDetail,
-                onBack = { navController.popBackStack() }
-            )
+        composable(
+            route = AppRoute.MovieDetail.route,
+            arguments = listOf(navArgument("movieId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
+            val detailViewModel: DetailViewModel = hiltViewModel()
+            val detailState by detailViewModel.uiState.collectAsState()
+
+            LaunchedEffect(movieId) {
+                detailViewModel.loadMovieDetail(movieId)
+            }
+
+            when (val state = detailState) {
+                is DetailUiState.Loading -> { /* Show Loader */ }
+                is DetailUiState.SuccessMovie -> {
+                    MovieDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                is DetailUiState.SuccessSeries -> {
+                    SeriesDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() },
+                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
+                    )
+                }
+                is DetailUiState.Error -> { /* Show Error */ }
+            }
         }
-        composable(AppRoute.ConcertDetail.route) {
-            EventDetailScreen(
-                data = appState.concertDetail,
-                onBack = { navController.popBackStack() }
-            )
+        composable(
+            route = AppRoute.SeriesDetail.route,
+            arguments = listOf(navArgument("movieId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
+            val detailViewModel: DetailViewModel = hiltViewModel()
+            val detailState by detailViewModel.uiState.collectAsState()
+
+            LaunchedEffect(movieId) {
+                detailViewModel.loadMovieDetail(movieId)
+            }
+
+            when (val state = detailState) {
+                is DetailUiState.Loading -> { /* Show Loader */ }
+                is DetailUiState.SuccessMovie -> {
+                    MovieDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                is DetailUiState.SuccessSeries -> {
+                    SeriesDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() },
+                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
+                    )
+                }
+                is DetailUiState.Error -> { /* Show Error */ }
+            }
         }
-        composable(AppRoute.StandupDetail.route) {
-            EventDetailScreen(
-                data = appState.standupDetail,
-                onBack = { navController.popBackStack() }
-            )
-        }
-        composable(AppRoute.SeriesDetail.route) {
-            SeriesDetailScreen(
-                data = appState.seriesDetail,
-                onBack = { navController.popBackStack() },
-                onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.route) }
-            )
-        }
-        composable(AppRoute.WatchSeries.route) {
-            WatchSeriesScreen(
-                data = appState.seriesDetail,
-                onBack = { navController.popBackStack() }
-            )
+        composable(
+            route = AppRoute.WatchSeries.route,
+            arguments = listOf(navArgument("movieId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
+            val detailViewModel: DetailViewModel = hiltViewModel()
+            val detailState by detailViewModel.uiState.collectAsState()
+
+            LaunchedEffect(movieId) {
+                detailViewModel.loadMovieDetail(movieId)
+            }
+
+            when (val state = detailState) {
+                is DetailUiState.SuccessSeries -> {
+                    WatchSeriesScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                else -> { /* Handle other states */ }
+            }
         }
     }
 }

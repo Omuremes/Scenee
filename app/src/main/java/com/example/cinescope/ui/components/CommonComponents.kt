@@ -182,7 +182,7 @@ fun CategoryIcon.toImageVector(): ImageVector = when (this) {
     CategoryIcon.Series -> Icons.Outlined.Tv
     CategoryIcon.Music -> Icons.Outlined.MusicNote
     CategoryIcon.Mic -> Icons.Outlined.Mic
-    CategoryIcon.Kids -> Icons.Outlined.Person
+    CategoryIcon.Child -> Icons.Outlined.Person
     CategoryIcon.Stadium -> Icons.Outlined.Stadium
     CategoryIcon.Person -> Icons.Outlined.Person
     CategoryIcon.Payments -> Icons.Outlined.Payments

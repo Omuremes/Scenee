@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.cinescope.data.CineScopeRepository
 import com.example.cinescope.data.local.SessionManager
 import com.example.cinescope.data.remote.AuthApiService
+import com.example.cinescope.data.remote.MovieApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -56,6 +57,12 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideMovieApiService(retrofit: Retrofit): MovieApiService {
+        return retrofit.create(MovieApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
         return SessionManager(context)
     }
@@ -64,8 +71,9 @@ object DataModule {
     @Singleton
     fun provideCineScopeRepository(
         authApiService: AuthApiService,
+        movieApiService: MovieApiService,
         sessionManager: SessionManager
     ): CineScopeRepository {
-        return CineScopeRepository(authApiService, sessionManager)
+        return CineScopeRepository(authApiService, movieApiService, sessionManager)
     }
 }

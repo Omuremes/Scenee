@@ -45,9 +45,9 @@ import com.example.cinescope.ui.theme.Crimson
 fun HomeScreen(
     categories: List<HomeCategory>,
     sections: List<HomeSection>,
-    onMovieClick: () -> Unit,
-    onConcertClick: () -> Unit,
-    onStandupClick: () -> Unit,
+    onMovieClick: (String) -> Unit,
+    onConcertClick: (String) -> Unit,
+    onStandupClick: (String) -> Unit,
     onSeriesOpen: () -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -62,9 +62,9 @@ fun HomeScreen(
 @Composable
 private fun HomeSectionBlock(
     section: HomeSection,
-    onMovieClick: () -> Unit,
-    onConcertClick: () -> Unit,
-    onStandupClick: () -> Unit
+    onMovieClick: (String) -> Unit,
+    onConcertClick: (String) -> Unit,
+    onStandupClick: (String) -> Unit
 ) {
     Column(modifier = Modifier.padding(bottom = 26.dp)) {
         Row(
@@ -99,10 +99,10 @@ private fun HomeSectionBlock(
 }
 
 @Composable
-private fun MovieCard(poster: MediaPoster, onMovieClick: () -> Unit) {
+private fun MovieCard(poster: MediaPoster, onMovieClick: (String) -> Unit) {
     Column(modifier = Modifier
         .width(180.dp)
-        .clickable { onMovieClick() }) {
+        .clickable { onMovieClick(poster.id) }) {
         PosterBox(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,10 +120,10 @@ private fun MovieCard(poster: MediaPoster, onMovieClick: () -> Unit) {
 }
 
 @Composable
-private fun ConcertCard(poster: MediaPoster, onClick: () -> Unit) {
+private fun ConcertCard(poster: MediaPoster, onClick: (String) -> Unit) {
     Column(modifier = Modifier
         .width(300.dp)
-        .clickable { onClick() }) {
+        .clickable { onClick(poster.id) }) {
         PosterBox(modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f), theme = poster.theme)
@@ -141,10 +141,10 @@ private fun ConcertCard(poster: MediaPoster, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StandupCard(poster: MediaPoster, onClick: () -> Unit) {
+private fun StandupCard(poster: MediaPoster, onClick: (String) -> Unit) {
     Column(modifier = Modifier
         .width(260.dp)
-        .clickable { onClick() }) {
+        .clickable { onClick(poster.id) }) {
         PosterBox(modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(4f / 3f), theme = poster.theme)

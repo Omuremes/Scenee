@@ -4,16 +4,16 @@ import androidx.compose.ui.graphics.Color
 
 data class CineScopeUiState(
     val isAuthenticated: Boolean = false,
-    val homeSections: List<HomeSection>,
-    val categories: List<HomeCategory>,
-    val seriesSections: List<SeriesSection>,
-    val ticketTabs: List<String>,
-    val tickets: List<TicketSummary>,
-    val profileSummary: ProfileSummary,
-    val concertDetail: EventDetailData,
-    val standupDetail: EventDetailData,
-    val movieDetail: MovieDetailData,
-    val seriesDetail: SeriesDetailData
+    val homeSections: List<HomeSection> = emptyList(),
+    val categories: List<HomeCategory> = emptyList(),
+    val seriesSections: List<SeriesSection> = emptyList(),
+    val ticketTabs: List<String> = emptyList(),
+    val tickets: List<TicketSummary> = emptyList(),
+    val profileSummary: ProfileSummary? = null,
+    val concertDetail: EventDetailData? = null,
+    val standupDetail: EventDetailData? = null,
+    val movieDetail: MovieDetailData? = null,
+    val seriesDetail: SeriesDetailData? = null
 )
 
 enum class PosterTheme(val start: Color, val end: Color) {
@@ -27,13 +27,14 @@ enum class PosterTheme(val start: Color, val end: Color) {
 }
 
 enum class CategoryIcon {
-    Movie, Series, Music, Mic, Kids, Stadium, Person, Payments, History
+    Movie, Series, Music, Mic, Child, Stadium, Person, Payments, History
 }
 
 data class ProfileSummary(
     val name: String,
     val email: String,
-    val actions: List<ProfileAction>
+    val initials: String,
+    val actions: List<ProfileAction> = emptyList()
 )
 
 data class ProfileAction(
@@ -50,8 +51,8 @@ data class MovieSession(
     val hall: String,
     val status: String,
     val price: String,
-    val selected: Boolean,
-    val soldOut: Boolean
+    val selected: Boolean = false,
+    val soldOut: Boolean = false
 )
 
 data class ReviewItem(val label: String, val progress: Float)
@@ -80,7 +81,8 @@ data class MovieDetailData(
     val description: String,
     val cast: List<String>,
     val details: List<Pair<String, String>>,
-    val reviews: List<ReviewItem>
+    val reviews: List<ReviewItem>,
+    val theme: PosterTheme = PosterTheme.VioletPop
 )
 
 data class EpisodeItem(
@@ -99,7 +101,9 @@ data class SeriesDetailData(
     val cast: List<String>,
     val reviews: List<String>,
     val seasons: List<String>,
-    val episodes: List<EpisodeItem>
+    val episodes: List<EpisodeItem>,
+    val tabs: List<String> = emptyList(),
+    val meta: List<String> = emptyList()
 )
 
 data class HomeSection(
@@ -108,6 +112,7 @@ data class HomeSection(
 )
 
 data class MediaPoster(
+    val id: String = "",
     val title: String,
     val subtitle: String,
     val meta: String,
@@ -117,7 +122,7 @@ data class MediaPoster(
 data class HomeCategory(
     val label: String,
     val icon: CategoryIcon,
-    val selected: Boolean
+    val selected: Boolean = false
 )
 
 data class SeriesSection(
@@ -126,6 +131,7 @@ data class SeriesSection(
 )
 
 data class SeriesPoster(
+    val id: String = "",
     val title: String,
     val genre: String,
     val rating: String,

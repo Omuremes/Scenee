@@ -37,7 +37,7 @@ import com.example.cinescope.ui.theme.Crimson
 @Composable
 fun SeriesScreen(
     sections: List<SeriesSection>,
-    onSeriesClick: () -> Unit
+    onSeriesClick: (String) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         item { SearchRow("Search series, genres, or actors", true) }
@@ -48,7 +48,7 @@ fun SeriesScreen(
 }
 
 @Composable
-private fun SeriesSectionBlock(section: SeriesSection, onSeriesClick: () -> Unit) {
+private fun SeriesSectionBlock(section: SeriesSection, onSeriesClick: (String) -> Unit) {
     Column(modifier = Modifier.padding(top = 6.dp, bottom = 18.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(section.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -62,8 +62,8 @@ private fun SeriesSectionBlock(section: SeriesSection, onSeriesClick: () -> Unit
 }
 
 @Composable
-private fun SeriesPosterCard(poster: SeriesPoster, onSeriesClick: () -> Unit) {
-    Column(modifier = Modifier.width(192.dp).clickable { onSeriesClick() }) {
+private fun SeriesPosterCard(poster: SeriesPoster, onSeriesClick: (String) -> Unit) {
+    Column(modifier = Modifier.width(192.dp).clickable { onSeriesClick(poster.id) }) {
         PosterBox(modifier = Modifier.fillMaxWidth().aspectRatio(2f / 3f), theme = poster.theme, topBadge = poster.rating, compactBadge = true, ratingMode = true)
         Spacer(Modifier.height(10.dp))
         Text(poster.title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
