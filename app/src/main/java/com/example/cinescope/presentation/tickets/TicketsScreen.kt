@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,19 @@ fun TicketsScreen(
     }
 
     var selectedTab by remember { mutableStateOf(tabs.first()) }
+    var selectedTicketTitle by remember { mutableStateOf<String?>(null) }
+    val filteredTickets = remember(selectedTab, tickets) {
+        if (selectedTab.equals("ALL", ignoreCase = true)) {
+            tickets
+        } else {
+            tickets.filter { it.category.equals(selectedTab, ignoreCase = true) }
+        }
+    }
+
+    LaunchedEffect(selectedTab) {
+        selectedTicketTitle = null
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(Color.White),
         contentPadding = PaddingValues(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 24.dp),
@@ -85,7 +99,16 @@ fun TicketsScreen(
                 }
             }
         }
-        items(tickets) { ticket -> TicketCard(ticket) }
+        items(filteredTickets, key = { it.title }) { ticket ->
+            val selected = ticket.title == selectedTicketTitle
+            TicketCard(
+                ticket = ticket,
+                selected = selected,
+                onSelect = { selectedTicketTitle = ticket.title },
+                onViewTicket = { selectedTicketTitle = ticket.title },
+                onQrClick = { selectedTicketTitle = ticket.title }
+            )
+        }
     }
 }
 
@@ -132,8 +155,25 @@ private fun GuestTicketsContent(onLoginClick: () -> Unit) {
 }
 
 @Composable
-private fun TicketCard(ticket: TicketSummary) {
-    Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+private fun TicketCard(
+    ticket: TicketSummary,
+    selected: Boolean,
+    onSelect: () -> Unit,
+    onViewTicket: () -> Unit,
+    onQrClick: () -> Unit
+) {
+    val borderColor = if (selected) Crimson else Color(0xFFE5E7EB)
+    val borderWidth = if (selected) 2.dp else 1.dp
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .border(borderWidth, borderColor, RoundedCornerShape(28.dp))
+            .clickable { onSelect() },
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
         Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(width = 112.dp, height = 160.dp)) {
                 PosterBox(modifier = Modifier.fillMaxSize(), theme = ticket.posterTheme)
@@ -146,8 +186,25 @@ private fun TicketCard(ticket: TicketSummary) {
                     MetaRow(Icons.Outlined.Place, ticket.venue)
                 }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("View Ticket", modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Crimson).padding(horizontal = 16.dp, vertical = 10.dp), color = Color.White, style = MaterialTheme.typography.labelSmall)
-                    Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFF9F9F9)).border(1.dp, Color(0xFFF0F0F0), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                    Text(
+                        "View Ticket",
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(Crimson)
+                            .clickable { onViewTicket() }
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF9F9F9))
+                            .border(1.dp, Color(0xFFF0F0F0), RoundedCornerShape(12.dp))
+                            .clickable { onQrClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(Icons.Outlined.ConfirmationNumber, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f), modifier = Modifier.size(18.dp))
                     }
                 }
