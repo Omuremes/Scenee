@@ -64,6 +64,7 @@ data class EventDetailData(
     val title: String,
     val accentTitle: String,
     val venue: String,
+    val description: String,
     val confirmLabel: String,
     val dates: List<MovieDateChip>,
     val sessions: List<MovieSession>,

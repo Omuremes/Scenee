@@ -95,10 +95,16 @@ fun CineScopeNavGraph(
             )
         }
         composable(BottomNavRoute.Tickets.route) {
-            TicketsScreen(appState.ticketTabs, appState.tickets)
+            TicketsScreen(
+                tabs = appState.ticketTabs,
+                tickets = appState.tickets,
+                isAuthenticated = appState.isAuthenticated,
+                onLoginClick = { navController.navigate(AppRoute.Login.route) }
+            )
         }
         composable(BottomNavRoute.Profile.route) {
             ProfileScreen(
+                isAuthenticated = appState.isAuthenticated,
                 onLoginClick = { navController.navigate(AppRoute.Login.route) }
             )
         }
@@ -244,10 +250,16 @@ fun CineScopeNavGraph(
 
             when (val state = detailState) {
                 is DetailUiState.SuccessSeries -> {
-                    WatchSeriesScreen(
-                        data = state.data,
-                        onBack = { navController.popBackStack() }
-                    )
+                    if (appState.isAuthenticated) {
+                        WatchSeriesScreen(
+                            data = state.data,
+                            onBack = { navController.popBackStack() }
+                        )
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(AppRoute.Login.route)
+                        }
+                    }
                 }
                 else -> { /* Handle other states */ }
             }

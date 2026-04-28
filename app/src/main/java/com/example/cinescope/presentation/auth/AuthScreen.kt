@@ -70,14 +70,17 @@ fun AuthScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        if (isSignup) {
-            Icon(
-                Icons.Outlined.ArrowBack,
-                contentDescription = null,
-                tint = Crimson,
-                modifier = Modifier.padding(24.dp).clickable { onBack() }
-            )
-        }
+        // Show back button always so user can return to the app
+        Icon(
+            Icons.Outlined.ArrowBack,
+            contentDescription = "Back",
+            tint = Crimson,
+            modifier = Modifier
+                .padding(24.dp)
+                .size(24.dp)
+                .clickable { onBack() }
+        )
+
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

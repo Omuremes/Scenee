@@ -28,6 +28,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cinescope.data.CineScopeRepository
 import com.example.cinescope.presentation.models.CineScopeUiState
+import com.example.cinescope.presentation.models.ProfileSummary
 import com.example.cinescope.ui.components.CineScopeTopBar
 import com.example.cinescope.ui.navigation.AppRoute
 import com.example.cinescope.ui.navigation.BottomNavRoute
@@ -61,12 +62,34 @@ class CineScopeViewModel @Inject constructor(
         } catch (e: Exception) {
             emptyList()
         }
+
+        val profileSummary = if (token != null) {
+            try {
+                val user = repository.getMe()
+                val initials = if (!user.username.isNullOrBlank()) {
+                    user.username.split(" ")
+                        .filter { it.isNotEmpty() }
+                        .take(2)
+                        .joinToString("") { it.take(1).uppercase() }
+                } else if (user.email.isNotEmpty()) {
+                    user.email.take(1).uppercase()
+                } else ""
+                
+                ProfileSummary(
+                    name = user.username ?: user.email,
+                    email = user.email,
+                    initials = initials
+                )
+            } catch (e: Exception) {
+                null
+            }
+        } else null
         
         repository.loadInitialState(
             isAuthenticated = token != null,
             popularSeries = popular,
             newSeries = new
-        )
+        ).copy(profileSummary = profileSummary)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -88,7 +111,7 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
     Scaffold(
         topBar = {
             if (currentRoute != AppRoute.Login.route && currentRoute != AppRoute.Signup.route) {
-                AppHeader(currentRoute, navController)
+                AppHeader(currentRoute, navController, uiState)
             }
         },
         bottomBar = {
@@ -100,7 +123,7 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
         CineScopeNavGraph(
             navController = navController,
             appState = uiState,
-            startDestination = if (uiState.isAuthenticated) BottomNavRoute.Home.route else AppRoute.Login.route,
+            startDestination = BottomNavRoute.Home.route,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -130,17 +153,31 @@ private fun selectedBottomRoute(currentRoute: String?): String? = when {
 }
 
 @Composable
-private fun AppHeader(currentRoute: String?, navController: NavHostController) {
+private fun AppHeader(currentRoute: String?, navController: NavHostController, uiState: CineScopeUiState) {
+    val initials = if (uiState.isAuthenticated) uiState.profileSummary?.initials else null
+    val onProfileClick = { navController.navigateToBottomRoute(BottomNavRoute.Profile.route) }
+
     when (currentRoute) {
-        BottomNavRoute.Home.route -> CineScopeTopBar(showLogo = true, showMenu = true, showSearch = true, showProfile = true)
-        BottomNavRoute.Series.route -> CineScopeTopBar(showLogo = true, showMenu = true, showSearch = true, showProfile = true)
+        BottomNavRoute.Home.route -> CineScopeTopBar(
+            showLogo = true, 
+            showMenu = true, 
+            showProfile = true,
+            profileInitials = initials,
+            onProfileClick = onProfileClick
+        )
+        BottomNavRoute.Series.route -> CineScopeTopBar(
+            showLogo = true, 
+            showMenu = true, 
+            showProfile = true,
+            profileInitials = initials,
+            onProfileClick = onProfileClick
+        )
         BottomNavRoute.Tickets.route -> CineScopeTopBar(title = "My tickets", centeredTitle = true)
         BottomNavRoute.Profile.route -> CineScopeTopBar(title = "Profile", centeredTitle = true)
         AppRoute.Movies.route -> CineScopeTopBar(title = "All Movies", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Concerts.route -> CineScopeTopBar(title = "All Concerts", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Standup.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         
-        // Handling dynamic routes for detail screens
         else -> {
             if (currentRoute?.startsWith("movie_detail") == true) {
                 CineScopeTopBar(title = "Cinema", showBack = true, onBackClick = { navController.popBackStack() })

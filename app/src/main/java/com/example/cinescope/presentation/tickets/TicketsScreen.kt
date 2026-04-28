@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material.icons.outlined.LocalActivity
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,16 +39,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.cinescope.presentation.models.TicketSummary
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
 
 @Composable
-fun TicketsScreen(tabs: List<String>, tickets: List<TicketSummary>) {
+fun TicketsScreen(
+    tabs: List<String>, 
+    tickets: List<TicketSummary>,
+    isAuthenticated: Boolean,
+    onLoginClick: () -> Unit
+) {
+    if (!isAuthenticated) {
+        GuestTicketsContent(onLoginClick)
+        return
+    }
+
     var selectedTab by remember { mutableStateOf(tabs.first()) }
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentPadding = PaddingValues(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
@@ -72,6 +86,48 @@ fun TicketsScreen(tabs: List<String>, tickets: List<TicketSummary>) {
             }
         }
         items(tickets) { ticket -> TicketCard(ticket) }
+    }
+}
+
+@Composable
+private fun GuestTicketsContent(onLoginClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().background(Color.White).padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            Icons.Outlined.LocalActivity,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = Crimson.copy(alpha = 0.2f)
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            "Access Your Tickets",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "Log in to view your booked tickets, upcoming events, and reservation history.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(40.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Crimson)
+                .clickable { onLoginClick() }
+                .padding(vertical = 18.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Sign In", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        }
     }
 }
 
