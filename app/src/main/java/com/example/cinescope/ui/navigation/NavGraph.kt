@@ -16,6 +16,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cinescope.presentation.auth.AuthScreen
+import com.example.cinescope.presentation.catalog.ConcertsCatalogScreen
+import com.example.cinescope.presentation.catalog.MoviesCatalogScreen
+import com.example.cinescope.presentation.catalog.StandupCatalogScreen
 import com.example.cinescope.presentation.details.*
 import com.example.cinescope.presentation.home.HomeScreen
 import com.example.cinescope.presentation.models.CineScopeUiState
@@ -33,6 +36,9 @@ sealed class BottomNavRoute(val route: String, val label: String) {
 sealed class AppRoute(val route: String) {
     data object Login : AppRoute("login")
     data object Signup : AppRoute("signup")
+    data object Movies : AppRoute("movies")
+    data object Concerts : AppRoute("concerts")
+    data object Standup : AppRoute("standup")
     data object MovieDetail : AppRoute("movie_detail/{movieId}") {
         fun createRoute(id: String) = "movie_detail/$id"
     }
@@ -76,6 +82,9 @@ fun CineScopeNavGraph(
                 onMovieClick = { id -> navController.navigate(AppRoute.MovieDetail.createRoute(id)) },
                 onConcertClick = { id -> navController.navigate(AppRoute.ConcertDetail.createRoute(id)) },
                 onStandupClick = { id -> navController.navigate(AppRoute.StandupDetail.createRoute(id)) },
+                onMoviesOpen = { navController.navigate(AppRoute.Movies.route) },
+                onConcertsOpen = { navController.navigate(AppRoute.Concerts.route) },
+                onStandupOpen = { navController.navigate(AppRoute.Standup.route) },
                 onSeriesOpen = { navController.navigateToBottomRoute(BottomNavRoute.Series.route) }
             )
         }
@@ -91,6 +100,24 @@ fun CineScopeNavGraph(
         composable(BottomNavRoute.Profile.route) {
             ProfileScreen(
                 onLoginClick = { navController.navigate(AppRoute.Login.route) }
+            )
+        }
+        composable(AppRoute.Movies.route) {
+            MoviesCatalogScreen(
+                items = appState.homeSections.firstOrNull { it.title == "Cinema" }?.items.orEmpty(),
+                onMovieClick = { id -> navController.navigate(AppRoute.MovieDetail.createRoute(id)) }
+            )
+        }
+        composable(AppRoute.Concerts.route) {
+            ConcertsCatalogScreen(
+                items = appState.homeSections.firstOrNull { it.title == "Concerts" }?.items.orEmpty(),
+                onConcertClick = { id -> navController.navigate(AppRoute.ConcertDetail.createRoute(id)) }
+            )
+        }
+        composable(AppRoute.Standup.route) {
+            StandupCatalogScreen(
+                items = appState.homeSections.firstOrNull { it.title == "Stand-Up" }?.items.orEmpty(),
+                onStandupClick = { id -> navController.navigate(AppRoute.StandupDetail.createRoute(id)) }
             )
         }
         composable(AppRoute.Login.route) {
@@ -179,6 +206,28 @@ fun CineScopeNavGraph(
                     )
                 }
                 is DetailUiState.Error -> { /* Show Error */ }
+            }
+        }
+        composable(
+            route = AppRoute.ConcertDetail.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
+            appState.concertDetail?.let { detail ->
+                EventDetailScreen(
+                    data = detail,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
+        composable(
+            route = AppRoute.StandupDetail.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
+            appState.standupDetail?.let { detail ->
+                EventDetailScreen(
+                    data = detail,
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
         composable(
