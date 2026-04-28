@@ -22,7 +22,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DataModule {
 
-    private const val BASE_URL = "http://192.168.68.150:8000/"
+//    private const val BASE_URL = "http://192.168.68.150:8000/"
+    private const val BASE_URL = "http://192.168.68.124:8000/"
 
     @Provides
     @Singleton
