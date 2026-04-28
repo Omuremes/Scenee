@@ -92,8 +92,8 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
             }
         },
         bottomBar = {
-            if (currentRoute in bottomNavRouteSet) {
-                BottomNavigationBar(navController, currentRoute)
+            if (shouldShowBottomBar(currentRoute)) {
+                BottomNavigationBar(navController, selectedBottomRoute(currentRoute))
             }
         }
     ) { innerPadding ->
@@ -106,6 +106,29 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
     }
 }
 
+private fun shouldShowBottomBar(currentRoute: String?): Boolean {
+    if (currentRoute == null) return false
+    return currentRoute in bottomNavRouteSet ||
+        currentRoute == AppRoute.Movies.route ||
+        currentRoute == AppRoute.Concerts.route ||
+        currentRoute == AppRoute.Standup.route ||
+        currentRoute.startsWith("movie_detail") ||
+        currentRoute.startsWith("concert_detail") ||
+        currentRoute.startsWith("standup_detail") ||
+        currentRoute.startsWith("series_detail") ||
+        currentRoute.startsWith("watch_series")
+}
+
+private fun selectedBottomRoute(currentRoute: String?): String? = when {
+    currentRoute == null -> null
+    currentRoute == BottomNavRoute.Tickets.route -> BottomNavRoute.Tickets.route
+    currentRoute == BottomNavRoute.Profile.route -> BottomNavRoute.Profile.route
+    currentRoute == BottomNavRoute.Series.route ||
+        currentRoute.startsWith("series_detail") ||
+        currentRoute.startsWith("watch_series") -> BottomNavRoute.Series.route
+    else -> BottomNavRoute.Home.route
+}
+
 @Composable
 private fun AppHeader(currentRoute: String?, navController: NavHostController) {
     when (currentRoute) {
@@ -113,19 +136,22 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController) {
         BottomNavRoute.Series.route -> CineScopeTopBar(showLogo = true, showMenu = true, showSearch = true, showProfile = true)
         BottomNavRoute.Tickets.route -> CineScopeTopBar(title = "My tickets", centeredTitle = true)
         BottomNavRoute.Profile.route -> CineScopeTopBar(title = "Profile", centeredTitle = true)
+        AppRoute.Movies.route -> CineScopeTopBar(title = "All Movies", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+        AppRoute.Concerts.route -> CineScopeTopBar(title = "All Concerts", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+        AppRoute.Standup.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         
         // Handling dynamic routes for detail screens
         else -> {
             if (currentRoute?.startsWith("movie_detail") == true) {
                 CineScopeTopBar(title = "Cinema", showBack = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("concert_detail") == true) {
-                CineScopeTopBar(title = "Concert", showBack = true, onBackClick = { navController.popBackStack() })
+                CineScopeTopBar(title = "Concert", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("standup_detail") == true) {
-                CineScopeTopBar(title = "Stand-Up", showBack = true, onBackClick = { navController.popBackStack() })
+                CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("series_detail") == true) {
-                CineScopeTopBar(title = "Series", showBack = true, onBackClick = { navController.popBackStack() })
+                CineScopeTopBar(title = "Series", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("watch_series") == true) {
-                CineScopeTopBar(title = "Episodes", showBack = true, onBackClick = { navController.popBackStack() })
+                CineScopeTopBar(title = "Episodes", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             }
         }
     }

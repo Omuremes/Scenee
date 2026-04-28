@@ -5,10 +5,27 @@ import com.example.cinescope.data.local.SessionManager
 import com.example.cinescope.data.remote.AuthApiService
 import com.example.cinescope.data.remote.MovieApiService
 import com.example.cinescope.data.remote.dto.LoginRequest
+import com.example.cinescope.data.remote.dto.MovieDto
 import com.example.cinescope.data.remote.dto.RegisterRequest
 import com.example.cinescope.data.remote.dto.UserDto
-import com.example.cinescope.data.remote.dto.MovieDto
-import com.example.cinescope.presentation.models.*
+import com.example.cinescope.presentation.models.CategoryIcon
+import com.example.cinescope.presentation.models.CineScopeUiState
+import com.example.cinescope.presentation.models.EpisodeItem
+import com.example.cinescope.presentation.models.EventDetailData
+import com.example.cinescope.presentation.models.HomeCategory
+import com.example.cinescope.presentation.models.HomeSection
+import com.example.cinescope.presentation.models.MediaPoster
+import com.example.cinescope.presentation.models.MovieDateChip
+import com.example.cinescope.presentation.models.MovieDetailData
+import com.example.cinescope.presentation.models.MovieSession
+import com.example.cinescope.presentation.models.MovieTab
+import com.example.cinescope.presentation.models.PosterTheme
+import com.example.cinescope.presentation.models.ProfileSummary
+import com.example.cinescope.presentation.models.ReviewItem
+import com.example.cinescope.presentation.models.SeriesDetailData
+import com.example.cinescope.presentation.models.SeriesPoster
+import com.example.cinescope.presentation.models.SeriesSection
+import com.example.cinescope.presentation.models.TicketSummary
 import com.example.cinescope.ui.theme.Crimson
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -58,23 +75,28 @@ class CineScopeRepository @Inject constructor(
                 HomeSection(
                     "Cinema",
                     listOf(
-                        MediaPoster("1", "Odyssey Horizon", "Sci-Fi • 2h 14m", "8.4", PosterTheme.VioletPop),
-                        MediaPoster("2", "The Director's Cut", "Drama • 1h 58m", "9.1", PosterTheme.CrimsonNight),
-                        MediaPoster("3", "Neon Pursuit", "Action • 2h 05m", "7.8", PosterTheme.MonoSmoke)
+                        MediaPoster("1", "Stellar Odyssey", "SCI-FI • 2H 14M", "8.4", PosterTheme.VioletPop),
+                        MediaPoster("2", "Neon Echoes", "THRILLER • 1H 52M", "7.9", PosterTheme.CrimsonNight),
+                        MediaPoster("3", "The Last Canvas", "DRAMA • 2H 05M", "9.1", PosterTheme.MonoSmoke),
+                        MediaPoster("8", "Frame by Frame", "DOCUMENTARY • 1H 38M", "8.2", PosterTheme.SoftAmber)
                     )
                 ),
                 HomeSection(
                     "Concerts",
                     listOf(
-                        MediaPoster("4", "Electric Pulse Tour", "The Synthetics", "Oct 12 • City Arena", PosterTheme.VioletPop),
-                        MediaPoster("5", "Acoustic Sessions", "Elena Rivers", "Nov 05 • Symphony Hall", PosterTheme.CrimsonNight)
+                        MediaPoster("4", "Neon Dreams Tour", "ELECTRONIC POP • 2H 45M", "9.5", PosterTheme.VioletPop),
+                        MediaPoster("5", "Electric Pulse", "TECHNO HOUSE • 3H 20M", "9.2", PosterTheme.CrimsonNight),
+                        MediaPoster("9", "Vocal Legends", "CLASSIC JAZZ • 2H 15M", "9.8", PosterTheme.SoftAmber),
+                        MediaPoster("10", "Midnight Rebellion", "ALT ROCK • 1H 50M", "8.9", PosterTheme.MonoSmoke)
                     )
                 ),
                 HomeSection(
                     "Stand-Up",
                     listOf(
-                        MediaPoster("6", "Laughs & Lore", "Marcus Webb", "\"Unfiltered and hilarious.\"", PosterTheme.MonoSmoke),
-                        MediaPoster("7", "Modern Problems", "Sarah Jenkins", "\"A fresh take on daily life.\"", PosterTheme.VioletPop)
+                        MediaPoster("6", "Midnight Laughs", "IMPROV COMEDY • 1H 15M", "9.5", PosterTheme.MonoSmoke),
+                        MediaPoster("7", "Comedy Central Live", "STAND-UP SPECIAL • 1H 45M", "9.2", PosterTheme.VioletPop),
+                        MediaPoster("11", "Laugh Out Loud", "OBSERVATIONAL • 1H 30M", "9.8", PosterTheme.CrimsonNight),
+                        MediaPoster("12", "The Punchline Session", "STORYTELLING • 2H 00M", "8.9", PosterTheme.SoftAmber)
                     )
                 )
             ),
@@ -97,47 +119,54 @@ class CineScopeRepository @Inject constructor(
             ),
             profileSummary = ProfileSummary("Alex Johnson", "alex.johnson@example.com", "AJ"),
             concertDetail = EventDetailData(
-                screenTitle = "Concert", 
-                badge = "LIVE CONCERT", 
-                ageLabel = "16+", 
-                title = "Electric Pulse Tour", 
-                accentTitle = "THE SYNTHETICS", 
-                venue = "City Arena", 
-                confirmLabel = "Book Tickets",
+                screenTitle = "Concert",
+                badge = "CONCERT",
+                ageLabel = "18+",
+                title = "The Synthetics:",
+                accentTitle = "Electric Pulse Tour",
+                venue = "City Arena, Metropolis",
+                confirmLabel = "Confirm Booking",
                 dates = listOf(
-                    MovieDateChip("Mon", "12 Oct", true),
-                    MovieDateChip("Tue", "13 Oct", false),
-                    MovieDateChip("Wed", "14 Oct", false)
+                    MovieDateChip("Thu", "16", false),
+                    MovieDateChip("Fri", "17", true),
+                    MovieDateChip("Sat", "18", false),
+                    MovieDateChip("Sun", "19", false),
+                    MovieDateChip("Mon", "20", false)
                 ),
                 sessions = listOf(
-                    MovieSession("19:30", "Main Hall", "Fast Selling", "from $85", true),
-                    MovieSession("22:00", "Main Hall", "Available", "$75", false)
+                    MovieSession("14:30", "Hall B", "112 Seats Left", "$45.00", false),
+                    MovieSession("19:00", "Hall A", "45 Seats Left", "$85.00", true),
+                    MovieSession("22:45", "Hall C", "80 Seats Left", "$55.00", false)
                 ),
                 theme = PosterTheme.VioletPop
             ),
             standupDetail = EventDetailData(
-                screenTitle = "Stand-Up", 
-                badge = "STAND-UP SHOW", 
-                ageLabel = "18+", 
-                title = "Laughs & Lore", 
-                accentTitle = "MARCUS WEBB", 
-                venue = "Comedy Club", 
-                confirmLabel = "Get Tickets",
+                screenTitle = "Stand-Up",
+                badge = "STAND-UP",
+                ageLabel = "18+",
+                title = "Midnight Laughs:",
+                accentTitle = "Live & Uncut",
+                venue = "The Laugh Factory, Metropolis",
+                confirmLabel = "Confirm Selection",
                 dates = listOf(
-                    MovieDateChip("Tue", "20 Oct", true),
-                    MovieDateChip("Wed", "21 Oct", false)
+                    MovieDateChip("Thu", "16", false),
+                    MovieDateChip("Fri", "17", true),
+                    MovieDateChip("Sat", "18", false),
+                    MovieDateChip("Sun", "19", false),
+                    MovieDateChip("Mon", "20", false)
                 ),
                 sessions = listOf(
-                    MovieSession("20:00", "Stage A", "Limited", "$45", true),
-                    MovieSession("22:30", "Stage A", "Available", "$40", false)
+                    MovieSession("21:00", "Hall B", "112 Seats Left", "$35.00", false),
+                    MovieSession("23:30", "Hall A", "45 Seats Left", "$45.00", true),
+                    MovieSession("01:00", "Lounge", "80 Seats Left", "$40.00", false)
                 ),
                 theme = PosterTheme.MonoSmoke
             ),
             movieDetail = MovieDetailData(
-                title = "Odyssey Horizon", 
+                title = "Odyssey Horizon",
                 genres = listOf("Sci-Fi", "Action"),
-                duration = "2h 14m", 
-                rating = "8.4", 
+                duration = "2h 14m",
+                rating = "8.4",
                 tabs = listOf(MovieTab.Tickets, MovieTab.About, MovieTab.Comments),
                 dates = listOf(
                     MovieDateChip("Wed", "27 Apr", true),
@@ -166,11 +195,11 @@ class CineScopeRepository @Inject constructor(
                 theme = PosterTheme.VioletPop
             ),
             seriesDetail = SeriesDetailData(
-                title = "Neon Horizon", 
+                title = "Neon Horizon",
                 genres = listOf("Action", "Sci-Fi", "Thriller"),
                 storyline = "In a neon-drenched future, a group of outcasts uncovers a truth that could change their world forever.",
-                rating = "4.9", 
-                reviewCount = "2.4k Reviews", 
+                rating = "4.9",
+                reviewCount = "2.4k Reviews",
                 cast = listOf("Actor 1", "Actor 2", "Actor 3"),
                 reviews = listOf("Amazing show!", "Best sci-fi in years.", "Can't wait for season 3!"),
                 seasons = listOf("Season 1", "Season 2"),

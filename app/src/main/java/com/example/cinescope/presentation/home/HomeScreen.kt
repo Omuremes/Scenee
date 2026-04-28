@@ -48,13 +48,37 @@ fun HomeScreen(
     onMovieClick: (String) -> Unit,
     onConcertClick: (String) -> Unit,
     onStandupClick: (String) -> Unit,
+    onMoviesOpen: () -> Unit,
+    onConcertsOpen: () -> Unit,
+    onStandupOpen: () -> Unit,
     onSeriesOpen: () -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         item { SearchRow("Search movies, concerts, shows...") }
-        item { CategoryGrid(categories, onSeriesOpen) }
+        item {
+            CategoryGrid(categories) { label ->
+                when (label) {
+                    "Cinema" -> onMoviesOpen()
+                    "Series" -> onSeriesOpen()
+                    "Concerts" -> onConcertsOpen()
+                    "Stand-Up" -> onStandupOpen()
+                }
+            }
+        }
         items(sections) { section ->
-            HomeSectionBlock(section, onMovieClick, onConcertClick, onStandupClick)
+            HomeSectionBlock(
+                section = section,
+                onMovieClick = onMovieClick,
+                onConcertClick = onConcertClick,
+                onStandupClick = onStandupClick,
+                onSeeAllClick = {
+                    when (section.title) {
+                        "Concerts" -> onConcertsOpen()
+                        "Stand-Up" -> onStandupOpen()
+                        else -> onMoviesOpen()
+                    }
+                }
+            )
         }
     }
 }
@@ -64,7 +88,8 @@ private fun HomeSectionBlock(
     section: HomeSection,
     onMovieClick: (String) -> Unit,
     onConcertClick: (String) -> Unit,
-    onStandupClick: (String) -> Unit
+    onStandupClick: (String) -> Unit,
+    onSeeAllClick: () -> Unit
 ) {
     Column(modifier = Modifier.padding(bottom = 26.dp)) {
         Row(
@@ -80,6 +105,7 @@ private fun HomeSectionBlock(
                 modifier = Modifier
                     .clip(RoundedCornerShape(999.dp))
                     .background(Crimson.copy(alpha = 0.06f))
+                    .clickable { onSeeAllClick() }
                     .padding(horizontal = 14.dp, vertical = 8.dp),
                 color = Crimson,
                 style = MaterialTheme.typography.labelSmall

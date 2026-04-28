@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.MoreVert
@@ -124,63 +125,85 @@ fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
 
 @Composable
 fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth().aspectRatio(4f / 5f)) {
-                PosterBox(modifier = Modifier.fillMaxSize(), theme = data.theme)
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 190.dp)) {
+            item {
+                Box(modifier = Modifier.fillMaxWidth().aspectRatio(4f / 5f)) {
+                    PosterBox(modifier = Modifier.fillMaxSize(), theme = data.theme)
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color.Transparent, Color.Black.copy(alpha = 0.82f))
+                                )
                             )
-                        )
-                )
+                    )
+                }
             }
-        }
-        item {
-            Card(
-                modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-32).dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(40.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            data.badge,
-                            modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Crimson).padding(horizontal = 14.dp, vertical = 8.dp),
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            data.ageLabel,
-                            modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                    Text(data.title, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold)
-                    Text(data.accentTitle, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold, color = Crimson)
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Outlined.Place, contentDescription = null, tint = Crimson)
-                        Text(data.venue, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
+            item {
+                Card(
+                    modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-32).dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(40.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                data.badge,
+                                modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Crimson).padding(horizontal = 14.dp, vertical = 8.dp),
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                data.ageLabel,
+                                modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                        Text(data.title, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold)
+                        Text(data.accentTitle, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold, color = Crimson)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Outlined.Place, contentDescription = null, tint = Crimson)
+                            Text(data.venue, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
                 }
             }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Text("Tickets", color = Crimson, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Text("About event", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            item { HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) }
+            item { EventTicketsTab(data) }
         }
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                Text("Tickets", color = Crimson, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                Text("About event", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 28.dp)
+                .clip(RoundedCornerShape(999.dp))
+                .background(Crimson)
+                .padding(vertical = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    data.confirmLabel.uppercase(),
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black
+                )
+                Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, tint = Color.White)
             }
         }
-        item { HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) }
-        item { EventTicketsTab(data) }
     }
 }
 
@@ -346,9 +369,6 @@ private fun EventTicketsTab(data: EventDetailData) {
         data.sessions.forEach { session ->
             SessionCard(session)
             Spacer(Modifier.height(12.dp))
-        }
-        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(999.dp)).background(Crimson).padding(vertical = 20.dp), contentAlignment = Alignment.Center) {
-            Text(data.confirmLabel.uppercase(), color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
         }
     }
 }

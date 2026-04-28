@@ -139,7 +139,7 @@ fun SearchRow(placeholder: String, withFilter: Boolean = false) {
 }
 
 @Composable
-fun CategoryGrid(categories: List<HomeCategory>, onSeriesOpen: () -> Unit) {
+fun CategoryGrid(categories: List<HomeCategory>, onCategoryClick: (String) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 14.dp)) {
         categories.chunked(3).forEach { row ->
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -150,9 +150,7 @@ fun CategoryGrid(categories: List<HomeCategory>, onSeriesOpen: () -> Unit) {
                             .clip(RoundedCornerShape(24.dp))
                             .background(Color.White)
                             .border(1.dp, Color(0xFFF8F8F8), RoundedCornerShape(24.dp))
-                            .clickable {
-                                if (category.label == "Series") onSeriesOpen()
-                            }
+                            .clickable { onCategoryClick(category.label) }
                             .padding(vertical = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
