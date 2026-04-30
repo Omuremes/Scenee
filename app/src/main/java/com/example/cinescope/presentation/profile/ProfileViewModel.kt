@@ -2,9 +2,7 @@ package com.example.cinescope.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cinescope.data.CineScopeRepository
-import com.example.cinescope.presentation.models.CategoryIcon
-import com.example.cinescope.presentation.models.ProfileAction
+import com.example.cinescope.data.profile.ProfileRepository
 import com.example.cinescope.presentation.models.ProfileSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +20,7 @@ sealed class ProfileUiState {
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repository: CineScopeRepository
+    private val repository: ProfileRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -36,18 +34,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
             try {
-                val user = repository.getMe()
-                val profileSummary = ProfileSummary(
-                    name = user.username ?: "User",
-                    email = user.email,
-                    initials = (user.username ?: "U").take(2).uppercase(),
-                    actions = listOf(
-                        ProfileAction("Personal Info", CategoryIcon.Person),
-                        ProfileAction("Payment Methods", CategoryIcon.Payments),
-                        ProfileAction("Order History", CategoryIcon.History)
-                    )
-                )
-                _uiState.value = ProfileUiState.Success(profileSummary)
+                _uiState.value = ProfileUiState.Success(repository.getProfileSummary())
             } catch (e: HttpException) {
                 if (e.code() == 401) {
                     repository.logout()

@@ -2,7 +2,7 @@ package com.example.cinescope.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cinescope.data.CineScopeRepository
+import com.example.cinescope.data.auth.AuthRepository
 import com.example.cinescope.data.remote.dto.LoginRequest
 import com.example.cinescope.data.remote.dto.RegisterRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +21,7 @@ sealed class AuthUiState {
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: CineScopeRepository
+    private val repository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)

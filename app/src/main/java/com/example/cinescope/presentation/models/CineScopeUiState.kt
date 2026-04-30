@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 
 data class CineScopeUiState(
     val isAuthenticated: Boolean = false,
+    val homeLoading: Boolean = false,
+    val homeErrorMessage: String? = null,
     val homeSections: List<HomeSection> = emptyList(),
     val categories: List<HomeCategory> = emptyList(),
     val seriesSections: List<SeriesSection> = emptyList(),
@@ -76,6 +78,7 @@ data class MovieDetailData(
     val genres: List<String>,
     val duration: String,
     val rating: String,
+    val reviewCount: String = "0 Reviews",
     val tabs: List<MovieTab>,
     val dates: List<MovieDateChip>,
     val sessions: List<MovieSession>,
@@ -83,6 +86,7 @@ data class MovieDetailData(
     val cast: List<String>,
     val details: List<Pair<String, String>>,
     val reviews: List<ReviewItem>,
+    val comments: List<String> = emptyList(),
     val theme: PosterTheme = PosterTheme.VioletPop
 )
 

@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +47,9 @@ import com.example.cinescope.ui.theme.Crimson
 fun HomeScreen(
     categories: List<HomeCategory>,
     sections: List<HomeSection>,
+    isLoading: Boolean,
+    errorMessage: String?,
+    onRetry: () -> Unit,
     onMovieClick: (String) -> Unit,
     onConcertClick: (String) -> Unit,
     onStandupClick: (String) -> Unit,
@@ -65,23 +70,75 @@ fun HomeScreen(
                 }
             }
         }
-        items(sections) { section ->
-            HomeSectionBlock(
-                section = section,
-                onMovieClick = onMovieClick,
-                onConcertClick = onConcertClick,
-                onStandupClick = onStandupClick,
-                onSeeAllClick = {
-                    when (section.title) {
-                        "Concerts" -> onConcertsOpen()
-                        "Stand-Up" -> onStandupOpen()
-                        else -> onMoviesOpen()
-                    }
+        when {
+            isLoading -> item { HomeLoadingBlock() }
+            errorMessage != null -> item { HomeErrorBlock(message = errorMessage, onRetry = onRetry) }
+            sections.isEmpty() -> item { EmptyPosterBlock() }
+            else -> {
+                items(sections) { section ->
+                    HomeSectionBlock(
+                        section = section,
+                        onMovieClick = onMovieClick,
+                        onConcertClick = onConcertClick,
+                        onStandupClick = onStandupClick,
+                        onSeeAllClick = {
+                            when (section.title) {
+                                "Concerts" -> onConcertsOpen()
+                                "Stand-Up" -> onStandupOpen()
+                                else -> onMoviesOpen()
+                            }
+                        }
+                    )
                 }
-            )
+            }
         }
     }
 }
+
+@Composable
+private fun HomeLoadingBlock() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(color = Crimson)
+    }
+}
+
+@Composable
+private fun HomeErrorBlock(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text("Could not load events", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Button(onClick = onRetry) {
+            Text("Retry")
+        }
+    }
+}
+
+@Composable
+private fun EmptyPosterBlock() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "No upcoming events yet",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+    }
 
 @Composable
 private fun HomeSectionBlock(

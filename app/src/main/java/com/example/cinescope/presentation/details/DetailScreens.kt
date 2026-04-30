@@ -504,7 +504,7 @@ private fun MovieCommentsTab(data: MovieDetailData) {
                     Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFEAB308).copy(alpha = 0.5f))
                 }
                 Spacer(Modifier.height(6.dp))
-                Text("2.4k Reviews", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(data.reviewCount, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(16.dp))
                 data.reviews.forEach { review ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -521,6 +521,25 @@ private fun MovieCommentsTab(data: MovieDetailData) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("User Reviews", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
             Text("Newest", color = Crimson, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        }
+        if (data.comments.isNotEmpty()) {
+            Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                data.comments.forEach { comment ->
+                    Card(
+                        modifier = Modifier.width(300.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(
+                            comment,
+                            modifier = Modifier.padding(18.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
         }
     }
 }

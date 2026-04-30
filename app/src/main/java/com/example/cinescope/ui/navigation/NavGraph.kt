@@ -23,7 +23,11 @@ import com.example.cinescope.presentation.details.*
 import com.example.cinescope.presentation.home.HomeScreen
 import com.example.cinescope.presentation.models.CineScopeUiState
 import com.example.cinescope.presentation.profile.ProfileScreen
+import com.example.cinescope.presentation.series.SeriesErrorScreen
+import com.example.cinescope.presentation.series.SeriesLoadingScreen
 import com.example.cinescope.presentation.series.SeriesScreen
+import com.example.cinescope.presentation.series.SeriesUiState
+import com.example.cinescope.presentation.series.SeriesViewModel
 import com.example.cinescope.presentation.tickets.TicketsScreen
 
 sealed class BottomNavRoute(val route: String, val label: String) {
@@ -68,6 +72,7 @@ fun CineScopeNavGraph(
     navController: NavHostController,
     appState: CineScopeUiState,
     startDestination: String,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -79,6 +84,9 @@ fun CineScopeNavGraph(
             HomeScreen(
                 categories = appState.categories,
                 sections = appState.homeSections,
+                isLoading = appState.homeLoading,
+                errorMessage = appState.homeErrorMessage,
+                onRetry = onRetry,
                 onMovieClick = { id -> navController.navigate(AppRoute.MovieDetail.createRoute(id)) },
                 onConcertClick = { id -> navController.navigate(AppRoute.ConcertDetail.createRoute(id)) },
                 onStandupClick = { id -> navController.navigate(AppRoute.StandupDetail.createRoute(id)) },
@@ -89,10 +97,24 @@ fun CineScopeNavGraph(
             )
         }
         composable(BottomNavRoute.Series.route) {
-            SeriesScreen(
-                sections = appState.seriesSections,
-                onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) }
-            )
+            val seriesViewModel: SeriesViewModel = hiltViewModel()
+            val seriesState by seriesViewModel.uiState.collectAsState()
+
+            when (val state = seriesState) {
+                SeriesUiState.Loading -> SeriesLoadingScreen()
+                is SeriesUiState.Success -> {
+                    SeriesScreen(
+                        sections = state.sections,
+                        onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) }
+                    )
+                }
+                is SeriesUiState.Error -> {
+                    SeriesErrorScreen(
+                        message = state.message,
+                        onRetry = seriesViewModel::loadSeries
+                    )
+                }
+            }
         }
         composable(BottomNavRoute.Tickets.route) {
             TicketsScreen(
@@ -109,22 +131,28 @@ fun CineScopeNavGraph(
             )
         }
         composable(AppRoute.Movies.route) {
-            MoviesCatalogScreen(
-                items = appState.homeSections.firstOrNull { it.title == "Cinema" }?.items.orEmpty(),
-                onMovieClick = { id -> navController.navigate(AppRoute.MovieDetail.createRoute(id)) }
-            )
+            PosterCatalogContent(appState = appState, onRetry = onRetry) {
+                MoviesCatalogScreen(
+                    items = appState.homeSections.firstOrNull { it.title == "Cinema" }?.items.orEmpty(),
+                    onMovieClick = { id -> navController.navigate(AppRoute.MovieDetail.createRoute(id)) }
+                )
+            }
         }
         composable(AppRoute.Concerts.route) {
-            ConcertsCatalogScreen(
-                items = appState.homeSections.firstOrNull { it.title == "Concerts" }?.items.orEmpty(),
-                onConcertClick = { id -> navController.navigate(AppRoute.ConcertDetail.createRoute(id)) }
-            )
+            PosterCatalogContent(appState = appState, onRetry = onRetry) {
+                ConcertsCatalogScreen(
+                    items = appState.homeSections.firstOrNull { it.title == "Concerts" }?.items.orEmpty(),
+                    onConcertClick = { id -> navController.navigate(AppRoute.ConcertDetail.createRoute(id)) }
+                )
+            }
         }
         composable(AppRoute.Standup.route) {
-            StandupCatalogScreen(
-                items = appState.homeSections.firstOrNull { it.title == "Stand-Up" }?.items.orEmpty(),
-                onStandupClick = { id -> navController.navigate(AppRoute.StandupDetail.createRoute(id)) }
-            )
+            PosterCatalogContent(appState = appState, onRetry = onRetry) {
+                StandupCatalogScreen(
+                    items = appState.homeSections.firstOrNull { it.title == "Stand-Up" }?.items.orEmpty(),
+                    onStandupClick = { id -> navController.navigate(AppRoute.StandupDetail.createRoute(id)) }
+                )
+            }
         }
         composable(AppRoute.Login.route) {
             AuthScreen(
@@ -163,11 +191,11 @@ fun CineScopeNavGraph(
             val detailState by detailViewModel.uiState.collectAsState()
 
             LaunchedEffect(movieId) {
-                detailViewModel.loadMovieDetail(movieId)
+                detailViewModel.loadCinemaEventDetail(movieId)
             }
 
             when (val state = detailState) {
-                is DetailUiState.Loading -> { /* Show Loader */ }
+                is DetailUiState.Loading -> SeriesLoadingScreen()
                 is DetailUiState.SuccessMovie -> {
                     MovieDetailScreen(
                         data = state.data,
@@ -181,7 +209,16 @@ fun CineScopeNavGraph(
                         onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
                     )
                 }
-                is DetailUiState.Error -> { /* Show Error */ }
+                is DetailUiState.SuccessEvent -> {
+                    EventDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                is DetailUiState.Error -> SeriesErrorScreen(
+                    message = state.message,
+                    onRetry = { detailViewModel.loadCinemaEventDetail(movieId) }
+                )
             }
         }
         composable(
@@ -193,11 +230,11 @@ fun CineScopeNavGraph(
             val detailState by detailViewModel.uiState.collectAsState()
 
             LaunchedEffect(movieId) {
-                detailViewModel.loadMovieDetail(movieId)
+                detailViewModel.loadSeriesDetail(movieId)
             }
 
             when (val state = detailState) {
-                is DetailUiState.Loading -> { /* Show Loader */ }
+                is DetailUiState.Loading -> SeriesLoadingScreen()
                 is DetailUiState.SuccessMovie -> {
                     MovieDetailScreen(
                         data = state.data,
@@ -211,28 +248,81 @@ fun CineScopeNavGraph(
                         onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
                     )
                 }
-                is DetailUiState.Error -> { /* Show Error */ }
+                is DetailUiState.SuccessEvent -> EventDetailScreen(
+                    data = state.data,
+                    onBack = { navController.popBackStack() }
+                )
+                is DetailUiState.Error -> SeriesErrorScreen(
+                    message = state.message,
+                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                )
             }
         }
         composable(
             route = AppRoute.ConcertDetail.route,
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
-            appState.concertDetail?.let { detail ->
-                EventDetailScreen(
-                    data = detail,
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+            val detailViewModel: DetailViewModel = hiltViewModel()
+            val detailState by detailViewModel.uiState.collectAsState()
+
+            LaunchedEffect(eventId) {
+                detailViewModel.loadEventDetail(eventId)
+            }
+
+            when (val state = detailState) {
+                is DetailUiState.Loading -> SeriesLoadingScreen()
+                is DetailUiState.SuccessEvent -> {
+                    EventDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                is DetailUiState.Error -> SeriesErrorScreen(
+                    message = state.message,
+                    onRetry = { detailViewModel.loadEventDetail(eventId) }
+                )
+                is DetailUiState.SuccessMovie -> MovieDetailScreen(
+                    data = state.data,
                     onBack = { navController.popBackStack() }
+                )
+                is DetailUiState.SuccessSeries -> SeriesErrorScreen(
+                    message = "Selected item is not an event.",
+                    onRetry = { detailViewModel.loadEventDetail(eventId) }
                 )
             }
         }
         composable(
             route = AppRoute.StandupDetail.route,
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
-            appState.standupDetail?.let { detail ->
-                EventDetailScreen(
-                    data = detail,
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+            val detailViewModel: DetailViewModel = hiltViewModel()
+            val detailState by detailViewModel.uiState.collectAsState()
+
+            LaunchedEffect(eventId) {
+                detailViewModel.loadEventDetail(eventId)
+            }
+
+            when (val state = detailState) {
+                is DetailUiState.Loading -> SeriesLoadingScreen()
+                is DetailUiState.SuccessEvent -> {
+                    EventDetailScreen(
+                        data = state.data,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                is DetailUiState.Error -> SeriesErrorScreen(
+                    message = state.message,
+                    onRetry = { detailViewModel.loadEventDetail(eventId) }
+                )
+                is DetailUiState.SuccessMovie -> MovieDetailScreen(
+                    data = state.data,
                     onBack = { navController.popBackStack() }
+                )
+                is DetailUiState.SuccessSeries -> SeriesErrorScreen(
+                    message = "Selected item is not an event.",
+                    onRetry = { detailViewModel.loadEventDetail(eventId) }
                 )
             }
         }
@@ -245,7 +335,7 @@ fun CineScopeNavGraph(
             val detailState by detailViewModel.uiState.collectAsState()
 
             LaunchedEffect(movieId) {
-                detailViewModel.loadMovieDetail(movieId)
+                detailViewModel.loadSeriesDetail(movieId)
             }
 
             when (val state = detailState) {
@@ -261,7 +351,19 @@ fun CineScopeNavGraph(
                         }
                     }
                 }
-                else -> { /* Handle other states */ }
+                is DetailUiState.Loading -> SeriesLoadingScreen()
+                is DetailUiState.Error -> SeriesErrorScreen(
+                    message = state.message,
+                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                )
+                is DetailUiState.SuccessMovie -> SeriesErrorScreen(
+                    message = "Selected item is not a series.",
+                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                )
+                is DetailUiState.SuccessEvent -> SeriesErrorScreen(
+                    message = "Selected item is not a series.",
+                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                )
             }
         }
     }
@@ -272,6 +374,22 @@ fun NavHostController.navigateToBottomRoute(route: String) {
         popUpTo(BottomNavRoute.Home.route) { saveState = true }
         launchSingleTop = true
         restoreState = true
+    }
+}
+
+@Composable
+private fun PosterCatalogContent(
+    appState: CineScopeUiState,
+    onRetry: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    when {
+        appState.homeLoading -> SeriesLoadingScreen()
+        appState.homeErrorMessage != null -> SeriesErrorScreen(
+            message = appState.homeErrorMessage,
+            onRetry = onRetry
+        )
+        else -> content()
     }
 }
 

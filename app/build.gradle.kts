@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +7,21 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+}
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+val apiBaseUrl = providers.gradleProperty("CINESCOPE_API_BASE_URL")
+    .orElse(localProperties.getProperty("CINESCOPE_API_BASE_URL") ?: "")
+    .get()
+
+if (apiBaseUrl.isBlank()) {
+    throw GradleException("CINESCOPE_API_BASE_URL must be set in local.properties or as a Gradle property.")
 }
 
 android {
@@ -19,6 +36,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl.escapeForBuildConfig()}\"")
     }
 
     buildTypes {
@@ -39,7 +57,12 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+}
+
+fun String.escapeForBuildConfig(): String {
+    return replace("\\", "\\\\").replace("\"", "\\\"")
 }
 
 dependencies {

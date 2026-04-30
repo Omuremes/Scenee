@@ -2,8 +2,12 @@ package com.example.cinescope.presentation.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cinescope.data.CineScopeRepository
-import com.example.cinescope.presentation.models.*
+import com.example.cinescope.data.event.EventRepository
+import com.example.cinescope.data.movie.MovieRepository
+import com.example.cinescope.data.series.SeriesRepository
+import com.example.cinescope.presentation.models.EventDetailData
+import com.example.cinescope.presentation.models.MovieDetailData
+import com.example.cinescope.presentation.models.SeriesDetailData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,15 +16,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed class DetailUiState {
-    object Loading : DetailUiState()
+    data object Loading : DetailUiState()
     data class SuccessSeries(val data: SeriesDetailData) : DetailUiState()
     data class SuccessMovie(val data: MovieDetailData) : DetailUiState()
+    data class SuccessEvent(val data: EventDetailData) : DetailUiState()
     data class Error(val message: String) : DetailUiState()
 }
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val repository: CineScopeRepository
+    private val movieRepository: MovieRepository,
+    private val seriesRepository: SeriesRepository,
+    private val eventRepository: EventRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading)
@@ -30,52 +37,40 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = DetailUiState.Loading
             try {
-                val dto = repository.getMovieDetail(movieId)
-                
-                if (dto.is_series) {
-                    val detailData = SeriesDetailData(
-                        title = dto.name,
-                        rating = String.format("%.1f", dto.average_rating),
-                        reviewCount = "2.4k Reviews",
-                        storyline = dto.description,
-                        genres = dto.categories.map { it.name },
-                        tabs = listOf("Seasons", "Episodes", "Reviews"),
-                        meta = listOf("${dto.created_at.take(4)}", "${dto.seasons_count} Seasons", "18+"),
-                        seasons = (1..dto.seasons_count).map { "Season $it" },
-                        episodes = dto.episodes.map { ep ->
-                            EpisodeItem(
-                                badge = "EPISODE ${ep.episode_number}",
-                                title = ep.title,
-                                duration = "${ep.duration}m",
-                                theme = PosterTheme.VioletPop
-                            )
-                        },
-                        cast = dto.actors.map { it.full_name },
-                        reviews = listOf("Amazing show!", "Great plot twists.")
-                    )
-                    _uiState.value = DetailUiState.SuccessSeries(detailData)
-                } else {
-                    val detailData = MovieDetailData(
-                        title = dto.name,
-                        genres = dto.categories.map { it.name },
-                        duration = "${dto.duration}m",
-                        rating = String.format("%.1f", dto.average_rating),
-                        tabs = listOf(MovieTab.Tickets, MovieTab.About, MovieTab.Comments),
-                        dates = listOf(
-                            MovieDateChip("Wed", "27 Apr", true),
-                            MovieDateChip("Thu", "28 Apr", false),
-                            MovieDateChip("Fri", "29 Apr", false)
-                        ),
-                        sessions = dto.episodes.map { ep -> // Используем эпизоды как сеансы для примера
-                            MovieSession("${ep.episode_number}:00", "Hall ${ep.season_number}", "Available", "$15", false)
-                        },
-                        description = dto.description,
-                        cast = dto.actors.map { it.full_name },
-                        details = listOf("Director" to "Unknown", "Release" to dto.created_at.take(4)),
-                        reviews = listOf(ReviewItem("5", 0.8f), ReviewItem("4", 0.6f))
-                    )
-                    _uiState.value = DetailUiState.SuccessMovie(detailData)
-                }
+                _uiState.value = DetailUiState.SuccessMovie(movieRepository.getMovieDetail(movieId))
+            } catch (e: Exception) {
+                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun loadCinemaEventDetail(eventId: String) {
+        viewModelScope.launch {
+            _uiState.value = DetailUiState.Loading
+            try {
+                _uiState.value = DetailUiState.SuccessMovie(eventRepository.getCinemaEventDetail(eventId))
+            } catch (e: Exception) {
+                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun loadEventDetail(eventId: String) {
+        viewModelScope.launch {
+            _uiState.value = DetailUiState.Loading
+            try {
+                _uiState.value = DetailUiState.SuccessEvent(eventRepository.getEventDetail(eventId))
+            } catch (e: Exception) {
+                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun loadSeriesDetail(serialId: String) {
+        viewModelScope.launch {
+            _uiState.value = DetailUiState.Loading
+            try {
+                _uiState.value = DetailUiState.SuccessSeries(seriesRepository.getSerialDetail(serialId))
             } catch (e: Exception) {
                 _uiState.value = DetailUiState.Error(e.message ?: "Unknown error")
             }

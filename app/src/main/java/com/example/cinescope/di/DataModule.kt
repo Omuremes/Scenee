@@ -1,10 +1,12 @@
 package com.example.cinescope.di
 
 import android.content.Context
-import com.example.cinescope.data.CineScopeRepository
+import com.example.cinescope.BuildConfig
 import com.example.cinescope.data.local.SessionManager
 import com.example.cinescope.data.remote.AuthApiService
+import com.example.cinescope.data.remote.EventApiService
 import com.example.cinescope.data.remote.MovieApiService
+import com.example.cinescope.data.remote.SerialApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,10 +23,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
-
-//    private const val BASE_URL = "http://192.168.68.150:8000/"
-    private const val BASE_URL = "http://192.168.68.124:8000/"
-
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
@@ -44,7 +42,7 @@ object DataModule {
         }
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
@@ -64,17 +62,19 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
-        return SessionManager(context)
+    fun provideEventApiService(retrofit: Retrofit): EventApiService {
+        return retrofit.create(EventApiService::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideCineScopeRepository(
-        authApiService: AuthApiService,
-        movieApiService: MovieApiService,
-        sessionManager: SessionManager
-    ): CineScopeRepository {
-        return CineScopeRepository(authApiService, movieApiService, sessionManager)
+    fun provideSerialApiService(retrofit: Retrofit): SerialApiService {
+        return retrofit.create(SerialApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
+        return SessionManager(context)
     }
 }
