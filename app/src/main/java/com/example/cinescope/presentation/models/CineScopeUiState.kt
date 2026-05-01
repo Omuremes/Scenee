@@ -54,13 +54,15 @@ data class MovieSession(
     val status: String,
     val price: String,
     val selected: Boolean = false,
-    val soldOut: Boolean = false
+    val soldOut: Boolean = false,
+    val id: String? = null
 )
 
 data class ReviewItem(val label: String, val progress: Float)
 
 data class EventDetailData(
     val screenTitle: String,
+    val eventTypeCode: String = "",
     val badge: String,
     val ageLabel: String,
     val title: String,
@@ -149,5 +151,43 @@ data class TicketSummary(
     val dateTime: String,
     val venue: String,
     val accent: Color,
-    val posterTheme: PosterTheme
+    val posterTheme: PosterTheme,
+    val id: String = "",
+    val bookingReference: String = "",
+    val status: String = "",
+    val seatsCount: Int = 1,
+    val totalPrice: String = "",
+    val priceRange: String = "",
+    val seatLabel: String = ""
+)
+
+data class BookingSelectionData(
+    val eventId: String,
+    val title: String,
+    val eventTypeCode: String,
+    val eventType: String,
+    val venue: String,
+    val availableSeats: Int? = null,
+    val sessions: List<BookingSessionOption>,
+    val seats: List<BookingSeatOption>,
+    val selectedSessionId: String?,
+    val theme: PosterTheme
+)
+
+data class BookingSessionOption(
+    val id: String,
+    val startsAt: String,
+    val hall: String,
+    val price: String,
+    val basePrice: Double? = null,
+    val selected: Boolean = false
+)
+
+data class BookingSeatOption(
+    val id: String,
+    val label: String,
+    val zone: String,
+    val price: String,
+    val rawPrice: Double? = null,
+    val available: Boolean
 )

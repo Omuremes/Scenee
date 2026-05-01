@@ -73,7 +73,6 @@ class CineScopeViewModel @Inject constructor(
             homeSections = homeResult.getOrDefault(emptyList()),
             categories = homeRepository.getCategories(),
             ticketTabs = ticketsRepository.getTicketTabs(),
-            tickets = ticketsRepository.getTickets(),
             profileSummary = profileSummary
         )
     }.stateIn(
@@ -82,8 +81,7 @@ class CineScopeViewModel @Inject constructor(
         initialValue = CineScopeUiState(
             homeLoading = true,
             categories = homeRepository.getCategories(),
-            ticketTabs = ticketsRepository.getTicketTabs(),
-            tickets = ticketsRepository.getTickets()
+            ticketTabs = ticketsRepository.getTicketTabs()
         )
     )
     
@@ -127,9 +125,12 @@ private fun shouldShowBottomBar(currentRoute: String?): Boolean {
         currentRoute == AppRoute.Movies.route ||
         currentRoute == AppRoute.Concerts.route ||
         currentRoute == AppRoute.Standup.route ||
+        currentRoute == AppRoute.Kids.route ||
+        currentRoute == AppRoute.Events.route ||
         currentRoute.startsWith("movie_detail") ||
         currentRoute.startsWith("concert_detail") ||
         currentRoute.startsWith("standup_detail") ||
+        currentRoute.startsWith("event_detail") ||
         currentRoute.startsWith("series_detail") ||
         currentRoute.startsWith("watch_series")
 }
@@ -169,6 +170,8 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController, u
         AppRoute.Movies.route -> CineScopeTopBar(title = "All Movies", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Concerts.route -> CineScopeTopBar(title = "All Concerts", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Standup.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+        AppRoute.Kids.route -> CineScopeTopBar(title = "Kids", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+        AppRoute.Events.route -> CineScopeTopBar(title = "Events", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         
         else -> {
             if (currentRoute?.startsWith("movie_detail") == true) {
@@ -177,10 +180,14 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController, u
                 CineScopeTopBar(title = "Concert", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("standup_detail") == true) {
                 CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("event_detail") == true) {
+                CineScopeTopBar(title = "Event", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("series_detail") == true) {
                 CineScopeTopBar(title = "Series", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("watch_series") == true) {
                 CineScopeTopBar(title = "Episodes", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("book_seats") == true) {
+                CineScopeTopBar(title = "Select seats", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             }
         }
     }

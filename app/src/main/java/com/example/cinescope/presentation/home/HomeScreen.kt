@@ -19,17 +19,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.CategoryGrid
 import com.example.cinescope.ui.components.PosterBox
-import com.example.cinescope.ui.components.SearchRow
 import com.example.cinescope.ui.theme.Crimson
 
 @Composable
@@ -53,13 +56,38 @@ fun HomeScreen(
     onMovieClick: (String) -> Unit,
     onConcertClick: (String) -> Unit,
     onStandupClick: (String) -> Unit,
+    onEventClick: (String) -> Unit,
     onMoviesOpen: () -> Unit,
     onConcertsOpen: () -> Unit,
     onStandupOpen: () -> Unit,
+    onKidsOpen: () -> Unit,
+    onEventsOpen: () -> Unit,
     onSeriesOpen: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    val visibleSections = remember(sections, searchQuery) {
+        val query = searchQuery.trim()
+        if (query.isBlank()) {
+            sections
+        } else {
+            sections.mapNotNull { section ->
+                val filtered = section.items.filter { poster ->
+                    poster.title.contains(query, ignoreCase = true) ||
+                        poster.subtitle.contains(query, ignoreCase = true) ||
+                        poster.meta.contains(query, ignoreCase = true)
+                }
+                if (filtered.isEmpty()) null else section.copy(items = filtered)
+            }
+        }
+    }
+
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-        item { SearchRow("Search movies, concerts, shows...") }
+        item {
+            HomeSearchField(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it }
+            )
+        }
         item {
             CategoryGrid(categories) { label ->
                 when (label) {
@@ -67,24 +95,29 @@ fun HomeScreen(
                     "Series" -> onSeriesOpen()
                     "Concerts" -> onConcertsOpen()
                     "Stand-Up" -> onStandupOpen()
+                    "Kids" -> onKidsOpen()
+                    "Events" -> onEventsOpen()
                 }
             }
         }
         when {
             isLoading -> item { HomeLoadingBlock() }
             errorMessage != null -> item { HomeErrorBlock(message = errorMessage, onRetry = onRetry) }
-            sections.isEmpty() -> item { EmptyPosterBlock() }
+            visibleSections.isEmpty() -> item { EmptyPosterBlock() }
             else -> {
-                items(sections) { section ->
+                items(visibleSections) { section ->
                     HomeSectionBlock(
                         section = section,
                         onMovieClick = onMovieClick,
                         onConcertClick = onConcertClick,
                         onStandupClick = onStandupClick,
+                        onEventClick = onEventClick,
                         onSeeAllClick = {
                             when (section.title) {
                                 "Concerts" -> onConcertsOpen()
                                 "Stand-Up" -> onStandupOpen()
+                                "Kids" -> onKidsOpen()
+                                "Events" -> onEventsOpen()
                                 else -> onMoviesOpen()
                             }
                         }
@@ -92,6 +125,40 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun HomeSearchField(query: String, onQueryChange: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(999.dp)),
+            placeholder = { Text("Search movies, concerts, shows...") },
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.size(18.dp)
+                )
+            },
+            singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
+        )
     }
 }
 
@@ -138,7 +205,7 @@ private fun EmptyPosterBlock() {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-    }
+}
 
 @Composable
 private fun HomeSectionBlock(
@@ -146,6 +213,7 @@ private fun HomeSectionBlock(
     onMovieClick: (String) -> Unit,
     onConcertClick: (String) -> Unit,
     onStandupClick: (String) -> Unit,
+    onEventClick: (String) -> Unit,
     onSeeAllClick: () -> Unit
 ) {
     Column(modifier = Modifier.padding(bottom = 26.dp)) {
@@ -174,6 +242,7 @@ private fun HomeSectionBlock(
                 when (section.title) {
                     "Concerts" -> ConcertCard(poster, onConcertClick)
                     "Stand-Up" -> StandupCard(poster, onStandupClick)
+                    "Kids", "Events" -> StandupCard(poster, onEventClick)
                     else -> MovieCard(poster, onMovieClick)
                 }
             }

@@ -34,6 +34,8 @@ data class EventDetailDto(
     val city: String? = null,
     val average_rating: Double = 0.0,
     val is_active: Boolean = true,
+    val available_seats: Int? = null,
+    val price: Double? = null,
     val category: CategoryDto? = null,
     val sessions: List<EventSessionDto> = emptyList(),
     val venue: EventVenueDto? = null,

@@ -62,7 +62,15 @@ class EventRepository @Inject constructor(
             reviewCount = summary?.reviews_count?.toReviewCount() ?: "0 Reviews",
             tabs = listOf(MovieTab.Tickets, MovieTab.About, MovieTab.Comments),
             dates = detail.sessions.toDateChips(),
-            sessions = detail.sessions.map { session -> session.toMovieSession(seatsBySession[session.id].orEmpty()) },
+            sessions = detail.sessions.map { session ->
+                session.toMovieSession(
+                    eventType = detail.type,
+                    availableSeats = seatsBySession[session.id].orEmpty(),
+                    totalAvailableSeats = detail.available_seats,
+                    city = detail.city,
+                    venue = detail.venueLabel()
+                )
+            },
             description = detail.description.orEmpty(),
             cast = emptyList(),
             details = detail.toDetails(),
@@ -78,6 +86,7 @@ class EventRepository @Inject constructor(
 
         EventDetailData(
             screenTitle = detail.type.toDisplayType(),
+            eventTypeCode = detail.type,
             badge = detail.type.toDisplayType().uppercase(Locale.ENGLISH),
             ageLabel = detail.city ?: "Event",
             title = detail.title,
@@ -86,7 +95,15 @@ class EventRepository @Inject constructor(
             description = detail.description.orEmpty(),
             confirmLabel = "Confirm Booking",
             dates = detail.sessions.toDateChips(),
-            sessions = detail.sessions.map { session -> session.toMovieSession(seatsBySession[session.id].orEmpty()) },
+            sessions = detail.sessions.map { session ->
+                session.toMovieSession(
+                    eventType = detail.type,
+                    availableSeats = seatsBySession[session.id].orEmpty(),
+                    totalAvailableSeats = detail.available_seats,
+                    city = detail.city,
+                    venue = detail.venueLabel()
+                )
+            },
             theme = detail.type.toPosterTheme()
         )
     }
@@ -126,6 +143,11 @@ class EventRepository @Inject constructor(
                 .joinToString(" - "),
             meta = when {
                 event.type == "cinema" -> event.average_rating.formatRating()
+                event.type == "kids" || event.type == "events" -> {
+                    event.price?.formatPrice()
+                        ?: event.available_seats?.let { "$it tickets" }
+                        ?: event.next_session_at?.toDateTime()?.format(cardDateFormatter).orEmpty()
+                }
                 event.available_seats != null -> "${event.available_seats} seats"
                 event.min_price != null -> "from ${event.min_price.formatPrice()}"
                 event.price != null -> event.price.formatPrice()
@@ -150,21 +172,39 @@ class EventRepository @Inject constructor(
         return listOfNotNull(venueName, address, city).distinct().joinToString(", ").ifBlank { city.orEmpty() }
     }
 
-    private fun EventSessionDto.toMovieSession(availableSeats: List<EventSeatDto>): MovieSession {
+    private fun EventSessionDto.toMovieSession(
+        eventType: String,
+        availableSeats: List<EventSeatDto>,
+        totalAvailableSeats: Int?,
+        city: String?,
+        venue: String
+    ): MovieSession {
         val startsAt = starts_at.toDateTime()
-        val seatsCount = availableSeats.size.takeIf { it > 0 } ?: seats.count { it.is_available }
-        val status = if (seatsCount > 0) "$seatsCount Seats Left" else "Sold out"
-        val hall = hall_name ?: cinema_name ?: "General admission"
-        val price = availableSeats.minOfOrNull { it.price ?: base_price ?: 0.0 }
-            ?.takeIf { it > 0.0 }
-            ?: base_price
+        val seatsCount = availableSeats.count { it.is_available }.takeIf { availableSeats.isNotEmpty() }
+            ?: seats.count { it.is_available }
+        val status = when {
+            eventType.hasSeatMap() -> if (seatsCount > 0) "$seatsCount Seats Left" else "Sold out"
+            totalAvailableSeats != null -> "$totalAvailableSeats Tickets Left"
+            city != null -> city
+            else -> "Tickets available"
+        }
+        val hall = when {
+            eventType.hasSeatMap() -> hall_name ?: cinema_name ?: "General admission"
+            venue.isNotBlank() -> venue
+            else -> hall_name ?: cinema_name ?: "General admission"
+        }
+        val price = when {
+            eventType.usesSeatPrice() -> availableSeats.priceRangeLabel() ?: base_price?.formatPrice()
+            else -> base_price?.formatPrice()
+        }
 
         return MovieSession(
             time = startsAt?.format(timeFormatter) ?: starts_at,
             hall = hall,
             status = status,
-            price = price?.formatPrice() ?: "Free",
-            soldOut = seatsCount == 0
+            price = price ?: "Free",
+            soldOut = eventType.hasSeatMap() && seatsCount == 0,
+            id = id
         )
     }
 
@@ -208,6 +248,18 @@ class EventRepository @Inject constructor(
         else -> PosterTheme.GoldenStage
     }
 
+    private fun String.hasSeatMap(): Boolean = this == "cinema" || this == "concerts" || this == "stand-up"
+
+    private fun String.usesSeatPrice(): Boolean = this == "concerts" || this == "stand-up"
+
+    private fun List<EventSeatDto>.priceRangeLabel(): String? {
+        val prices = mapNotNull { it.price }.filter { it > 0.0 }
+        if (prices.isEmpty()) return null
+        val min = prices.minOrNull() ?: return null
+        val max = prices.maxOrNull() ?: min
+        return if (min == max) min.formatPrice() else "${min.formatPrice()} - ${max.formatPrice()}"
+    }
+
     private fun Double.formatRating(): String = String.format(Locale.ENGLISH, "%.1f", this)
 
     private fun Double.formatPrice(): String {
@@ -245,7 +297,9 @@ class EventRepository @Inject constructor(
         val posterTypes = listOf(
             PosterSectionType("cinema", "Cinema"),
             PosterSectionType("concerts", "Concerts"),
-            PosterSectionType("stand-up", "Stand-Up")
+            PosterSectionType("stand-up", "Stand-Up"),
+            PosterSectionType("kids", "Kids"),
+            PosterSectionType("events", "Events")
         )
         val dayFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH)
         val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM", Locale.ENGLISH)

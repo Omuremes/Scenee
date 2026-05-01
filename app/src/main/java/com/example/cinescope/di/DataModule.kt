@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.cinescope.BuildConfig
 import com.example.cinescope.data.local.SessionManager
 import com.example.cinescope.data.remote.AuthApiService
+import com.example.cinescope.data.remote.BookingApiService
 import com.example.cinescope.data.remote.EventApiService
 import com.example.cinescope.data.remote.MovieApiService
 import com.example.cinescope.data.remote.SerialApiService
@@ -52,6 +53,12 @@ object DataModule {
     @Singleton
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookingApiService(retrofit: Retrofit): BookingApiService {
+        return retrofit.create(BookingApiService::class.java)
     }
 
     @Provides
