@@ -3,6 +3,7 @@ package com.example.cinescope.presentation.series
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cinescope.data.series.SeriesRepository
+import com.example.cinescope.presentation.models.SeriesPoster
 import com.example.cinescope.presentation.models.SeriesSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 sealed class SeriesUiState {
     data object Loading : SeriesUiState()
-    data class Success(val sections: List<SeriesSection>) : SeriesUiState()
+    data class Success(val sections: List<SeriesSection>, val query: String = "") : SeriesUiState()
     data class Error(val message: String) : SeriesUiState()
 }
 
@@ -28,14 +29,24 @@ class SeriesViewModel @Inject constructor(
         loadSeries()
     }
 
-    fun loadSeries() {
+    fun loadSeries(query: String = "") {
         viewModelScope.launch {
             _uiState.value = SeriesUiState.Loading
             try {
-                _uiState.value = SeriesUiState.Success(repository.getSeriesSections())
+                val sections = if (query.isBlank()) {
+                    repository.getSeriesSections()
+                } else {
+                    val results = repository.searchSerials(query = query)
+                    listOf(SeriesSection("Search Results", results))
+                }
+                _uiState.value = SeriesUiState.Success(sections, query)
             } catch (e: Exception) {
                 _uiState.value = SeriesUiState.Error(e.message ?: "Failed to load series")
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        loadSeries(query.trim())
     }
 }

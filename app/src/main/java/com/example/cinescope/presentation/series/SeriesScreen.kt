@@ -39,10 +39,17 @@ import com.example.cinescope.ui.theme.Crimson
 @Composable
 fun SeriesScreen(
     sections: List<SeriesSection>,
+    onSearchClick: () -> Unit,
     onSeriesClick: (String) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-        item { SearchRow("Search series, genres, or actors", true) }
+        item {
+            SearchRow(
+                placeholder = "Search series, genres, or actors",
+                withFilter = true,
+                onClick = onSearchClick
+            )
+        }
         items(sections) { section ->
             SeriesSectionBlock(section, onSeriesClick)
         }

@@ -36,6 +36,8 @@ import com.example.cinescope.presentation.profile.ProfileScreen
 import com.example.cinescope.presentation.series.SeriesErrorScreen
 import com.example.cinescope.presentation.series.SeriesLoadingScreen
 import com.example.cinescope.presentation.series.SeriesScreen
+import com.example.cinescope.presentation.series.SeriesSearchScreen
+import com.example.cinescope.presentation.series.SeriesSearchViewModel
 import com.example.cinescope.presentation.series.SeriesUiState
 import com.example.cinescope.presentation.series.SeriesViewModel
 import com.example.cinescope.presentation.tickets.TicketsScreen
@@ -56,6 +58,7 @@ sealed class AppRoute(val route: String) {
     data object Standup : AppRoute("standup")
     data object Kids : AppRoute("kids")
     data object Events : AppRoute("events")
+    data object SeriesSearch : AppRoute("series_search")
     data object MovieDetail : AppRoute("movie_detail/{movieId}") {
         fun createRoute(id: String) = "movie_detail/$id"
     }
@@ -139,6 +142,7 @@ fun CineScopeNavGraph(
                 is SeriesUiState.Success -> {
                     SeriesScreen(
                         sections = state.sections,
+                        onSearchClick = { navController.navigate(AppRoute.SeriesSearch.route) },
                         onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) }
                     )
                 }
@@ -217,6 +221,14 @@ fun CineScopeNavGraph(
                     onEventClick = { id -> navController.navigate(AppRoute.EventDetail.createRoute(id)) }
                 )
             }
+        }
+        composable(AppRoute.SeriesSearch.route) {
+            val seriesSearchViewModel: SeriesSearchViewModel = hiltViewModel()
+            SeriesSearchScreen(
+                onBack = { navController.popBackStack() },
+                onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) },
+                viewModel = seriesSearchViewModel
+            )
         }
         composable(AppRoute.Login.route) {
             AuthScreen(

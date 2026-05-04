@@ -449,7 +449,7 @@ private fun HeroTrailerBlock(trailerUrl: String?) {
                     PlayerView(viewContext).apply {
                         player = exoPlayer
                         useController = true
-                        setShowNextButton(false)
+                            setShowNextButton(false)
                         setShowPreviousButton(false)
                     }
                 },

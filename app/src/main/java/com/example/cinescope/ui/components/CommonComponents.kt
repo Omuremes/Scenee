@@ -94,7 +94,11 @@ fun PosterBox(
 }
 
 @Composable
-fun SearchRow(placeholder: String, withFilter: Boolean = false) {
+fun SearchRow(
+    placeholder: String,
+    withFilter: Boolean = false,
+    onClick: (() -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -108,6 +112,7 @@ fun SearchRow(placeholder: String, withFilter: Boolean = false) {
                 .clip(RoundedCornerShape(999.dp))
                 .background(Color.White)
                 .border(1.dp, Color(0xFFF1F1F1), RoundedCornerShape(999.dp))
+                .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
                 .padding(horizontal = 18.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

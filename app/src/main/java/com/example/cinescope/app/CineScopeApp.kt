@@ -128,6 +128,7 @@ private fun shouldShowBottomBar(currentRoute: String?): Boolean {
         currentRoute == AppRoute.Standup.route ||
         currentRoute == AppRoute.Kids.route ||
         currentRoute == AppRoute.Events.route ||
+        currentRoute == AppRoute.SeriesSearch.route ||
         currentRoute.startsWith("movie_detail") ||
         currentRoute.startsWith("concert_detail") ||
         currentRoute.startsWith("standup_detail") ||
@@ -141,6 +142,7 @@ private fun selectedBottomRoute(currentRoute: String?): String? = when {
     currentRoute == BottomNavRoute.Tickets.route -> BottomNavRoute.Tickets.route
     currentRoute == BottomNavRoute.Profile.route -> BottomNavRoute.Profile.route
     currentRoute == BottomNavRoute.Series.route ||
+        currentRoute == AppRoute.SeriesSearch.route ||
         currentRoute.startsWith("series_detail") ||
         currentRoute.startsWith("watch_series") -> BottomNavRoute.Series.route
     else -> BottomNavRoute.Home.route
@@ -167,6 +169,12 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController, u
             profileInitials = initials,
             onProfileClick = onProfileClick
         )
+        AppRoute.SeriesSearch.route -> CineScopeTopBar(
+            title = "Search series",
+            showBack = true,
+            centeredTitle = true,
+            onBackClick = { navController.popBackStack() }
+        )
         BottomNavRoute.Tickets.route -> CineScopeTopBar(title = "My tickets", centeredTitle = true)
         BottomNavRoute.Profile.route -> CineScopeTopBar(title = "Profile", centeredTitle = true)
         AppRoute.Movies.route -> CineScopeTopBar(title = "All Movies", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
@@ -174,7 +182,7 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController, u
         AppRoute.Standup.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Kids.route -> CineScopeTopBar(title = "Kids", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Events.route -> CineScopeTopBar(title = "Events", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
-        
+
         else -> {
             if (currentRoute?.startsWith("movie_detail") == true) {
                 CineScopeTopBar(title = "Cinema", showBack = true, onBackClick = { navController.popBackStack() })
