@@ -97,7 +97,8 @@ fun PosterBox(
 fun SearchRow(
     placeholder: String,
     withFilter: Boolean = false,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onFilterClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -134,7 +135,8 @@ fun SearchRow(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .then(if (onFilterClick != null) Modifier.clickable { onFilterClick() } else Modifier),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Outlined.Tune, contentDescription = null)

@@ -10,6 +10,7 @@ import com.example.cinescope.data.local.SessionManager
 import com.example.cinescope.presentation.models.EpisodeItem
 import com.example.cinescope.presentation.models.PosterTheme
 import com.example.cinescope.presentation.models.SeriesCastMember
+import com.example.cinescope.presentation.models.SeriesFilterCategory
 import com.example.cinescope.presentation.models.SeriesDetailData
 import com.example.cinescope.presentation.models.SeriesReviewItem
 import com.example.cinescope.presentation.models.SeriesPoster
@@ -93,6 +94,12 @@ class SeriesRepository @Inject constructor(
             title = dto.name,
             genre = dto.categories.joinToString(" - ") { it.name },
             rating = String.format("%.1f", dto.average_rating),
+            categories = dto.categories.map {
+                SeriesFilterCategory(
+                    id = it.id,
+                    name = it.name
+                )
+            },
             theme = PosterTheme.VioletPop
         )
     }

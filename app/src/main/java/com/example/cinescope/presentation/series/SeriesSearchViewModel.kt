@@ -33,6 +33,10 @@ class SeriesSearchViewModel @Inject constructor(
 
     fun onQueryChange(query: String) {
         _query.value = query
+        search(query = query)
+    }
+
+    private fun search(query: String) {
         searchJob?.cancel()
 
         val trimmed = query.trim()

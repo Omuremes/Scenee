@@ -98,6 +98,11 @@ data class SeriesCastMember(
     val photoUrl: String? = null
 )
 
+data class SeriesFilterCategory(
+    val id: String,
+    val name: String
+)
+
 data class SeriesReviewItem(
     val id: String,
     val userId: String,
@@ -163,6 +168,7 @@ data class SeriesPoster(
     val title: String,
     val genre: String,
     val rating: String,
+    val categories: List<SeriesFilterCategory> = emptyList(),
     val theme: PosterTheme
 )
 
