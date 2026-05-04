@@ -318,13 +318,7 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
         item {
-            Box(modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) {
-                PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
-                Box(modifier = Modifier.align(Alignment.Center).size(78.dp).clip(CircleShape).background(Crimson.copy(alpha = 0.92f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
-                }
-                Text("Trailer • 2:14", modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp).clip(RoundedCornerShape(999.dp)).background(Color.Black.copy(alpha = 0.4f)).padding(horizontal = 12.dp, vertical = 6.dp), color = Color.White, style = MaterialTheme.typography.labelSmall)
-            }
+            HeroTrailerBlock(trailerUrl = data.trailerUrl)
         }
         item {
             Card(modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-24).dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
@@ -381,6 +375,75 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
         item { RatingSection(data) }
         item { CastSection(data.cast) }
         item { ReviewsSection(data.reviews) }
+    }
+}
+
+@Composable
+private fun HeroTrailerBlock(trailerUrl: String?) {
+    val context = LocalContext.current
+    var showTrailer by remember(trailerUrl) { mutableStateOf(false) }
+    val canPlayTrailer = !trailerUrl.isNullOrBlank()
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .clickable(enabled = canPlayTrailer && !showTrailer) { showTrailer = true }
+    ) {
+        if (showTrailer && canPlayTrailer) {
+            val exoPlayer = remember(trailerUrl) {
+                ExoPlayer.Builder(context).build().apply {
+                    setMediaItem(MediaItem.fromUri(trailerUrl!!))
+                    prepare()
+                    playWhenReady = true
+                }
+            }
+
+            DisposableEffect(exoPlayer) {
+                onDispose {
+                    exoPlayer.release()
+                }
+            }
+
+            AndroidView(
+                factory = { viewContext ->
+                    PlayerView(viewContext).apply {
+                        player = exoPlayer
+                        useController = true
+                        setShowNextButton(false)
+                        setShowPreviousButton(false)
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { playerView ->
+                    playerView.player = exoPlayer
+                }
+            )
+        } else {
+            PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(78.dp)
+                    .clip(CircleShape)
+                    .background(if (canPlayTrailer) Crimson.copy(alpha = 0.92f) else Color.Gray.copy(alpha = 0.7f))
+                    .clickable(enabled = canPlayTrailer) { showTrailer = true },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
+            }
+            Text(
+                if (canPlayTrailer) "Trailer" else "Trailer unavailable",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(18.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                color = Color.White,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
     }
 }
 

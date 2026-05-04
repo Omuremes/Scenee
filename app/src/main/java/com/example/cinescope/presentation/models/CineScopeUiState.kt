@@ -113,6 +113,7 @@ data class SeriesDetailData(
     val reviews: List<String>,
     val seasons: List<String>,
     val episodes: List<EpisodeItem>,
+    val trailerUrl: String? = null,
     val tabs: List<String> = emptyList(),
     val meta: List<String> = emptyList()
 )

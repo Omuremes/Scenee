@@ -77,6 +77,7 @@ class SeriesRepository @Inject constructor(
             reviews = emptyList(),
             seasons = sortedSeasons.map { it.title ?: "Season ${it.season_number}" },
             episodes = episodes,
+            trailerUrl = trailer_url,
             tabs = listOf("Seasons", "Episodes", "Reviews"),
             meta = listOf(created_at.take(4), "${sortedSeasons.size} Seasons", "Series")
         )
