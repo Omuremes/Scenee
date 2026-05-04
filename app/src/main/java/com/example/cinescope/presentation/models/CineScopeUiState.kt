@@ -92,6 +92,11 @@ data class MovieDetailData(
     val theme: PosterTheme = PosterTheme.VioletPop
 )
 
+data class SeriesCastMember(
+    val name: String,
+    val photoUrl: String? = null
+)
+
 data class EpisodeItem(
     val id: String,
     val badge: String,
@@ -109,7 +114,7 @@ data class SeriesDetailData(
     val storyline: String,
     val rating: String,
     val reviewCount: String,
-    val cast: List<String>,
+    val cast: List<SeriesCastMember>,
     val reviews: List<String>,
     val seasons: List<String>,
     val episodes: List<EpisodeItem>,

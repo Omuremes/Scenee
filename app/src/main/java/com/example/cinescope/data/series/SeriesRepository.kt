@@ -6,6 +6,7 @@ import com.example.cinescope.data.remote.dto.SerialDto
 import com.example.cinescope.data.remote.dto.SerialEpisodeDto
 import com.example.cinescope.presentation.models.EpisodeItem
 import com.example.cinescope.presentation.models.PosterTheme
+import com.example.cinescope.presentation.models.SeriesCastMember
 import com.example.cinescope.presentation.models.SeriesDetailData
 import com.example.cinescope.presentation.models.SeriesPoster
 import com.example.cinescope.presentation.models.SeriesSection
@@ -73,7 +74,12 @@ class SeriesRepository @Inject constructor(
             storyline = description,
             rating = String.format("%.1f", average_rating),
             reviewCount = "0 Reviews",
-            cast = actors.map { it.full_name },
+            cast = actors.map { actor ->
+                SeriesCastMember(
+                    name = actor.full_name,
+                    photoUrl = actor.photo_url
+                )
+            },
             reviews = emptyList(),
             seasons = sortedSeasons.map { it.title ?: "Season ${it.season_number}" },
             episodes = episodes,

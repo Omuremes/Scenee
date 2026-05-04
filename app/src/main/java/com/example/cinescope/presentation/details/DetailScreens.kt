@@ -60,6 +60,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +75,8 @@ import androidx.media3.ui.PlayerView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
@@ -814,7 +819,7 @@ private fun MovieCommentsTab(data: MovieDetailData) {
     }
 }
 
-@Composable private fun CastSection(cast: List<String>) {
+@Composable private fun CastSection(cast: List<SeriesCastMember>) {
     Column(modifier = Modifier.padding(vertical = 20.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Main Cast", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -822,14 +827,58 @@ private fun MovieCommentsTab(data: MovieDetailData) {
         }
         Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            cast.forEach {
+            cast.forEach { actor ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(modifier = Modifier.size(96.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant))
+                    ActorAvatar(photoUrl = actor.photoUrl, name = actor.name)
                     Spacer(Modifier.height(10.dp))
-                    Text(it, modifier = Modifier.width(80.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Text(actor.name, modifier = Modifier.width(80.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ActorAvatar(photoUrl: String?, name: String) {
+    val fallbackColor = MaterialTheme.colorScheme.surfaceVariant
+    val bitmapState = androidx.compose.runtime.produceState<ImageBitmap?>(initialValue = null, key1 = photoUrl) {
+        value = loadBitmapFromUrl(photoUrl)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(96.dp)
+            .clip(CircleShape)
+            .background(fallbackColor),
+        contentAlignment = Alignment.Center
+    ) {
+        val bitmap = bitmapState.value
+        if (bitmap != null) {
+            androidx.compose.foundation.Image(
+                bitmap = bitmap,
+                contentDescription = name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = name.take(1).uppercase(),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+private suspend fun loadBitmapFromUrl(photoUrl: String?): ImageBitmap? {
+    if (photoUrl.isNullOrBlank()) return null
+    return withContext(Dispatchers.IO) {
+        runCatching {
+            java.net.URL(photoUrl).openStream().use { input ->
+                android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
+            }
+        }.getOrNull()
     }
 }
 
