@@ -81,6 +81,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.media3.common.util.UnstableApi
@@ -349,7 +350,7 @@ fun SeriesDetailScreen(
             HeroTrailerBlock(trailerUrl = data.trailerUrl)
         }
         item {
-            Card(modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-24).dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
+            Card(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
                 Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(data.title, style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(10.dp))
@@ -420,21 +421,21 @@ fun SeriesDetailScreen(
 @Composable
 private fun HeroTrailerBlock(trailerUrl: String?) {
     val context = LocalContext.current
-    var showTrailer by remember(trailerUrl) { mutableStateOf(false) }
     val canPlayTrailer = !trailerUrl.isNullOrBlank()
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
-            .clickable(enabled = canPlayTrailer && !showTrailer) { showTrailer = true }
     ) {
-        if (showTrailer && canPlayTrailer) {
+        if (canPlayTrailer) {
             val exoPlayer = remember(trailerUrl) {
                 ExoPlayer.Builder(context).build().apply {
                     setMediaItem(MediaItem.fromUri(trailerUrl!!))
+                    repeatMode = Player.REPEAT_MODE_ONE
                     prepare()
                     playWhenReady = true
+                    volume = 0f
                 }
             }
 
@@ -449,7 +450,7 @@ private fun HeroTrailerBlock(trailerUrl: String?) {
                     PlayerView(viewContext).apply {
                         player = exoPlayer
                         useController = true
-                            setShowNextButton(false)
+                        setShowNextButton(false)
                         setShowPreviousButton(false)
                     }
                 },
@@ -460,19 +461,8 @@ private fun HeroTrailerBlock(trailerUrl: String?) {
             )
         } else {
             PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(78.dp)
-                    .clip(CircleShape)
-                    .background(if (canPlayTrailer) Crimson.copy(alpha = 0.92f) else Color.Gray.copy(alpha = 0.7f))
-                    .clickable(enabled = canPlayTrailer) { showTrailer = true },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
-            }
             Text(
-                if (canPlayTrailer) "Trailer" else "Trailer unavailable",
+                "Trailer unavailable",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(18.dp)
