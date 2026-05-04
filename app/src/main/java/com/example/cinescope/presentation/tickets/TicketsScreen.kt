@@ -23,8 +23,10 @@ import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.ConfirmationNumber
 import androidx.compose.material.icons.outlined.LocalActivity
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,17 +50,22 @@ import com.example.cinescope.ui.theme.Crimson
 
 @Composable
 fun TicketsScreen(
-    tabs: List<String>, 
+    tabs: List<String>,
     tickets: List<TicketSummary>,
     isAuthenticated: Boolean,
-    onLoginClick: () -> Unit
+    isLoading: Boolean,
+    errorMessage: String?,
+    cancellingBookingId: String?,
+    onLoginClick: () -> Unit,
+    onRetry: () -> Unit,
+    onCancelTicket: (String) -> Unit
 ) {
     if (!isAuthenticated) {
         GuestTicketsContent(onLoginClick)
         return
     }
 
-    var selectedTab by remember { mutableStateOf(tabs.first()) }
+    var selectedTab by remember(tabs) { mutableStateOf(tabs.firstOrNull() ?: "ALL") }
     var selectedTicketTitle by remember { mutableStateOf<String?>(null) }
     val filteredTickets = remember(selectedTab, tickets) {
         if (selectedTab.equals("ALL", ignoreCase = true)) {
@@ -83,6 +90,11 @@ fun TicketsScreen(
                 Text("Ready for your next experience?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
+        when {
+            isLoading -> item { TicketsLoadingBlock() }
+            errorMessage != null -> item { TicketsErrorBlock(message = errorMessage, onRetry = onRetry) }
+            filteredTickets.isEmpty() -> item { EmptyTicketsBlock() }
+        }
         item {
             Row(
                 modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(999.dp)).padding(4.dp),
@@ -99,16 +111,47 @@ fun TicketsScreen(
                 }
             }
         }
-        items(filteredTickets, key = { it.title }) { ticket ->
+        items(filteredTickets, key = { it.id.ifBlank { it.title } }) { ticket ->
             val selected = ticket.title == selectedTicketTitle
             TicketCard(
                 ticket = ticket,
                 selected = selected,
+                isCancelling = cancellingBookingId == ticket.id,
                 onSelect = { selectedTicketTitle = ticket.title },
                 onViewTicket = { selectedTicketTitle = ticket.title },
-                onQrClick = { selectedTicketTitle = ticket.title }
+                onQrClick = { selectedTicketTitle = ticket.title },
+                onCancel = { onCancelTicket(ticket.id) }
             )
         }
+    }
+}
+
+@Composable
+private fun TicketsLoadingBlock() {
+    Box(modifier = Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = Crimson)
+    }
+}
+
+@Composable
+private fun TicketsErrorBlock(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Could not load tickets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Button(onClick = onRetry) {
+            Text("Retry")
+        }
+    }
+}
+
+@Composable
+private fun EmptyTicketsBlock() {
+    Box(modifier = Modifier.fillMaxWidth().height(160.dp), contentAlignment = Alignment.Center) {
+        Text("No bookings yet", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -158,9 +201,11 @@ private fun GuestTicketsContent(onLoginClick: () -> Unit) {
 private fun TicketCard(
     ticket: TicketSummary,
     selected: Boolean,
+    isCancelling: Boolean,
     onSelect: () -> Unit,
     onViewTicket: () -> Unit,
-    onQrClick: () -> Unit
+    onQrClick: () -> Unit,
+    onCancel: () -> Unit
 ) {
     val borderColor = if (selected) Crimson else Color(0xFFE5E7EB)
     val borderWidth = if (selected) 2.dp else 1.dp
@@ -184,6 +229,17 @@ private fun TicketCard(
                     Text(ticket.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     MetaRow(Icons.Outlined.CalendarToday, ticket.dateTime)
                     MetaRow(Icons.Outlined.Place, ticket.venue)
+                    if (ticket.bookingReference.isNotBlank()) {
+                        MetaRow(Icons.Outlined.ConfirmationNumber, ticket.bookingReference)
+                    }
+                    if (ticket.seatLabel.isNotBlank()) {
+                        MetaRow(Icons.Outlined.LocalActivity, "Seat ${ticket.seatLabel}")
+                    }
+                    Text(
+                        "${ticket.seatsCount} seat(s) • ${ticket.priceRange.ifBlank { ticket.totalPrice }} • ${ticket.status.uppercase()}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -207,6 +263,19 @@ private fun TicketCard(
                     ) {
                         Icon(Icons.Outlined.ConfirmationNumber, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f), modifier = Modifier.size(18.dp))
                     }
+                }
+                if (!ticket.status.equals("cancelled", ignoreCase = true)) {
+                    Text(
+                        if (isCancelling) "Cancelling..." else "Cancel booking",
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(Color(0xFFFFF1F2))
+                            .clickable(enabled = !isCancelling) { onCancel() }
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        color = Crimson,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 
 data class CineScopeUiState(
     val isAuthenticated: Boolean = false,
+    val homeLoading: Boolean = false,
+    val homeErrorMessage: String? = null,
     val homeSections: List<HomeSection> = emptyList(),
     val categories: List<HomeCategory> = emptyList(),
     val seriesSections: List<SeriesSection> = emptyList(),
@@ -52,13 +54,15 @@ data class MovieSession(
     val status: String,
     val price: String,
     val selected: Boolean = false,
-    val soldOut: Boolean = false
+    val soldOut: Boolean = false,
+    val id: String? = null
 )
 
 data class ReviewItem(val label: String, val progress: Float)
 
 data class EventDetailData(
     val screenTitle: String,
+    val eventTypeCode: String = "",
     val badge: String,
     val ageLabel: String,
     val title: String,
@@ -76,6 +80,7 @@ data class MovieDetailData(
     val genres: List<String>,
     val duration: String,
     val rating: String,
+    val reviewCount: String = "0 Reviews",
     val tabs: List<MovieTab>,
     val dates: List<MovieDateChip>,
     val sessions: List<MovieSession>,
@@ -83,6 +88,7 @@ data class MovieDetailData(
     val cast: List<String>,
     val details: List<Pair<String, String>>,
     val reviews: List<ReviewItem>,
+    val comments: List<String> = emptyList(),
     val theme: PosterTheme = PosterTheme.VioletPop
 )
 
@@ -145,5 +151,43 @@ data class TicketSummary(
     val dateTime: String,
     val venue: String,
     val accent: Color,
-    val posterTheme: PosterTheme
+    val posterTheme: PosterTheme,
+    val id: String = "",
+    val bookingReference: String = "",
+    val status: String = "",
+    val seatsCount: Int = 1,
+    val totalPrice: String = "",
+    val priceRange: String = "",
+    val seatLabel: String = ""
+)
+
+data class BookingSelectionData(
+    val eventId: String,
+    val title: String,
+    val eventTypeCode: String,
+    val eventType: String,
+    val venue: String,
+    val availableSeats: Int? = null,
+    val sessions: List<BookingSessionOption>,
+    val seats: List<BookingSeatOption>,
+    val selectedSessionId: String?,
+    val theme: PosterTheme
+)
+
+data class BookingSessionOption(
+    val id: String,
+    val startsAt: String,
+    val hall: String,
+    val price: String,
+    val basePrice: Double? = null,
+    val selected: Boolean = false
+)
+
+data class BookingSeatOption(
+    val id: String,
+    val label: String,
+    val zone: String,
+    val price: String,
+    val rawPrice: Double? = null,
+    val available: Boolean
 )

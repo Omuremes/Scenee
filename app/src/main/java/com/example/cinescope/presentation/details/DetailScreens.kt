@@ -61,8 +61,9 @@ import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
 
 @Composable
-fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
+fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit, onBook: (String?) -> Unit) {
     var selectedTab by remember { mutableStateOf(MovieTab.Tickets) }
+    var selectedSessionIndex by remember(data.sessions) { mutableStateOf<Int?>(null) }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
         item { HeroMediaBlock() }
         item {
@@ -112,7 +113,14 @@ fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
         }
         when (selectedTab) {
             MovieTab.Tickets -> {
-                item { MovieTicketsTab(data) }
+                item {
+                    MovieTicketsTab(
+                        data = data,
+                        selectedSessionIndex = selectedSessionIndex,
+                        onSessionSelect = { selectedSessionIndex = it },
+                        onBook = { onBook(selectedSessionIndex?.let { data.sessions[it].id }) }
+                    )
+                }
             }
             MovieTab.About -> {
                 item { MovieAboutTab(data) }
@@ -125,22 +133,25 @@ fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit) {
 }
 
 @Composable
-fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
+fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit, onBook: (String?) -> Unit) {
     var selectedTab by remember { mutableStateOf(EventTab.Tickets) }
+    val isGeneralAdmission = data.eventTypeCode == "kids" || data.eventTypeCode == "events"
     val initialDateIndex = remember(data.dates) {
         val selected = data.dates.indexOfFirst { it.selected }
         if (selected >= 0) selected else 0
     }
     var selectedDateIndex by remember(data.dates) { mutableStateOf(initialDateIndex) }
-    var selectedFilter by remember { mutableStateOf(EventSessionFilter.Daily) }
-    var selectedSessionIndex by remember { mutableStateOf<Int?>(null) }
+    var selectedFilter by remember { mutableStateOf(EventSessionFilter.All) }
+    var selectedSessionIndex by remember(data.sessions, isGeneralAdmission) {
+        mutableStateOf(if (isGeneralAdmission && data.sessions.isNotEmpty()) 0 else null)
+    }
 
     val dates = data.dates.mapIndexed { index, chip ->
         chip.copy(selected = index == selectedDateIndex)
     }
     val sessions = data.sessions.mapIndexed { index, session ->
         SessionDisplay(index, session.copy(selected = index == selectedSessionIndex))
-    }.filter { sessionMatchesFilter(it.session, selectedFilter) }
+    }.filter { isGeneralAdmission || sessionMatchesFilter(it.session, selectedFilter) }
     val isConfirmEnabled = selectedSessionIndex != null
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -220,6 +231,7 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
                         dates = dates,
                         selectedFilter = selectedFilter,
                         sessions = sessions,
+                        showFilters = !isGeneralAdmission,
                         onDateSelect = { selectedDateIndex = it },
                         onFilterSelect = {
                             selectedFilter = it
@@ -241,7 +253,9 @@ fun EventDetailScreen(data: EventDetailData, onBack: () -> Unit) {
                 .padding(horizontal = 24.dp, vertical = 28.dp)
                 .clip(RoundedCornerShape(999.dp))
                 .background(if (isConfirmEnabled) Crimson else Crimson.copy(alpha = 0.5f))
-                .clickable(enabled = isConfirmEnabled) { }
+                .clickable(enabled = isConfirmEnabled) {
+                    onBook(selectedSessionIndex?.let { data.sessions[it].id })
+                }
                 .padding(vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -374,7 +388,12 @@ fun WatchSeriesScreen(data: SeriesDetailData, onBack: () -> Unit) {
 }
 
 @Composable
-private fun MovieTicketsTab(data: MovieDetailData) {
+private fun MovieTicketsTab(
+    data: MovieDetailData,
+    selectedSessionIndex: Int?,
+    onSessionSelect: (Int) -> Unit,
+    onBook: () -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         Column {
             Text("Select Date", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
@@ -397,11 +416,20 @@ private fun MovieTicketsTab(data: MovieDetailData) {
             FilterPill("Evening", false) { }
             FilterPill("All", false) { }
         }
-        data.sessions.forEach { session ->
-            SessionCard(session) { }
+        data.sessions.forEachIndexed { index, session ->
+            SessionCard(session.copy(selected = index == selectedSessionIndex)) { onSessionSelect(index) }
             Spacer(Modifier.height(12.dp))
         }
-        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(999.dp)).background(Crimson).padding(vertical = 20.dp), contentAlignment = Alignment.Center) {
+        val enabled = selectedSessionIndex != null
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(999.dp))
+                .background(if (enabled) Crimson else Crimson.copy(alpha = 0.5f))
+                .clickable(enabled = enabled) { onBook() }
+                .padding(vertical = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Text("CONFIRM BOOKING", color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
         }
     }
@@ -412,6 +440,7 @@ private fun EventTicketsTab(
     dates: List<MovieDateChip>,
     selectedFilter: EventSessionFilter,
     sessions: List<SessionDisplay>,
+    showFilters: Boolean,
     onDateSelect: (Int) -> Unit,
     onFilterSelect: (EventSessionFilter) -> Unit,
     onSessionSelect: (Int) -> Unit
@@ -437,14 +466,24 @@ private fun EventTicketsTab(
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterPill("Daily", selectedFilter == EventSessionFilter.Daily) { onFilterSelect(EventSessionFilter.Daily) }
-            FilterPill("Evening", selectedFilter == EventSessionFilter.Evening) { onFilterSelect(EventSessionFilter.Evening) }
-            FilterPill("All", selectedFilter == EventSessionFilter.All) { onFilterSelect(EventSessionFilter.All) }
+        if (showFilters) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterPill("Daily", selectedFilter == EventSessionFilter.Daily) { onFilterSelect(EventSessionFilter.Daily) }
+                FilterPill("Evening", selectedFilter == EventSessionFilter.Evening) { onFilterSelect(EventSessionFilter.Evening) }
+                FilterPill("All", selectedFilter == EventSessionFilter.All) { onFilterSelect(EventSessionFilter.All) }
+            }
         }
-        sessions.forEach { session ->
-            SessionCard(session.session) { onSessionSelect(session.index) }
-            Spacer(Modifier.height(12.dp))
+        if (sessions.isEmpty()) {
+            Text(
+                "No sessions available",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            sessions.forEach { session ->
+                SessionCard(session.session) { onSessionSelect(session.index) }
+                Spacer(Modifier.height(12.dp))
+            }
         }
     }
 }
@@ -504,7 +543,7 @@ private fun MovieCommentsTab(data: MovieDetailData) {
                     Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFEAB308).copy(alpha = 0.5f))
                 }
                 Spacer(Modifier.height(6.dp))
-                Text("2.4k Reviews", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(data.reviewCount, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(16.dp))
                 data.reviews.forEach { review ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -521,6 +560,25 @@ private fun MovieCommentsTab(data: MovieDetailData) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("User Reviews", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
             Text("Newest", color = Crimson, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        }
+        if (data.comments.isNotEmpty()) {
+            Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                data.comments.forEach { comment ->
+                    Card(
+                        modifier = Modifier.width(300.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(
+                            comment,
+                            modifier = Modifier.padding(18.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
         }
     }
 }

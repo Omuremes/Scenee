@@ -26,9 +26,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.cinescope.data.CineScopeRepository
+import com.example.cinescope.data.auth.AuthRepository
+import com.example.cinescope.data.home.HomeRepository
+import com.example.cinescope.data.profile.ProfileRepository
+import com.example.cinescope.data.tickets.TicketsRepository
 import com.example.cinescope.presentation.models.CineScopeUiState
-import com.example.cinescope.presentation.models.ProfileSummary
 import com.example.cinescope.ui.components.CineScopeTopBar
 import com.example.cinescope.ui.navigation.AppRoute
 import com.example.cinescope.ui.navigation.BottomNavRoute
@@ -42,62 +44,49 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CineScopeViewModel @Inject constructor(
-    private val repository: CineScopeRepository
+    authRepository: AuthRepository,
+    private val profileRepository: ProfileRepository,
+    private val homeRepository: HomeRepository,
+    private val ticketsRepository: TicketsRepository
 ) : ViewModel() {
 
-    private val authFlow = repository.getAuthToken()
-    private val refreshTrigger = MutableStateFlow(Unit)
+    private val authFlow = authRepository.getAuthToken()
+    private val refreshTrigger = MutableStateFlow(0)
 
     val uiState: StateFlow<CineScopeUiState> = combine(
         authFlow,
         refreshTrigger
-    ) { token: String?, _: Unit ->
-        val popular = try {
-            repository.getPopularMovies().map { repository.mapToSeriesPoster(it) }
-        } catch (e: Exception) {
-            emptyList()
-        }
-        val new = try {
-            repository.getNewMovies().map { repository.mapToSeriesPoster(it) }
-        } catch (e: Exception) {
-            emptyList()
-        }
-
+    ) { token: String?, _: Int ->
+        val homeResult = runCatching { homeRepository.getHomeSections() }
         val profileSummary = if (token != null) {
             try {
-                val user = repository.getMe()
-                val initials = if (!user.username.isNullOrBlank()) {
-                    user.username.split(" ")
-                        .filter { it.isNotEmpty() }
-                        .take(2)
-                        .joinToString("") { it.take(1).uppercase() }
-                } else if (user.email.isNotEmpty()) {
-                    user.email.take(1).uppercase()
-                } else ""
-                
-                ProfileSummary(
-                    name = user.username ?: user.email,
-                    email = user.email,
-                    initials = initials
-                )
+                profileRepository.getProfileSummary()
             } catch (e: Exception) {
                 null
             }
         } else null
-        
-        repository.loadInitialState(
+
+        CineScopeUiState(
             isAuthenticated = token != null,
-            popularSeries = popular,
-            newSeries = new
-        ).copy(profileSummary = profileSummary)
+            homeLoading = false,
+            homeErrorMessage = homeResult.exceptionOrNull()?.message,
+            homeSections = homeResult.getOrDefault(emptyList()),
+            categories = homeRepository.getCategories(),
+            ticketTabs = ticketsRepository.getTicketTabs(),
+            profileSummary = profileSummary
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = repository.loadInitialState(isAuthenticated = false)
+        initialValue = CineScopeUiState(
+            homeLoading = true,
+            categories = homeRepository.getCategories(),
+            ticketTabs = ticketsRepository.getTicketTabs()
+        )
     )
     
     fun refresh() {
-        refreshTrigger.value = Unit
+        refreshTrigger.value += 1
     }
 }
 
@@ -124,6 +113,7 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
             navController = navController,
             appState = uiState,
             startDestination = BottomNavRoute.Home.route,
+            onRetry = viewModel::refresh,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -135,9 +125,12 @@ private fun shouldShowBottomBar(currentRoute: String?): Boolean {
         currentRoute == AppRoute.Movies.route ||
         currentRoute == AppRoute.Concerts.route ||
         currentRoute == AppRoute.Standup.route ||
+        currentRoute == AppRoute.Kids.route ||
+        currentRoute == AppRoute.Events.route ||
         currentRoute.startsWith("movie_detail") ||
         currentRoute.startsWith("concert_detail") ||
         currentRoute.startsWith("standup_detail") ||
+        currentRoute.startsWith("event_detail") ||
         currentRoute.startsWith("series_detail") ||
         currentRoute.startsWith("watch_series")
 }
@@ -177,6 +170,8 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController, u
         AppRoute.Movies.route -> CineScopeTopBar(title = "All Movies", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Concerts.route -> CineScopeTopBar(title = "All Concerts", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         AppRoute.Standup.route -> CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+        AppRoute.Kids.route -> CineScopeTopBar(title = "Kids", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+        AppRoute.Events.route -> CineScopeTopBar(title = "Events", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
         
         else -> {
             if (currentRoute?.startsWith("movie_detail") == true) {
@@ -185,10 +180,14 @@ private fun AppHeader(currentRoute: String?, navController: NavHostController, u
                 CineScopeTopBar(title = "Concert", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("standup_detail") == true) {
                 CineScopeTopBar(title = "Stand-Up", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("event_detail") == true) {
+                CineScopeTopBar(title = "Event", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("series_detail") == true) {
                 CineScopeTopBar(title = "Series", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             } else if (currentRoute?.startsWith("watch_series") == true) {
                 CineScopeTopBar(title = "Episodes", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
+            } else if (currentRoute?.startsWith("book_seats") == true) {
+                CineScopeTopBar(title = "Select seats", showBack = true, centeredTitle = true, onBackClick = { navController.popBackStack() })
             }
         }
     }

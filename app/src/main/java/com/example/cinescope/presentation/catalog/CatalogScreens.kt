@@ -28,7 +28,14 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,11 +52,25 @@ fun MoviesCatalogScreen(
     items: List<MediaPoster>,
     onMovieClick: (String) -> Unit
 ) {
+    var query by remember { mutableStateOf("") }
+    var selectedChipIndex by remember { mutableIntStateOf(0) }
+    var showFilters by remember { mutableStateOf(false) }
+    val chips = listOf("All", "Now Showing", "Coming Soon", "IMAX", "Premiere")
+    val filteredItems = remember(items, query, selectedChipIndex) {
+        items.filterCatalog(query, chips[selectedChipIndex])
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         CatalogSearchSection(
             title = "Browse Movies",
             placeholder = "Search movies or cinemas",
-            chips = listOf("Now Showing", "Coming Soon", "IMAX", "Premiere")
+            query = query,
+            onQueryChange = { query = it },
+            chips = chips,
+            selectedChipIndex = selectedChipIndex,
+            onChipClick = { selectedChipIndex = it },
+            showFilters = showFilters,
+            onFilterClick = { showFilters = !showFilters }
         )
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -58,8 +79,14 @@ fun MoviesCatalogScreen(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
-            items(items) { item ->
-                MovieGridCard(item = item, onClick = { onMovieClick(item.id) })
+            if (filteredItems.isEmpty()) {
+                item {
+                    EmptyCatalogBlock()
+                }
+            } else {
+                items(filteredItems) { item ->
+                    MovieGridCard(item = item, onClick = { onMovieClick(item.id) })
+                }
             }
         }
     }
@@ -73,7 +100,7 @@ fun ConcertsCatalogScreen(
     VerticalCatalogScreen(
         title = "Browse Concerts",
         placeholder = "Search concerts or artists",
-        chips = listOf("All Concerts", "Now Showing", "Rock", "Electronic"),
+        chips = listOf("All", "Rock", "Electronic", "Jazz", "Pop"),
         items = items,
         onClick = onConcertClick
     )
@@ -87,9 +114,37 @@ fun StandupCatalogScreen(
     VerticalCatalogScreen(
         title = "Browse Stand-Up",
         placeholder = "Search comedians or specials",
-        chips = listOf("All Specials", "Recently Added", "Observational", "Political"),
+        chips = listOf("All", "Observational", "Political", "Storytelling"),
         items = items,
         onClick = onStandupClick
+    )
+}
+
+@Composable
+fun KidsCatalogScreen(
+    items: List<MediaPoster>,
+    onEventClick: (String) -> Unit
+) {
+    VerticalCatalogScreen(
+        title = "Browse Kids",
+        placeholder = "Search kids events",
+        chips = listOf("All", "Show", "Family", "Workshop"),
+        items = items,
+        onClick = onEventClick
+    )
+}
+
+@Composable
+fun EventsCatalogScreen(
+    items: List<MediaPoster>,
+    onEventClick: (String) -> Unit
+) {
+    VerticalCatalogScreen(
+        title = "Browse Events",
+        placeholder = "Search events",
+        chips = listOf("All", "Festival", "Expo", "Meetup"),
+        items = items,
+        onClick = onEventClick
     )
 }
 
@@ -101,6 +156,13 @@ private fun VerticalCatalogScreen(
     items: List<MediaPoster>,
     onClick: (String) -> Unit
 ) {
+    var query by remember { mutableStateOf("") }
+    var selectedChipIndex by remember { mutableIntStateOf(0) }
+    var showFilters by remember { mutableStateOf(false) }
+    val filteredItems = remember(items, query, selectedChipIndex) {
+        items.filterCatalog(query, chips[selectedChipIndex])
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 120.dp),
@@ -110,12 +172,22 @@ private fun VerticalCatalogScreen(
             CatalogSearchSection(
                 title = title,
                 placeholder = placeholder,
-                chips = chips
+                query = query,
+                onQueryChange = { query = it },
+                chips = chips,
+                selectedChipIndex = selectedChipIndex,
+                onChipClick = { selectedChipIndex = it },
+                showFilters = showFilters,
+                onFilterClick = { showFilters = !showFilters }
             )
         }
-        items(items.size) { index ->
-            val item = items[index]
-            VerticalPosterCard(item = item, onClick = { onClick(item.id) })
+        if (filteredItems.isEmpty()) {
+            item { EmptyCatalogBlock() }
+        } else {
+            items(filteredItems.size) { index ->
+                val item = filteredItems[index]
+                VerticalPosterCard(item = item, onClick = { onClick(item.id) })
+            }
         }
     }
 }
@@ -124,7 +196,13 @@ private fun VerticalCatalogScreen(
 private fun CatalogSearchSection(
     title: String,
     placeholder: String,
-    chips: List<String>
+    query: String,
+    onQueryChange: (String) -> Unit,
+    chips: List<String>,
+    selectedChipIndex: Int,
+    onChipClick: (Int) -> Unit,
+    showFilters: Boolean,
+    onFilterClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
@@ -132,43 +210,83 @@ private fun CatalogSearchSection(
     ) {
         Text(title, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Row(
+            TextField(
+                value = query,
+                onValueChange = onQueryChange,
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(Color(0xFFF3F4F6))
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Outlined.Search, contentDescription = null, tint = Color(0xFFA1A1AA))
-                Spacer(Modifier.width(10.dp))
-                Text(placeholder, color = Color(0xFFA1A1AA), style = MaterialTheme.typography.bodyMedium)
-            }
+                    .clip(RoundedCornerShape(22.dp)),
+                placeholder = { Text(placeholder) },
+                leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null, tint = Color(0xFFA1A1AA)) },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFF3F4F6),
+                    unfocusedContainerColor = Color(0xFFF3F4F6),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
+            )
             Box(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(RoundedCornerShape(18.dp))
-                    .background(Color(0xFFF3F4F6)),
+                    .background(if (showFilters) Crimson.copy(alpha = 0.12f) else Color(0xFFF3F4F6))
+                    .clickable { onFilterClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Outlined.Tune, contentDescription = null, tint = Crimson)
             }
         }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(chips.size) { index ->
-                val selected = index == 0
-                Text(
-                    text = chips[index],
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(if (selected) Crimson else Color(0xFFF3F4F6))
-                        .padding(horizontal = 20.dp, vertical = 10.dp),
-                    color = if (selected) Color.White else Color(0xFF71717A),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
+        if (showFilters) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                items(chips.size) { index ->
+                    val selected = index == selectedChipIndex
+                    Text(
+                        text = chips[index],
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(if (selected) Crimson else Color(0xFFF3F4F6))
+                            .clickable { onChipClick(index) }
+                            .padding(horizontal = 20.dp, vertical = 10.dp),
+                        color = if (selected) Color.White else Color(0xFF71717A),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyCatalogBlock() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "No matching events",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+private fun List<MediaPoster>.filterCatalog(query: String, chip: String): List<MediaPoster> {
+    val normalizedQuery = query.trim()
+    val normalizedChip = chip.takeUnless { it.equals("All", ignoreCase = true) }.orEmpty()
+    return filter { item ->
+        val matchesQuery = normalizedQuery.isBlank() ||
+            item.title.contains(normalizedQuery, ignoreCase = true) ||
+            item.subtitle.contains(normalizedQuery, ignoreCase = true) ||
+            item.meta.contains(normalizedQuery, ignoreCase = true)
+        val matchesChip = normalizedChip.isBlank() ||
+            item.title.contains(normalizedChip, ignoreCase = true) ||
+            item.subtitle.contains(normalizedChip, ignoreCase = true) ||
+            item.meta.contains(normalizedChip, ignoreCase = true)
+        matchesQuery && matchesChip
     }
 }
 
