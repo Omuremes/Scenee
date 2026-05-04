@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -38,9 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.CategoryGrid
 import com.example.cinescope.ui.components.PosterBox
@@ -255,12 +258,12 @@ private fun MovieCard(poster: MediaPoster, onMovieClick: (String) -> Unit) {
     Column(modifier = Modifier
         .width(180.dp)
         .clickable { onMovieClick(poster.id) }) {
-        PosterBox(
+        PosterCover(
+            poster = poster,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f / 3f),
-            theme = poster.theme,
-            topBadge = poster.meta,
+            badge = poster.meta,
             compactBadge = true,
             ratingMode = true
         )
@@ -276,9 +279,12 @@ private fun ConcertCard(poster: MediaPoster, onClick: (String) -> Unit) {
     Column(modifier = Modifier
         .width(300.dp)
         .clickable { onClick(poster.id) }) {
-        PosterBox(modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(16f / 9f), theme = poster.theme)
+        PosterCover(
+            poster = poster,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f)
+        )
         Spacer(Modifier.height(16.dp))
         Text(
             poster.title,
@@ -297,9 +303,12 @@ private fun StandupCard(poster: MediaPoster, onClick: (String) -> Unit) {
     Column(modifier = Modifier
         .width(260.dp)
         .clickable { onClick(poster.id) }) {
-        PosterBox(modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(4f / 3f), theme = poster.theme)
+        PosterCover(
+            poster = poster,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(4f / 3f)
+        )
         Spacer(Modifier.height(14.dp))
         Text(poster.title, style = MaterialTheme.typography.titleLarge)
         Text(poster.subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -308,6 +317,72 @@ private fun StandupCard(poster: MediaPoster, onClick: (String) -> Unit) {
             poster.meta,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+    }
+}
+
+@Composable
+private fun PosterCover(
+    poster: MediaPoster,
+    modifier: Modifier,
+    badge: String? = null,
+    compactBadge: Boolean = false,
+    ratingMode: Boolean = false
+) {
+    if (!poster.posterUrl.isNullOrBlank()) {
+        Box(modifier = modifier.clip(RoundedCornerShape(28.dp))) {
+            AsyncImage(
+                model = poster.posterUrl,
+                contentDescription = poster.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        androidx.compose.ui.graphics.Brush.verticalGradient(
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.18f))
+                        )
+                    )
+            )
+            Text(
+                "CinePass",
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp),
+                color = Color.White.copy(alpha = 0.92f),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.ExtraBold
+            )
+            if (badge != null) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(14.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color.White.copy(alpha = 0.93f))
+                        .padding(horizontal = if (compactBadge) 10.dp else 14.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (ratingMode) Icon(
+                        Icons.Outlined.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFEAB308),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(badge, style = MaterialTheme.typography.labelSmall, color = Color(0xFF141414))
+                }
+            }
+        }
+    } else {
+        PosterBox(
+            modifier = modifier,
+            theme = poster.theme,
+            topBadge = badge,
+            compactBadge = compactBadge,
+            ratingMode = ratingMode
         )
     }
 }
