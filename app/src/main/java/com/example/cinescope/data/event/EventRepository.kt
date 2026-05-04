@@ -153,6 +153,7 @@ class EventRepository @Inject constructor(
                 event.price != null -> event.price.formatPrice()
                 else -> event.next_session_at?.toDateTime()?.format(cardDateFormatter).orEmpty()
             },
+            posterUrl = event.poster_url ?: event.image_url,
             theme = event.type.toPosterTheme()
         )
     }

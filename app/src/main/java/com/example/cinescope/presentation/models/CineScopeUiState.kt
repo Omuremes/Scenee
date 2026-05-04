@@ -149,6 +149,7 @@ data class MediaPoster(
     val title: String,
     val subtitle: String,
     val meta: String,
+    val posterUrl: String? = null,
     val theme: PosterTheme
 )
 
