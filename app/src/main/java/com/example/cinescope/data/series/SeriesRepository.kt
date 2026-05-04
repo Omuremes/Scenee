@@ -42,7 +42,10 @@ class SeriesRepository @Inject constructor(
     }
 
     suspend fun getSeasonEpisodes(serialId: String, seasonNumber: Int): List<EpisodeItem> {
-        return serialApiService.getSeasonEpisodes(serialId, seasonNumber).map(::mapToEpisode)
+        val seasonLabel = "Season $seasonNumber"
+        return serialApiService.getSeasonEpisodes(serialId, seasonNumber).map { episode ->
+            mapToEpisode(episode, seasonLabel)
+        }
     }
 
     private fun mapToPoster(dto: SerialDto): SeriesPoster {
@@ -58,7 +61,9 @@ class SeriesRepository @Inject constructor(
     private fun SerialDetailDto.toDetailData(): SeriesDetailData {
         val sortedSeasons = seasons.sortedBy { it.season_number }
         val episodes = sortedSeasons.flatMap { season ->
-            season.episodes.sortedBy { it.episode_number }.map(::mapToEpisode)
+            season.episodes.sortedBy { it.episode_number }.map { episode ->
+                mapToEpisode(episode, season.title ?: "Season ${season.season_number}")
+            }
         }
 
         return SeriesDetailData(
@@ -76,11 +81,15 @@ class SeriesRepository @Inject constructor(
         )
     }
 
-    private fun mapToEpisode(dto: SerialEpisodeDto): EpisodeItem {
+    private fun mapToEpisode(dto: SerialEpisodeDto, seasonLabel: String): EpisodeItem {
         return EpisodeItem(
+            id = dto.id,
             badge = "EPISODE ${dto.episode_number}",
+            seasonLabel = seasonLabel,
             title = dto.title,
             duration = "${dto.duration}m",
+            description = dto.description.orEmpty(),
+            videoUrl = dto.episode_file?.video_url,
             theme = PosterTheme.VioletPop
         )
     }

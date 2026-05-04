@@ -74,6 +74,13 @@ sealed class AppRoute(val route: String) {
     data object WatchSeries : AppRoute("watch_series/{movieId}") {
         fun createRoute(id: String) = "watch_series/$id"
     }
+    data object EpisodePlayer : AppRoute("episode_player/{title}?videoUrl={videoUrl}") {
+        fun createRoute(title: String, videoUrl: String): String {
+            val encodedTitle = android.net.Uri.encode(title)
+            val encodedUrl = android.net.Uri.encode(videoUrl)
+            return "episode_player/$encodedTitle?videoUrl=$encodedUrl"
+        }
+    }
     data object BookSeats : AppRoute("book_seats/{eventId}?sessionId={sessionId}") {
         fun createRoute(eventId: String, sessionId: String?) = if (sessionId.isNullOrBlank()) {
             "book_seats/$eventId"
@@ -563,7 +570,18 @@ fun CineScopeNavGraph(
                     if (appState.isAuthenticated) {
                         WatchSeriesScreen(
                             data = state.data,
-                            onBack = { navController.popBackStack() }
+                            onBack = { navController.popBackStack() },
+                            onEpisodeClick = { episode ->
+                                val videoUrl = episode.videoUrl
+                                if (!videoUrl.isNullOrBlank()) {
+                                    navController.navigate(
+                                        AppRoute.EpisodePlayer.createRoute(
+                                            title = episode.title,
+                                            videoUrl = videoUrl
+                                        )
+                                    )
+                                }
+                            }
                         )
                     } else {
                         LaunchedEffect(Unit) {
@@ -585,6 +603,21 @@ fun CineScopeNavGraph(
                     onRetry = { detailViewModel.loadSeriesDetail(movieId) }
                 )
             }
+        }
+        composable(
+            route = AppRoute.EpisodePlayer.route,
+            arguments = listOf(
+                navArgument("title") { type = NavType.StringType },
+                navArgument("videoUrl") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val title = backStackEntry.arguments?.getString("title").orEmpty()
+            val videoUrl = backStackEntry.arguments?.getString("videoUrl").orEmpty()
+            EpisodePlayerScreen(
+                title = title,
+                videoUrl = videoUrl,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

@@ -1,5 +1,10 @@
 package com.example.cinescope.presentation.details
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,9 +45,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,10 +60,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
@@ -354,8 +370,15 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
 }
 
 @Composable
-fun WatchSeriesScreen(data: SeriesDetailData, onBack: () -> Unit) {
-    var selectedSeason by remember { mutableStateOf(data.seasons.first()) }
+fun WatchSeriesScreen(
+    data: SeriesDetailData,
+    onBack: () -> Unit,
+    onEpisodeClick: (EpisodeItem) -> Unit
+) {
+    var selectedSeason by remember { mutableStateOf(data.seasons.firstOrNull().orEmpty()) }
+    val seasonEpisodes = remember(data.episodes, selectedSeason) {
+        data.episodes.filter { selectedSeason.isBlank() || it.seasonLabel == selectedSeason }
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 110.dp),
@@ -381,10 +404,124 @@ fun WatchSeriesScreen(data: SeriesDetailData, onBack: () -> Unit) {
                 }
             }
         }
-        items(data.episodes) { episode ->
-            EpisodeCard(episode)
+        if (seasonEpisodes.isEmpty()) {
+            item {
+                Text(
+                    "No episodes available for this season",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        items(seasonEpisodes, key = { it.id }) { episode ->
+            EpisodeCard(episode = episode, onClick = { onEpisodeClick(episode) })
         }
     }
+}
+
+@Composable
+fun EpisodePlayerScreen(
+    title: String,
+    videoUrl: String,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    var isLandscapeFullscreen by remember(activity) {
+        mutableStateOf(
+            activity?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        )
+    }
+    val exoPlayer = remember(videoUrl) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(videoUrl))
+            prepare()
+            playWhenReady = true
+        }
+    }
+
+    DisposableEffect(activity, exoPlayer) {
+        val window = activity?.window
+        val previousOrientation = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        val controller = window?.let { WindowCompat.getInsetsController(it, it.decorView) }
+
+        if (window != null && controller != null) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        onDispose {
+            exoPlayer.release()
+            activity?.requestedOrientation = previousOrientation
+            if (window != null && controller != null) {
+                controller.show(WindowInsetsCompat.Type.systemBars())
+                WindowCompat.setDecorFitsSystemWindows(window, true)
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Black
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AndroidView(
+                factory = { viewContext ->
+                    PlayerView(viewContext).apply {
+                        player = exoPlayer
+                        useController = true
+                        setShowNextButton(false)
+                        setShowPreviousButton(false)
+                        setFullscreenButtonClickListener { shouldEnterFullscreen ->
+                            isLandscapeFullscreen = shouldEnterFullscreen
+                            activity?.requestedOrientation = if (shouldEnterFullscreen) {
+                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            } else {
+                                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { playerView ->
+                    playerView.player = exoPlayer
+                }
+            )
+
+            if (!isLandscapeFullscreen) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                    Text(
+                        text = title,
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @Composable
@@ -642,9 +779,14 @@ private fun MovieCommentsTab(data: MovieDetailData) {
     }
 }
 
-@Composable private fun EpisodeCard(episode: EpisodeItem) {
+@Composable private fun EpisodeCard(episode: EpisodeItem, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White).padding(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color.White)
+            .clickable(enabled = !episode.videoUrl.isNullOrBlank(), onClick = onClick)
+            .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -657,13 +799,27 @@ private fun MovieCommentsTab(data: MovieDetailData) {
         Column(modifier = Modifier.weight(1f)) {
             Text(episode.badge, style = MaterialTheme.typography.labelSmall, color = Crimson)
             Text(episode.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            if (episode.description.isNotBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    episode.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(episode.duration, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Icon(Icons.Outlined.MoreVert, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            if (episode.videoUrl.isNullOrBlank()) Icons.Outlined.MoreVert else Icons.Outlined.PlayCircle,
+            contentDescription = null,
+            tint = if (episode.videoUrl.isNullOrBlank()) MaterialTheme.colorScheme.onSurfaceVariant else Crimson
+        )
     }
 }
 

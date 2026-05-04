@@ -147,6 +147,7 @@ private fun selectedBottomRoute(currentRoute: String?): String? = when {
 
 @Composable
 private fun AppHeader(currentRoute: String?, navController: NavHostController, uiState: CineScopeUiState) {
+    if (currentRoute?.startsWith("episode_player") == true) return
     val initials = if (uiState.isAuthenticated) uiState.profileSummary?.initials else null
     val onProfileClick = { navController.navigateToBottomRoute(BottomNavRoute.Profile.route) }
 

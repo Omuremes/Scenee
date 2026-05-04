@@ -93,9 +93,13 @@ data class MovieDetailData(
 )
 
 data class EpisodeItem(
+    val id: String,
     val badge: String,
+    val seasonLabel: String,
     val title: String,
     val duration: String,
+    val description: String = "",
+    val videoUrl: String? = null,
     val theme: PosterTheme
 )
 
