@@ -168,6 +168,7 @@ data class SeriesPoster(
     val title: String,
     val genre: String,
     val rating: String,
+    val posterUrl: String? = null,
     val categories: List<SeriesFilterCategory> = emptyList(),
     val theme: PosterTheme
 )

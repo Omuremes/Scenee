@@ -94,6 +94,7 @@ class SeriesRepository @Inject constructor(
             title = dto.name,
             genre = dto.categories.joinToString(" - ") { it.name },
             rating = String.format("%.1f", dto.average_rating),
+            posterUrl = dto.poster_url,
             categories = dto.categories.map {
                 SeriesFilterCategory(
                     id = it.id,

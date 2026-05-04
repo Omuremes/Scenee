@@ -36,10 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import coil.compose.AsyncImage
 import com.example.cinescope.presentation.models.SeriesPoster
 import com.example.cinescope.presentation.models.SeriesSection
 import com.example.cinescope.ui.components.PosterBox
@@ -178,7 +180,25 @@ private fun SeriesSectionBlock(section: SeriesSection, onSeriesClick: (String) -
 @Composable
 private fun SeriesPosterCard(poster: SeriesPoster, onSeriesClick: (String) -> Unit) {
     Column(modifier = Modifier.width(192.dp).clickable { onSeriesClick(poster.id) }) {
-        PosterBox(modifier = Modifier.fillMaxWidth().aspectRatio(2f / 3f), theme = poster.theme, topBadge = poster.rating, compactBadge = true, ratingMode = true)
+        if (!poster.posterUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = poster.posterUrl,
+                contentDescription = poster.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f / 3f)
+                    .clip(RoundedCornerShape(28.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            PosterBox(
+                modifier = Modifier.fillMaxWidth().aspectRatio(2f / 3f),
+                theme = poster.theme,
+                topBadge = poster.rating,
+                compactBadge = true,
+                ratingMode = true
+            )
+        }
         Spacer(Modifier.height(10.dp))
         Text(poster.title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(poster.genre, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
