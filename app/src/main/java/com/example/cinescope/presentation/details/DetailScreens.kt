@@ -339,6 +339,7 @@ fun SeriesDetailScreen(
 ) {
     val seasonCount = data.seasons.size
     val episodeCount = data.episodes.size
+    var isStorylineExpanded by remember(data.storyline) { mutableStateOf(false) }
     val seriesSummary = buildList {
         data.meta.firstOrNull()?.takeIf { it.isNotBlank() }?.let(::add)
         add(pluralizeCount(seasonCount, "Season", "Seasons"))
@@ -371,14 +372,32 @@ fun SeriesDetailScreen(
             }
         }
         item {
-            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .clickable { isStorylineExpanded = !isStorylineExpanded }
+            ) {
                 Text("Storyline", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))
-                Text(data.storyline, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = data.storyline,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = if (isStorylineExpanded) Int.MAX_VALUE else 4,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("All details", color = Crimson, fontWeight = FontWeight.Bold)
-                    Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null, tint = Crimson)
+                    Text(
+                        text = if (isStorylineExpanded) "Show less" else "All details",
+                        color = Crimson,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Icon(
+                        imageVector = if (isStorylineExpanded) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = Crimson
+                    )
                 }
             }
         }
