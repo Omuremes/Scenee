@@ -76,4 +76,19 @@ class DetailViewModel @Inject constructor(
             }
         }
     }
+
+    suspend fun submitSeriesReview(serialId: String, rating: Float, text: String) {
+        seriesRepository.submitSerialReview(serialId, rating, text)
+        _uiState.value = DetailUiState.SuccessSeries(seriesRepository.getSerialDetail(serialId))
+    }
+
+    suspend fun updateSeriesReview(serialId: String, reviewId: String, rating: Float, text: String) {
+        seriesRepository.updateSerialReview(reviewId, rating, text)
+        _uiState.value = DetailUiState.SuccessSeries(seriesRepository.getSerialDetail(serialId))
+    }
+
+    suspend fun deleteSeriesReview(serialId: String, reviewId: String) {
+        seriesRepository.deleteSerialReview(reviewId)
+        _uiState.value = DetailUiState.SuccessSeries(seriesRepository.getSerialDetail(serialId))
+    }
 }

@@ -36,6 +36,8 @@ import com.example.cinescope.presentation.profile.ProfileScreen
 import com.example.cinescope.presentation.series.SeriesErrorScreen
 import com.example.cinescope.presentation.series.SeriesLoadingScreen
 import com.example.cinescope.presentation.series.SeriesScreen
+import com.example.cinescope.presentation.series.SeriesSearchScreen
+import com.example.cinescope.presentation.series.SeriesSearchViewModel
 import com.example.cinescope.presentation.series.SeriesUiState
 import com.example.cinescope.presentation.series.SeriesViewModel
 import com.example.cinescope.presentation.tickets.TicketsScreen
@@ -56,6 +58,7 @@ sealed class AppRoute(val route: String) {
     data object Standup : AppRoute("standup")
     data object Kids : AppRoute("kids")
     data object Events : AppRoute("events")
+    data object SeriesSearch : AppRoute("series_search")
     data object MovieDetail : AppRoute("movie_detail/{movieId}") {
         fun createRoute(id: String) = "movie_detail/$id"
     }
@@ -73,6 +76,13 @@ sealed class AppRoute(val route: String) {
     }
     data object WatchSeries : AppRoute("watch_series/{movieId}") {
         fun createRoute(id: String) = "watch_series/$id"
+    }
+    data object EpisodePlayer : AppRoute("episode_player/{title}?videoUrl={videoUrl}") {
+        fun createRoute(title: String, videoUrl: String): String {
+            val encodedTitle = android.net.Uri.encode(title)
+            val encodedUrl = android.net.Uri.encode(videoUrl)
+            return "episode_player/$encodedTitle?videoUrl=$encodedUrl"
+        }
     }
     data object BookSeats : AppRoute("book_seats/{eventId}?sessionId={sessionId}") {
         fun createRoute(eventId: String, sessionId: String?) = if (sessionId.isNullOrBlank()) {
@@ -94,6 +104,7 @@ val bottomNavRouteSet = setOf(
 fun CineScopeNavGraph(
     navController: NavHostController,
     appState: CineScopeUiState,
+    currentUserId: String? = null,
     startDestination: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
@@ -131,6 +142,7 @@ fun CineScopeNavGraph(
                 is SeriesUiState.Success -> {
                     SeriesScreen(
                         sections = state.sections,
+                        onSearchClick = { navController.navigate(AppRoute.SeriesSearch.route) },
                         onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) }
                     )
                 }
@@ -210,6 +222,14 @@ fun CineScopeNavGraph(
                 )
             }
         }
+        composable(AppRoute.SeriesSearch.route) {
+            val seriesSearchViewModel: SeriesSearchViewModel = hiltViewModel()
+            SeriesSearchScreen(
+                onBack = { navController.popBackStack() },
+                onSeriesClick = { id -> navController.navigate(AppRoute.SeriesDetail.createRoute(id)) },
+                viewModel = seriesSearchViewModel
+            )
+        }
         composable(AppRoute.Login.route) {
             AuthScreen(
                 isSignup = false,
@@ -269,8 +289,13 @@ fun CineScopeNavGraph(
                 is DetailUiState.SuccessSeries -> {
                     SeriesDetailScreen(
                         data = state.data,
+                        isAuthenticated = appState.isAuthenticated,
+                        currentUserId = currentUserId,
                         onBack = { navController.popBackStack() },
-                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
+                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) },
+                        onCreateReview = { rating, text -> detailViewModel.submitSeriesReview(movieId, rating, text) },
+                        onUpdateReview = { reviewId, rating, text -> detailViewModel.updateSeriesReview(movieId, reviewId, rating, text) },
+                        onDeleteReview = { reviewId -> detailViewModel.deleteSeriesReview(movieId, reviewId) }
                     )
                 }
                 is DetailUiState.SuccessEvent -> {
@@ -325,8 +350,13 @@ fun CineScopeNavGraph(
                 is DetailUiState.SuccessSeries -> {
                     SeriesDetailScreen(
                         data = state.data,
+                        isAuthenticated = appState.isAuthenticated,
+                        currentUserId = currentUserId,
                         onBack = { navController.popBackStack() },
-                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
+                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) },
+                        onCreateReview = { rating, text -> detailViewModel.submitSeriesReview(movieId, rating, text) },
+                        onUpdateReview = { reviewId, rating, text -> detailViewModel.updateSeriesReview(movieId, reviewId, rating, text) },
+                        onDeleteReview = { reviewId -> detailViewModel.deleteSeriesReview(movieId, reviewId) }
                     )
                 }
                 is DetailUiState.SuccessEvent -> EventDetailScreen(
@@ -563,7 +593,18 @@ fun CineScopeNavGraph(
                     if (appState.isAuthenticated) {
                         WatchSeriesScreen(
                             data = state.data,
-                            onBack = { navController.popBackStack() }
+                            onBack = { navController.popBackStack() },
+                            onEpisodeClick = { episode ->
+                                val videoUrl = episode.videoUrl
+                                if (!videoUrl.isNullOrBlank()) {
+                                    navController.navigate(
+                                        AppRoute.EpisodePlayer.createRoute(
+                                            title = episode.title,
+                                            videoUrl = videoUrl
+                                        )
+                                    )
+                                }
+                            }
                         )
                     } else {
                         LaunchedEffect(Unit) {
@@ -585,6 +626,21 @@ fun CineScopeNavGraph(
                     onRetry = { detailViewModel.loadSeriesDetail(movieId) }
                 )
             }
+        }
+        composable(
+            route = AppRoute.EpisodePlayer.route,
+            arguments = listOf(
+                navArgument("title") { type = NavType.StringType },
+                navArgument("videoUrl") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val title = backStackEntry.arguments?.getString("title").orEmpty()
+            val videoUrl = backStackEntry.arguments?.getString("videoUrl").orEmpty()
+            EpisodePlayerScreen(
+                title = title,
+                videoUrl = videoUrl,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

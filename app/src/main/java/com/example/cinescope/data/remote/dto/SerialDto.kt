@@ -31,6 +31,37 @@ data class SerialActorDto(
 )
 
 @Serializable
+data class SerialReviewUserDto(
+    val id: String,
+    val username: String? = null,
+    val avatar_url: String? = null
+)
+
+@Serializable
+data class SerialReviewDto(
+    val id: String,
+    val serial_id: String,
+    val user_id: String,
+    val rating: Double,
+    val text: String? = null,
+    val created_at: String,
+    val user: SerialReviewUserDto
+)
+
+@Serializable
+data class SerialReviewCreateRequest(
+    val serial_id: String,
+    val rating: Double,
+    val text: String? = null
+)
+
+@Serializable
+data class SerialReviewUpdateRequest(
+    val rating: Double? = null,
+    val text: String? = null
+)
+
+@Serializable
 data class SerialEpisodeFileDto(
     val minio_bucket: String? = null,
     val minio_object_key: String? = null,
@@ -69,10 +100,13 @@ data class SerialDetailDto(
     val id: String,
     val poster_key: String? = null,
     val poster_url: String? = null,
+    val trailer_video_key: String? = null,
+    val trailer_url: String? = null,
     val average_rating: Double = 0.0,
     val created_at: String,
     val updated_at: String,
     val categories: List<CategoryDto> = emptyList(),
     val actors: List<SerialActorDto> = emptyList(),
-    val seasons: List<SerialSeasonDto> = emptyList()
+    val seasons: List<SerialSeasonDto> = emptyList(),
+    val reviews: List<SerialReviewDto> = emptyList()
 )

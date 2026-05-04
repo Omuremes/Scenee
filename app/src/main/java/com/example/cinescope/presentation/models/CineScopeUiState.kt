@@ -33,6 +33,7 @@ enum class CategoryIcon {
 }
 
 data class ProfileSummary(
+    val id: String,
     val name: String,
     val email: String,
     val initials: String,
@@ -92,10 +93,34 @@ data class MovieDetailData(
     val theme: PosterTheme = PosterTheme.VioletPop
 )
 
+data class SeriesCastMember(
+    val name: String,
+    val photoUrl: String? = null
+)
+
+data class SeriesFilterCategory(
+    val id: String,
+    val name: String
+)
+
+data class SeriesReviewItem(
+    val id: String,
+    val userId: String,
+    val userName: String,
+    val userAvatarUrl: String? = null,
+    val rating: Float,
+    val text: String,
+    val createdAt: String? = null
+)
+
 data class EpisodeItem(
+    val id: String,
     val badge: String,
+    val seasonLabel: String,
     val title: String,
     val duration: String,
+    val description: String = "",
+    val videoUrl: String? = null,
     val theme: PosterTheme
 )
 
@@ -105,10 +130,11 @@ data class SeriesDetailData(
     val storyline: String,
     val rating: String,
     val reviewCount: String,
-    val cast: List<String>,
-    val reviews: List<String>,
+    val cast: List<SeriesCastMember>,
+    val reviews: List<SeriesReviewItem>,
     val seasons: List<String>,
     val episodes: List<EpisodeItem>,
+    val trailerUrl: String? = null,
     val tabs: List<String> = emptyList(),
     val meta: List<String> = emptyList()
 )
@@ -142,6 +168,8 @@ data class SeriesPoster(
     val title: String,
     val genre: String,
     val rating: String,
+    val posterUrl: String? = null,
+    val categories: List<SeriesFilterCategory> = emptyList(),
     val theme: PosterTheme
 )
 

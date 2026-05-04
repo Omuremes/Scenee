@@ -1,5 +1,12 @@
+@file:OptIn(androidx.media3.common.util.UnstableApi::class)
+
 package com.example.cinescope.presentation.details
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +34,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.MoreVert
@@ -36,26 +46,52 @@ import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import androidx.media3.common.util.UnstableApi
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
@@ -286,20 +322,36 @@ private fun sessionMatchesFilter(session: MovieSession, filter: EventSessionFilt
     }
 }
 
+private fun pluralizeCount(count: Int, singular: String, plural: String): String {
+    return if (count == 1) "$count $singular" else "$count $plural"
+}
+
 @Composable
-fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesClick: () -> Unit) {
+fun SeriesDetailScreen(
+    data: SeriesDetailData,
+    isAuthenticated: Boolean,
+    currentUserId: String? = null,
+    onBack: () -> Unit,
+    onEpisodesClick: () -> Unit,
+    onCreateReview: suspend (Float, String) -> Unit,
+    onUpdateReview: suspend (String, Float, String) -> Unit,
+    onDeleteReview: suspend (String) -> Unit
+) {
+    val seasonCount = data.seasons.size
+    val episodeCount = data.episodes.size
+    var isStorylineExpanded by remember(data.storyline) { mutableStateOf(false) }
+    val seriesSummary = buildList {
+        data.meta.firstOrNull()?.takeIf { it.isNotBlank() }?.let(::add)
+        add(pluralizeCount(seasonCount, "Season", "Seasons"))
+        add(pluralizeCount(episodeCount, "Episode", "Episodes"))
+    }.joinToString(" • ")
+
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
         item {
-            Box(modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) {
-                PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
-                Box(modifier = Modifier.align(Alignment.Center).size(78.dp).clip(CircleShape).background(Crimson.copy(alpha = 0.92f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
-                }
-                Text("Trailer • 2:14", modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp).clip(RoundedCornerShape(999.dp)).background(Color.Black.copy(alpha = 0.4f)).padding(horizontal = 12.dp, vertical = 6.dp), color = Color.White, style = MaterialTheme.typography.labelSmall)
-            }
+            HeroTrailerBlock(trailerUrl = data.trailerUrl)
         }
         item {
-            Card(modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-24).dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
+            Card(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
                 Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(data.title, style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(10.dp))
@@ -320,14 +372,32 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
             }
         }
         item {
-            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .clickable { isStorylineExpanded = !isStorylineExpanded }
+            ) {
                 Text("Storyline", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))
-                Text(data.storyline, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = data.storyline,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = if (isStorylineExpanded) Int.MAX_VALUE else 4,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("All details", color = Crimson, fontWeight = FontWeight.Bold)
-                    Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null, tint = Crimson)
+                    Text(
+                        text = if (isStorylineExpanded) "Show less" else "All details",
+                        color = Crimson,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Icon(
+                        imageVector = if (isStorylineExpanded) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = Crimson
+                    )
                 }
             }
         }
@@ -340,7 +410,10 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
                         }
                         Column {
                             Text("Series and episodes", fontWeight = FontWeight.Bold)
-                            Text("2 Seasons, 24 Episodes", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "${pluralizeCount(seasonCount, "Season", "Seasons")}, ${pluralizeCount(episodeCount, "Episode", "Episodes")}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                     Text("All", modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Color.White).clickable { onEpisodesClick() }.padding(horizontal = 18.dp, vertical = 10.dp), fontWeight = FontWeight.Bold)
@@ -349,13 +422,89 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
         }
         item { RatingSection(data) }
         item { CastSection(data.cast) }
-        item { ReviewsSection(data.reviews) }
+        item {
+            ReviewsSection(
+                reviews = data.reviews,
+                reviewCount = data.reviewCount,
+                isAuthenticated = isAuthenticated,
+                currentUserId = currentUserId,
+                onCreateReview = onCreateReview,
+                onUpdateReview = onUpdateReview,
+                onDeleteReview = onDeleteReview
+            )
+        }
+    }
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+private fun HeroTrailerBlock(trailerUrl: String?) {
+    val context = LocalContext.current
+    val canPlayTrailer = !trailerUrl.isNullOrBlank()
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+    ) {
+        if (canPlayTrailer) {
+            val exoPlayer = remember(trailerUrl) {
+                ExoPlayer.Builder(context).build().apply {
+                    setMediaItem(MediaItem.fromUri(trailerUrl!!))
+                    repeatMode = Player.REPEAT_MODE_ONE
+                    prepare()
+                    playWhenReady = true
+                    volume = 0f
+                }
+            }
+
+            DisposableEffect(exoPlayer) {
+                onDispose {
+                    exoPlayer.release()
+                }
+            }
+
+            AndroidView(
+                factory = { viewContext ->
+                    PlayerView(viewContext).apply {
+                        player = exoPlayer
+                        useController = true
+                        setShowNextButton(false)
+                        setShowPreviousButton(false)
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { playerView ->
+                    playerView.player = exoPlayer
+                }
+            )
+        } else {
+            PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
+            Text(
+                "Trailer unavailable",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(18.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                color = Color.White,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
     }
 }
 
 @Composable
-fun WatchSeriesScreen(data: SeriesDetailData, onBack: () -> Unit) {
-    var selectedSeason by remember { mutableStateOf(data.seasons.first()) }
+fun WatchSeriesScreen(
+    data: SeriesDetailData,
+    onBack: () -> Unit,
+    onEpisodeClick: (EpisodeItem) -> Unit
+) {
+    var selectedSeason by remember { mutableStateOf(data.seasons.firstOrNull().orEmpty()) }
+    val seasonEpisodes = remember(data.episodes, selectedSeason) {
+        data.episodes.filter { selectedSeason.isBlank() || it.seasonLabel == selectedSeason }
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 110.dp),
@@ -381,10 +530,125 @@ fun WatchSeriesScreen(data: SeriesDetailData, onBack: () -> Unit) {
                 }
             }
         }
-        items(data.episodes) { episode ->
-            EpisodeCard(episode)
+        if (seasonEpisodes.isEmpty()) {
+            item {
+                Text(
+                    "No episodes available for this season",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        items(seasonEpisodes, key = { it.id }) { episode ->
+            EpisodeCard(episode = episode, onClick = { onEpisodeClick(episode) })
         }
     }
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+fun EpisodePlayerScreen(
+    title: String,
+    videoUrl: String,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    var isLandscapeFullscreen by remember(activity) {
+        mutableStateOf(
+            activity?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        )
+    }
+    val exoPlayer = remember(videoUrl) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(videoUrl))
+            prepare()
+            playWhenReady = true
+        }
+    }
+
+    DisposableEffect(activity, exoPlayer) {
+        val window = activity?.window
+        val previousOrientation = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        val controller = window?.let { WindowCompat.getInsetsController(it, it.decorView) }
+
+        if (window != null && controller != null) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        onDispose {
+            exoPlayer.release()
+            activity?.requestedOrientation = previousOrientation
+            if (window != null && controller != null) {
+                controller.show(WindowInsetsCompat.Type.systemBars())
+                WindowCompat.setDecorFitsSystemWindows(window, true)
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Black
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AndroidView(
+                factory = { viewContext ->
+                    PlayerView(viewContext).apply {
+                        player = exoPlayer
+                        useController = true
+                        setShowNextButton(false)
+                        setShowPreviousButton(false)
+                        setFullscreenButtonClickListener { shouldEnterFullscreen ->
+                            isLandscapeFullscreen = shouldEnterFullscreen
+                            activity?.requestedOrientation = if (shouldEnterFullscreen) {
+                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            } else {
+                                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { playerView ->
+                    playerView.player = exoPlayer
+                }
+            )
+
+            if (!isLandscapeFullscreen) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                    Text(
+                        text = title,
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @Composable
@@ -533,6 +797,208 @@ private fun MovieAboutTab(data: MovieDetailData) {
 }
 
 @Composable
+private fun ReviewsSection(
+    reviews: List<SeriesReviewItem>,
+    reviewCount: String,
+    isAuthenticated: Boolean,
+    currentUserId: String?,
+    onCreateReview: suspend (Float, String) -> Unit,
+    onUpdateReview: suspend (String, Float, String) -> Unit,
+    onDeleteReview: suspend (String) -> Unit
+) {
+    val ownReview = reviews.firstOrNull { it.userId == currentUserId }
+    var rating by remember { mutableIntStateOf(5) }
+    var comment by remember { mutableStateOf("") }
+    var editingReviewId by remember { mutableStateOf<String?>(null) }
+    var isSubmitting by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(ownReview) {
+        if (ownReview != null) {
+            editingReviewId = ownReview.id
+            rating = ownReview.rating.roundToInt().coerceIn(1, 5)
+            comment = ownReview.text
+        } else if (editingReviewId == null) {
+            rating = 5
+            comment = ""
+        }
+    }
+
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text("User Reviews", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+            Text(reviewCount, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+        }
+
+        if (isAuthenticated) {
+            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(24.dp)) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(
+                        if (editingReviewId != null) "Edit your review" else "Rate this series",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = null,
+                                tint = if (index < rating) Color(0xFFEAB308) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .clickable { rating = index + 1 }
+                            )
+                        }
+                    }
+                    OutlinedTextField(
+                        value = comment,
+                        onValueChange = { comment = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Comment") },
+                        minLines = 3,
+                        maxLines = 5
+                    )
+                    if (errorMessage != null) {
+                        Text(errorMessage.orEmpty(), color = Color.Red, style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                isSubmitting = true
+                                errorMessage = null
+                                try {
+                                    if (editingReviewId != null) {
+                                        onUpdateReview(editingReviewId!!, rating.toFloat(), comment)
+                                    } else {
+                                        onCreateReview(rating.toFloat(), comment)
+                                    }
+                                    editingReviewId = null
+                                    comment = ""
+                                    rating = 5
+                                } catch (err: Exception) {
+                                    errorMessage = err.message ?: "Failed to submit review"
+                                } finally {
+                                    isSubmitting = false
+                                }
+                            }
+                        },
+                        enabled = !isSubmitting,
+                        colors = ButtonDefaults.buttonColors(containerColor = Crimson)
+                    ) {
+                        Text(if (isSubmitting) "Submitting..." else if (editingReviewId != null) "Update review" else "Post review")
+                    }
+                }
+            }
+        } else {
+            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(24.dp)) {
+                Text(
+                    "Sign in to rate and comment on this series.",
+                    modifier = Modifier.padding(18.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        if (reviews.isEmpty()) {
+            Text(
+                "No comments yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                reviews.forEach { review ->
+                    ReviewCard(
+                        review = review,
+                        isOwnReview = review.userId == currentUserId,
+                        onEdit = {
+                            editingReviewId = review.id
+                            rating = review.rating.roundToInt().coerceIn(1, 5)
+                            comment = review.text
+                        },
+                        onDelete = {
+                            scope.launch {
+                                isSubmitting = true
+                                errorMessage = null
+                                try {
+                                    onDeleteReview(review.id)
+                                    if (editingReviewId == review.id) {
+                                        editingReviewId = null
+                                        rating = 5
+                                        comment = ""
+                                    }
+                                } catch (err: Exception) {
+                                    errorMessage = err.message ?: "Failed to delete review"
+                                } finally {
+                                    isSubmitting = false
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewCard(
+    review: SeriesReviewItem,
+    isOwnReview: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
+        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                ActorAvatar(photoUrl = review.userAvatarUrl, name = review.userName)
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(review.userName, fontWeight = FontWeight.Bold)
+                        if (isOwnReview) {
+                            Text(
+                                "You",
+                                color = Crimson,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        val stars = review.rating.roundToInt().coerceIn(1, 5)
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = if (index < stars) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = null,
+                                tint = if (index < stars) Color(0xFFEAB308) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(String.format("%.1f / 5", review.rating), fontWeight = FontWeight.Bold, color = Crimson)
+                    if (isOwnReview) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(onClick = onEdit) {
+                                Icon(Icons.Outlined.Edit, contentDescription = "Edit review", tint = Crimson)
+                            }
+                            IconButton(onClick = onDelete) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Delete review", tint = Crimson)
+                            }
+                        }
+                    }
+                }
+            }
+            if (review.text.isNotBlank()) {
+                Text(review.text, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+@Composable
 private fun MovieCommentsTab(data: MovieDetailData) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(28.dp)) {
@@ -599,7 +1065,7 @@ private fun MovieCommentsTab(data: MovieDetailData) {
     }
 }
 
-@Composable private fun CastSection(cast: List<String>) {
+@Composable private fun CastSection(cast: List<SeriesCastMember>) {
     Column(modifier = Modifier.padding(vertical = 20.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Main Cast", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -607,14 +1073,58 @@ private fun MovieCommentsTab(data: MovieDetailData) {
         }
         Spacer(Modifier.height(16.dp))
         Row(modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            cast.forEach {
+            cast.forEach { actor ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(modifier = Modifier.size(96.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant))
+                    ActorAvatar(photoUrl = actor.photoUrl, name = actor.name)
                     Spacer(Modifier.height(10.dp))
-                    Text(it, modifier = Modifier.width(80.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Text(actor.name, modifier = Modifier.width(80.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ActorAvatar(photoUrl: String?, name: String) {
+    val fallbackColor = MaterialTheme.colorScheme.surfaceVariant
+    val bitmapState = androidx.compose.runtime.produceState<ImageBitmap?>(initialValue = null, key1 = photoUrl) {
+        value = loadBitmapFromUrl(photoUrl)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(96.dp)
+            .clip(CircleShape)
+            .background(fallbackColor),
+        contentAlignment = Alignment.Center
+    ) {
+        val bitmap = bitmapState.value
+        if (bitmap != null) {
+            androidx.compose.foundation.Image(
+                bitmap = bitmap,
+                contentDescription = name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = name.take(1).uppercase(),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+private suspend fun loadBitmapFromUrl(photoUrl: String?): ImageBitmap? {
+    if (photoUrl.isNullOrBlank()) return null
+    return withContext(Dispatchers.IO) {
+        runCatching {
+            java.net.URL(photoUrl).openStream().use { input ->
+                android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
+            }
+        }.getOrNull()
     }
 }
 
@@ -642,9 +1152,14 @@ private fun MovieCommentsTab(data: MovieDetailData) {
     }
 }
 
-@Composable private fun EpisodeCard(episode: EpisodeItem) {
+@Composable private fun EpisodeCard(episode: EpisodeItem, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White).padding(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color.White)
+            .clickable(enabled = !episode.videoUrl.isNullOrBlank(), onClick = onClick)
+            .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -657,13 +1172,27 @@ private fun MovieCommentsTab(data: MovieDetailData) {
         Column(modifier = Modifier.weight(1f)) {
             Text(episode.badge, style = MaterialTheme.typography.labelSmall, color = Crimson)
             Text(episode.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            if (episode.description.isNotBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    episode.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(episode.duration, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Icon(Icons.Outlined.MoreVert, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            if (episode.videoUrl.isNullOrBlank()) Icons.Outlined.MoreVert else Icons.Outlined.PlayCircle,
+            contentDescription = null,
+            tint = if (episode.videoUrl.isNullOrBlank()) MaterialTheme.colorScheme.onSurfaceVariant else Crimson
+        )
     }
 }
 
