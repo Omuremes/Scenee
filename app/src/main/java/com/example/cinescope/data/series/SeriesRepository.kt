@@ -9,6 +9,7 @@ import com.example.cinescope.presentation.models.PosterTheme
 import com.example.cinescope.presentation.models.SeriesDetailData
 import com.example.cinescope.presentation.models.SeriesPoster
 import com.example.cinescope.presentation.models.SeriesSection
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -87,10 +88,23 @@ class SeriesRepository @Inject constructor(
             badge = "EPISODE ${dto.episode_number}",
             seasonLabel = seasonLabel,
             title = dto.title,
-            duration = "${dto.duration}m",
+            duration = dto.duration.toDurationLabel(),
             description = dto.description.orEmpty(),
             videoUrl = dto.episode_file?.video_url,
             theme = PosterTheme.VioletPop
         )
+    }
+
+    private fun Int.toDurationLabel(): String {
+        if (this <= 0) return "Duration unknown"
+        val hours = this / 3600
+        val minutes = (this % 3600) / 60
+        val seconds = this % 60
+
+        return when {
+            hours > 0 -> String.format(Locale.ENGLISH, "%dh %02dm", hours, minutes)
+            minutes > 0 -> String.format(Locale.ENGLISH, "%dm", minutes)
+            else -> String.format(Locale.ENGLISH, "%ds", seconds)
+        }
     }
 }

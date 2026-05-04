@@ -302,8 +302,20 @@ private fun sessionMatchesFilter(session: MovieSession, filter: EventSessionFilt
     }
 }
 
+private fun pluralizeCount(count: Int, singular: String, plural: String): String {
+    return if (count == 1) "$count $singular" else "$count $plural"
+}
+
 @Composable
 fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesClick: () -> Unit) {
+    val seasonCount = data.seasons.size
+    val episodeCount = data.episodes.size
+    val seriesSummary = buildList {
+        data.meta.firstOrNull()?.takeIf { it.isNotBlank() }?.let(::add)
+        add(pluralizeCount(seasonCount, "Season", "Seasons"))
+        add(pluralizeCount(episodeCount, "Episode", "Episodes"))
+    }.joinToString(" • ")
+
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
         item {
             Box(modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) {
@@ -356,7 +368,10 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
                         }
                         Column {
                             Text("Series and episodes", fontWeight = FontWeight.Bold)
-                            Text("2 Seasons, 24 Episodes", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "${pluralizeCount(seasonCount, "Season", "Seasons")}, ${pluralizeCount(episodeCount, "Episode", "Episodes")}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                     Text("All", modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Color.White).clickable { onEpisodesClick() }.padding(horizontal = 18.dp, vertical = 10.dp), fontWeight = FontWeight.Bold)
