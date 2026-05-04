@@ -33,6 +33,7 @@ enum class CategoryIcon {
 }
 
 data class ProfileSummary(
+    val id: String,
     val name: String,
     val email: String,
     val initials: String,
@@ -97,6 +98,16 @@ data class SeriesCastMember(
     val photoUrl: String? = null
 )
 
+data class SeriesReviewItem(
+    val id: String,
+    val userId: String,
+    val userName: String,
+    val userAvatarUrl: String? = null,
+    val rating: Float,
+    val text: String,
+    val createdAt: String? = null
+)
+
 data class EpisodeItem(
     val id: String,
     val badge: String,
@@ -115,7 +126,7 @@ data class SeriesDetailData(
     val rating: String,
     val reviewCount: String,
     val cast: List<SeriesCastMember>,
-    val reviews: List<String>,
+    val reviews: List<SeriesReviewItem>,
     val seasons: List<String>,
     val episodes: List<EpisodeItem>,
     val trailerUrl: String? = null,

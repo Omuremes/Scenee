@@ -23,6 +23,7 @@ class ProfileRepository @Inject constructor(
     suspend fun getProfileSummary(): ProfileSummary {
         val user = getMe()
         return ProfileSummary(
+            id = user.id,
             name = user.username ?: user.email,
             email = user.email,
             initials = buildInitials(user.username, user.email),

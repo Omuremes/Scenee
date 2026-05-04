@@ -1,22 +1,28 @@
 package com.example.cinescope.data.series
 
 import com.example.cinescope.data.remote.SerialApiService
+import com.example.cinescope.data.remote.dto.SerialReviewCreateRequest
+import com.example.cinescope.data.remote.dto.SerialReviewUpdateRequest
 import com.example.cinescope.data.remote.dto.SerialDetailDto
 import com.example.cinescope.data.remote.dto.SerialDto
 import com.example.cinescope.data.remote.dto.SerialEpisodeDto
+import com.example.cinescope.data.local.SessionManager
 import com.example.cinescope.presentation.models.EpisodeItem
 import com.example.cinescope.presentation.models.PosterTheme
 import com.example.cinescope.presentation.models.SeriesCastMember
 import com.example.cinescope.presentation.models.SeriesDetailData
+import com.example.cinescope.presentation.models.SeriesReviewItem
 import com.example.cinescope.presentation.models.SeriesPoster
 import com.example.cinescope.presentation.models.SeriesSection
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
 
 @Singleton
 class SeriesRepository @Inject constructor(
-    private val serialApiService: SerialApiService
+    private val serialApiService: SerialApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getSeriesSections(): List<SeriesSection> {
         val popular = serialApiService.getPopularSerials().map(::mapToPoster)
@@ -41,6 +47,37 @@ class SeriesRepository @Inject constructor(
 
     suspend fun getSerialDetail(serialId: String): SeriesDetailData {
         return serialApiService.getSerialDetail(serialId).toDetailData()
+    }
+
+    suspend fun submitSerialReview(serialId: String, rating: Float, text: String) {
+        val normalizedText = text.trim().takeIf { it.isNotBlank() }
+        serialApiService.createSerialReview(
+            token = bearerToken(),
+            SerialReviewCreateRequest(
+                serial_id = serialId,
+                rating = rating.toDouble(),
+                text = normalizedText
+            )
+        )
+    }
+
+    suspend fun updateSerialReview(reviewId: String, rating: Float, text: String) {
+        val normalizedText = text.trim().takeIf { it.isNotBlank() }
+        serialApiService.updateSerialReview(
+            token = bearerToken(),
+            reviewId = reviewId,
+            request = SerialReviewUpdateRequest(
+                rating = rating.toDouble(),
+                text = normalizedText
+            )
+        )
+    }
+
+    suspend fun deleteSerialReview(reviewId: String) {
+        serialApiService.deleteSerialReview(
+            token = bearerToken(),
+            reviewId = reviewId
+        )
     }
 
     suspend fun getSeasonEpisodes(serialId: String, seasonNumber: Int): List<EpisodeItem> {
@@ -73,14 +110,24 @@ class SeriesRepository @Inject constructor(
             genres = categories.map { it.name },
             storyline = description,
             rating = String.format("%.1f", average_rating),
-            reviewCount = "0 Reviews",
+            reviewCount = "${reviews.size} Reviews",
             cast = actors.map { actor ->
                 SeriesCastMember(
                     name = actor.full_name,
                     photoUrl = actor.photo_url
                 )
             },
-            reviews = emptyList(),
+            reviews = reviews.map { review ->
+                SeriesReviewItem(
+                    id = review.id,
+                    userId = review.user_id,
+                    userName = review.user.username?.takeIf { it.isNotBlank() } ?: "Viewer",
+                    userAvatarUrl = review.user.avatar_url,
+                    rating = review.rating.toFloat(),
+                    text = review.text.orEmpty(),
+                    createdAt = review.created_at
+                )
+            },
             seasons = sortedSeasons.map { it.title ?: "Season ${it.season_number}" },
             episodes = episodes,
             trailerUrl = trailer_url,
@@ -113,5 +160,11 @@ class SeriesRepository @Inject constructor(
             minutes > 0 -> String.format(Locale.ENGLISH, "%dm", minutes)
             else -> String.format(Locale.ENGLISH, "%ds", seconds)
         }
+    }
+
+    private suspend fun bearerToken(): String {
+        val token = sessionManager.authToken.first()
+        require(!token.isNullOrBlank()) { "Authorization required" }
+        return "Bearer $token"
     }
 }

@@ -1,3 +1,5 @@
+@file:OptIn(androidx.media3.common.util.UnstableApi::class)
+
 package com.example.cinescope.presentation.details
 
 import android.app.Activity
@@ -32,6 +34,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.MoreVert
@@ -41,19 +46,25 @@ import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,11 +83,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.media3.common.util.UnstableApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
@@ -312,7 +326,16 @@ private fun pluralizeCount(count: Int, singular: String, plural: String): String
 }
 
 @Composable
-fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesClick: () -> Unit) {
+fun SeriesDetailScreen(
+    data: SeriesDetailData,
+    isAuthenticated: Boolean,
+    currentUserId: String? = null,
+    onBack: () -> Unit,
+    onEpisodesClick: () -> Unit,
+    onCreateReview: suspend (Float, String) -> Unit,
+    onUpdateReview: suspend (String, Float, String) -> Unit,
+    onDeleteReview: suspend (String) -> Unit
+) {
     val seasonCount = data.seasons.size
     val episodeCount = data.episodes.size
     val seriesSummary = buildList {
@@ -379,10 +402,21 @@ fun SeriesDetailScreen(data: SeriesDetailData, onBack: () -> Unit, onEpisodesCli
         }
         item { RatingSection(data) }
         item { CastSection(data.cast) }
-        item { ReviewsSection(data.reviews) }
+        item {
+            ReviewsSection(
+                reviews = data.reviews,
+                reviewCount = data.reviewCount,
+                isAuthenticated = isAuthenticated,
+                currentUserId = currentUserId,
+                onCreateReview = onCreateReview,
+                onUpdateReview = onUpdateReview,
+                onDeleteReview = onDeleteReview
+            )
+        }
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun HeroTrailerBlock(trailerUrl: String?) {
     val context = LocalContext.current
@@ -502,6 +536,7 @@ fun WatchSeriesScreen(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 fun EpisodePlayerScreen(
     title: String,
@@ -747,6 +782,208 @@ private fun MovieAboutTab(data: MovieDetailData) {
                     Text(item.second, fontWeight = FontWeight.Bold)
                 }
                 if (index != data.details.lastIndex) HorizontalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewsSection(
+    reviews: List<SeriesReviewItem>,
+    reviewCount: String,
+    isAuthenticated: Boolean,
+    currentUserId: String?,
+    onCreateReview: suspend (Float, String) -> Unit,
+    onUpdateReview: suspend (String, Float, String) -> Unit,
+    onDeleteReview: suspend (String) -> Unit
+) {
+    val ownReview = reviews.firstOrNull { it.userId == currentUserId }
+    var rating by remember { mutableIntStateOf(5) }
+    var comment by remember { mutableStateOf("") }
+    var editingReviewId by remember { mutableStateOf<String?>(null) }
+    var isSubmitting by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(ownReview) {
+        if (ownReview != null) {
+            editingReviewId = ownReview.id
+            rating = ownReview.rating.roundToInt().coerceIn(1, 5)
+            comment = ownReview.text
+        } else if (editingReviewId == null) {
+            rating = 5
+            comment = ""
+        }
+    }
+
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text("User Reviews", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+            Text(reviewCount, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+        }
+
+        if (isAuthenticated) {
+            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(24.dp)) {
+                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(
+                        if (editingReviewId != null) "Edit your review" else "Rate this series",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = null,
+                                tint = if (index < rating) Color(0xFFEAB308) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .clickable { rating = index + 1 }
+                            )
+                        }
+                    }
+                    OutlinedTextField(
+                        value = comment,
+                        onValueChange = { comment = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Comment") },
+                        minLines = 3,
+                        maxLines = 5
+                    )
+                    if (errorMessage != null) {
+                        Text(errorMessage.orEmpty(), color = Color.Red, style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                isSubmitting = true
+                                errorMessage = null
+                                try {
+                                    if (editingReviewId != null) {
+                                        onUpdateReview(editingReviewId!!, rating.toFloat(), comment)
+                                    } else {
+                                        onCreateReview(rating.toFloat(), comment)
+                                    }
+                                    editingReviewId = null
+                                    comment = ""
+                                    rating = 5
+                                } catch (err: Exception) {
+                                    errorMessage = err.message ?: "Failed to submit review"
+                                } finally {
+                                    isSubmitting = false
+                                }
+                            }
+                        },
+                        enabled = !isSubmitting,
+                        colors = ButtonDefaults.buttonColors(containerColor = Crimson)
+                    ) {
+                        Text(if (isSubmitting) "Submitting..." else if (editingReviewId != null) "Update review" else "Post review")
+                    }
+                }
+            }
+        } else {
+            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(24.dp)) {
+                Text(
+                    "Sign in to rate and comment on this series.",
+                    modifier = Modifier.padding(18.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        if (reviews.isEmpty()) {
+            Text(
+                "No comments yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                reviews.forEach { review ->
+                    ReviewCard(
+                        review = review,
+                        isOwnReview = review.userId == currentUserId,
+                        onEdit = {
+                            editingReviewId = review.id
+                            rating = review.rating.roundToInt().coerceIn(1, 5)
+                            comment = review.text
+                        },
+                        onDelete = {
+                            scope.launch {
+                                isSubmitting = true
+                                errorMessage = null
+                                try {
+                                    onDeleteReview(review.id)
+                                    if (editingReviewId == review.id) {
+                                        editingReviewId = null
+                                        rating = 5
+                                        comment = ""
+                                    }
+                                } catch (err: Exception) {
+                                    errorMessage = err.message ?: "Failed to delete review"
+                                } finally {
+                                    isSubmitting = false
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewCard(
+    review: SeriesReviewItem,
+    isOwnReview: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
+        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                ActorAvatar(photoUrl = review.userAvatarUrl, name = review.userName)
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(review.userName, fontWeight = FontWeight.Bold)
+                        if (isOwnReview) {
+                            Text(
+                                "You",
+                                color = Crimson,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        val stars = review.rating.roundToInt().coerceIn(1, 5)
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = if (index < stars) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = null,
+                                tint = if (index < stars) Color(0xFFEAB308) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(String.format("%.1f / 5", review.rating), fontWeight = FontWeight.Bold, color = Crimson)
+                    if (isOwnReview) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(onClick = onEdit) {
+                                Icon(Icons.Outlined.Edit, contentDescription = "Edit review", tint = Crimson)
+                            }
+                            IconButton(onClick = onDelete) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Delete review", tint = Crimson)
+                            }
+                        }
+                    }
+                }
+            }
+            if (review.text.isNotBlank()) {
+                Text(review.text, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

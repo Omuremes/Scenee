@@ -101,6 +101,7 @@ val bottomNavRouteSet = setOf(
 fun CineScopeNavGraph(
     navController: NavHostController,
     appState: CineScopeUiState,
+    currentUserId: String? = null,
     startDestination: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
@@ -276,8 +277,13 @@ fun CineScopeNavGraph(
                 is DetailUiState.SuccessSeries -> {
                     SeriesDetailScreen(
                         data = state.data,
+                        isAuthenticated = appState.isAuthenticated,
+                        currentUserId = currentUserId,
                         onBack = { navController.popBackStack() },
-                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
+                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) },
+                        onCreateReview = { rating, text -> detailViewModel.submitSeriesReview(movieId, rating, text) },
+                        onUpdateReview = { reviewId, rating, text -> detailViewModel.updateSeriesReview(movieId, reviewId, rating, text) },
+                        onDeleteReview = { reviewId -> detailViewModel.deleteSeriesReview(movieId, reviewId) }
                     )
                 }
                 is DetailUiState.SuccessEvent -> {
@@ -332,8 +338,13 @@ fun CineScopeNavGraph(
                 is DetailUiState.SuccessSeries -> {
                     SeriesDetailScreen(
                         data = state.data,
+                        isAuthenticated = appState.isAuthenticated,
+                        currentUserId = currentUserId,
                         onBack = { navController.popBackStack() },
-                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) }
+                        onEpisodesClick = { navController.navigate(AppRoute.WatchSeries.createRoute(movieId)) },
+                        onCreateReview = { rating, text -> detailViewModel.submitSeriesReview(movieId, rating, text) },
+                        onUpdateReview = { reviewId, rating, text -> detailViewModel.updateSeriesReview(movieId, reviewId, rating, text) },
+                        onDeleteReview = { reviewId -> detailViewModel.deleteSeriesReview(movieId, reviewId) }
                     )
                 }
                 is DetailUiState.SuccessEvent -> EventDetailScreen(

@@ -112,6 +112,7 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
         CineScopeNavGraph(
             navController = navController,
             appState = uiState,
+            currentUserId = uiState.profileSummary?.id,
             startDestination = BottomNavRoute.Home.route,
             onRetry = viewModel::refresh,
             modifier = Modifier.padding(innerPadding)
