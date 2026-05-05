@@ -14,7 +14,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +30,7 @@ import com.example.cinescope.data.home.HomeRepository
 import com.example.cinescope.data.profile.ProfileRepository
 import com.example.cinescope.presentation.models.CineScopeUiState
 import com.example.cinescope.ui.components.CineScopeTopBar
+import com.example.cinescope.ui.components.collectAsLifecycleState
 import com.example.cinescope.ui.navigation.AppRoute
 import com.example.cinescope.ui.navigation.BottomNavRoute
 import com.example.cinescope.ui.navigation.CineScopeNavGraph
@@ -94,7 +94,7 @@ class CineScopeViewModel @Inject constructor(
 @Composable
 fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
     val navController = rememberNavController()
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsLifecycleState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 

@@ -71,8 +71,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -88,9 +86,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import kotlinx.coroutines.Dispatchers
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
@@ -1134,9 +1131,6 @@ private fun MovieCommentsTab(data: MovieDetailData) {
 @Composable
 private fun ActorAvatar(photoUrl: String?, name: String) {
     val fallbackColor = MaterialTheme.colorScheme.surfaceVariant
-    val bitmapState = androidx.compose.runtime.produceState<ImageBitmap?>(initialValue = null, key1 = photoUrl) {
-        value = loadBitmapFromUrl(photoUrl)
-    }
 
     Box(
         modifier = Modifier
@@ -1145,33 +1139,20 @@ private fun ActorAvatar(photoUrl: String?, name: String) {
             .background(fallbackColor),
         contentAlignment = Alignment.Center
     ) {
-        val bitmap = bitmapState.value
-        if (bitmap != null) {
-            androidx.compose.foundation.Image(
-                bitmap = bitmap,
+        Text(
+            text = name.take(1).uppercase(),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (!photoUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = photoUrl,
                 contentDescription = name,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-        } else {
-            Text(
-                text = name.take(1).uppercase(),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
-    }
-}
-
-private suspend fun loadBitmapFromUrl(photoUrl: String?): ImageBitmap? {
-    if (photoUrl.isNullOrBlank()) return null
-    return withContext(Dispatchers.IO) {
-        runCatching {
-            java.net.URL(photoUrl).openStream().use { input ->
-                android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
-            }
-        }.getOrNull()
     }
 }
 

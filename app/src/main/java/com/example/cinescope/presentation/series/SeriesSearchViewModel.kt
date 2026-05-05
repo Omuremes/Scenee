@@ -5,7 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.cinescope.data.series.SeriesRepository
 import com.example.cinescope.presentation.models.SeriesPoster
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,30 +34,39 @@ class SeriesSearchViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SeriesSearchUiState>(SeriesSearchUiState.Idle)
     val uiState: StateFlow<SeriesSearchUiState> = _uiState.asStateFlow()
 
-    private var searchJob: Job? = null
+    init {
+        observeQuery()
+    }
 
     fun onQueryChange(query: String) {
         _query.value = query
-        search(query = query)
     }
 
-    private fun search(query: String) {
-        searchJob?.cancel()
+    @OptIn(FlowPreview::class)
+    private fun observeQuery() {
+        viewModelScope.launch {
+            _query
+                .debounce(350)
+                .map { it.trim() }
+                .distinctUntilChanged()
+                .collectLatest(::search)
+        }
+    }
 
-        val trimmed = query.trim()
-        if (trimmed.isBlank()) {
+    private suspend fun search(query: String) {
+        if (query.isBlank()) {
             _uiState.value = SeriesSearchUiState.Idle
             return
         }
 
-        searchJob = viewModelScope.launch {
-            _uiState.value = SeriesSearchUiState.Loading
-            try {
-                val results = repository.searchSerials(query = trimmed)
-                _uiState.value = SeriesSearchUiState.Success(trimmed, results)
-            } catch (e: Exception) {
-                _uiState.value = SeriesSearchUiState.Error(e.message ?: "Failed to search series")
-            }
+        _uiState.value = SeriesSearchUiState.Loading
+        try {
+            val results = repository.searchSerials(query = query)
+            _uiState.value = SeriesSearchUiState.Success(query, results)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            _uiState.value = SeriesSearchUiState.Error(e.message ?: "Failed to search series")
         }
     }
 }

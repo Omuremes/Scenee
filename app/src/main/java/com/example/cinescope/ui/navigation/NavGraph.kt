@@ -11,7 +11,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +45,7 @@ import com.example.cinescope.presentation.series.SeriesViewModel
 import com.example.cinescope.presentation.tickets.TicketsScreen
 import com.example.cinescope.presentation.tickets.TicketDetailScreen
 import com.example.cinescope.presentation.tickets.TicketsViewModel
+import com.example.cinescope.ui.components.collectAsLifecycleState
 
 sealed class BottomNavRoute(val route: String, val label: String) {
     data object Home : BottomNavRoute("home", "Poster")
@@ -149,7 +149,7 @@ fun CineScopeNavGraph(
         }
         composable(BottomNavRoute.Series.route) {
             val seriesViewModel: SeriesViewModel = hiltViewModel()
-            val seriesState by seriesViewModel.uiState.collectAsState()
+            val seriesState by seriesViewModel.uiState.collectAsLifecycleState()
 
             when (val state = seriesState) {
                 SeriesUiState.Loading -> SeriesLoadingScreen()
@@ -175,7 +175,7 @@ fun CineScopeNavGraph(
         ) { backStackEntry ->
             val sectionTitle = backStackEntry.arguments?.getString("sectionTitle").orEmpty()
             val seriesViewModel: SeriesViewModel = hiltViewModel()
-            val seriesState by seriesViewModel.uiState.collectAsState()
+            val seriesState by seriesViewModel.uiState.collectAsLifecycleState()
 
             when (val state = seriesState) {
                 SeriesUiState.Loading -> SeriesLoadingScreen()
@@ -203,7 +203,7 @@ fun CineScopeNavGraph(
         }
         composable(BottomNavRoute.Tickets.route) {
             val ticketsViewModel: TicketsViewModel = hiltViewModel()
-            val ticketsState by ticketsViewModel.uiState.collectAsState()
+            val ticketsState by ticketsViewModel.uiState.collectAsLifecycleState()
 
             LaunchedEffect(appState.isAuthenticated) {
                 if (appState.isAuthenticated) {
@@ -235,7 +235,7 @@ fun CineScopeNavGraph(
         ) { backStackEntry ->
             val ticketId = backStackEntry.arguments?.getString("ticketId").orEmpty()
             val ticketsViewModel: TicketsViewModel = hiltViewModel()
-            val ticketsState by ticketsViewModel.uiState.collectAsState()
+            val ticketsState by ticketsViewModel.uiState.collectAsLifecycleState()
 
             LaunchedEffect(appState.isAuthenticated) {
                 if (appState.isAuthenticated) {
@@ -349,7 +349,7 @@ fun CineScopeNavGraph(
             val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
             val requestKey = DetailViewModel.cinemaEventRequestKey(movieId)
             val detailViewModel: DetailViewModel = hiltViewModel()
-            val detailState by detailViewModel.uiState.collectAsState()
+            val detailState by detailViewModel.uiState.collectAsLifecycleState()
             var showAuthRequired by remember { mutableStateOf(false) }
 
             LaunchedEffect(movieId) {
@@ -420,7 +420,7 @@ fun CineScopeNavGraph(
             val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
             val requestKey = DetailViewModel.seriesRequestKey(movieId)
             val detailViewModel: DetailViewModel = hiltViewModel()
-            val detailState by detailViewModel.uiState.collectAsState()
+            val detailState by detailViewModel.uiState.collectAsLifecycleState()
 
             LaunchedEffect(movieId) {
                 detailViewModel.loadSeriesDetail(movieId)
@@ -467,7 +467,7 @@ fun CineScopeNavGraph(
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             val requestKey = DetailViewModel.eventRequestKey(eventId)
             val detailViewModel: DetailViewModel = hiltViewModel()
-            val detailState by detailViewModel.uiState.collectAsState()
+            val detailState by detailViewModel.uiState.collectAsLifecycleState()
             var showAuthRequired by remember { mutableStateOf(false) }
 
             LaunchedEffect(eventId) {
@@ -528,7 +528,7 @@ fun CineScopeNavGraph(
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             val requestKey = DetailViewModel.eventRequestKey(eventId)
             val detailViewModel: DetailViewModel = hiltViewModel()
-            val detailState by detailViewModel.uiState.collectAsState()
+            val detailState by detailViewModel.uiState.collectAsLifecycleState()
             var showAuthRequired by remember { mutableStateOf(false) }
 
             LaunchedEffect(eventId) {
@@ -589,7 +589,7 @@ fun CineScopeNavGraph(
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             val requestKey = DetailViewModel.eventRequestKey(eventId)
             val detailViewModel: DetailViewModel = hiltViewModel()
-            val detailState by detailViewModel.uiState.collectAsState()
+            val detailState by detailViewModel.uiState.collectAsLifecycleState()
             var showAuthRequired by remember { mutableStateOf(false) }
 
             LaunchedEffect(eventId) {
@@ -655,7 +655,7 @@ fun CineScopeNavGraph(
             )
         ) {
             val bookingViewModel: BookingViewModel = hiltViewModel()
-            val bookingState by bookingViewModel.uiState.collectAsState()
+            val bookingState by bookingViewModel.uiState.collectAsLifecycleState()
 
             if (appState.isAuthenticated) {
                 BookingScreen(
@@ -680,19 +680,19 @@ fun CineScopeNavGraph(
             arguments = listOf(navArgument("movieId") { type = NavType.StringType })
         ) { backStackEntry ->
             val movieId = backStackEntry.arguments?.getString("movieId") ?: ""
-            val requestKey = DetailViewModel.seriesRequestKey(movieId)
-            val detailViewModel: DetailViewModel = hiltViewModel()
-            val detailState by detailViewModel.uiState.collectAsState()
+            if (appState.isAuthenticated) {
+                val requestKey = DetailViewModel.seriesRequestKey(movieId)
+                val detailViewModel: DetailViewModel = hiltViewModel()
+                val detailState by detailViewModel.uiState.collectAsLifecycleState()
 
-            LaunchedEffect(movieId) {
-                detailViewModel.loadSeriesDetail(movieId)
-            }
+                LaunchedEffect(movieId) {
+                    detailViewModel.loadSeriesDetail(movieId)
+                }
 
-            if (!detailState.isForRequest(requestKey)) {
-                SeriesLoadingScreen()
-            } else when (val state = detailState) {
-                is DetailUiState.SuccessSeries -> {
-                    if (appState.isAuthenticated) {
+                if (!detailState.isForRequest(requestKey)) {
+                    SeriesLoadingScreen()
+                } else when (val state = detailState) {
+                    is DetailUiState.SuccessSeries -> {
                         WatchSeriesScreen(
                             data = state.data,
                             onBack = { navController.popBackStack() },
@@ -708,24 +708,25 @@ fun CineScopeNavGraph(
                                 }
                             }
                         )
-                    } else {
-                        LaunchedEffect(Unit) {
-                            navController.navigate(AppRoute.Login.route)
-                        }
                     }
+                    is DetailUiState.Loading -> SeriesLoadingScreen()
+                    is DetailUiState.Error -> SeriesErrorScreen(
+                        message = state.message,
+                        onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                    )
+                    is DetailUiState.SuccessMovie -> SeriesErrorScreen(
+                        message = "Selected item is not a series.",
+                        onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                    )
+                    is DetailUiState.SuccessEvent -> SeriesErrorScreen(
+                        message = "Selected item is not a series.",
+                        onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+                    )
                 }
-                is DetailUiState.Loading -> SeriesLoadingScreen()
-                is DetailUiState.Error -> SeriesErrorScreen(
-                    message = state.message,
-                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
-                )
-                is DetailUiState.SuccessMovie -> SeriesErrorScreen(
-                    message = "Selected item is not a series.",
-                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
-                )
-                is DetailUiState.SuccessEvent -> SeriesErrorScreen(
-                    message = "Selected item is not a series.",
-                    onRetry = { detailViewModel.loadSeriesDetail(movieId) }
+            } else {
+                AuthRequiredDialog(
+                    onDismiss = { navController.popBackStack() },
+                    onLogin = { navController.navigate(AppRoute.Login.route) }
                 )
             }
         }

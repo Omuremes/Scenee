@@ -9,6 +9,8 @@ import com.example.cinescope.presentation.models.EventDetailData
 import com.example.cinescope.presentation.models.MovieDetailData
 import com.example.cinescope.presentation.models.SeriesDetailData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,51 +34,89 @@ class DetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading())
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
+    private var loadJob: Job? = null
+    private var loadGeneration = 0L
 
     fun loadMovieDetail(movieId: String) {
         val requestKey = movieRequestKey(movieId)
-        viewModelScope.launch {
+        val generation = nextLoadGeneration()
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = DetailUiState.Loading(requestKey)
             try {
-                _uiState.value = DetailUiState.SuccessMovie(requestKey, movieRepository.getMovieDetail(movieId))
+                val detail = movieRepository.getMovieDetail(movieId)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.SuccessMovie(requestKey, detail)
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                }
             }
         }
     }
 
     fun loadCinemaEventDetail(eventId: String) {
         val requestKey = cinemaEventRequestKey(eventId)
-        viewModelScope.launch {
+        val generation = nextLoadGeneration()
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = DetailUiState.Loading(requestKey)
             try {
-                _uiState.value = DetailUiState.SuccessMovie(requestKey, eventRepository.getCinemaEventDetail(eventId))
+                val detail = eventRepository.getCinemaEventDetail(eventId)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.SuccessMovie(requestKey, detail)
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                }
             }
         }
     }
 
     fun loadEventDetail(eventId: String) {
         val requestKey = eventRequestKey(eventId)
-        viewModelScope.launch {
+        val generation = nextLoadGeneration()
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = DetailUiState.Loading(requestKey)
             try {
-                _uiState.value = DetailUiState.SuccessEvent(requestKey, eventRepository.getEventDetail(eventId))
+                val detail = eventRepository.getEventDetail(eventId)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.SuccessEvent(requestKey, detail)
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                }
             }
         }
     }
 
     fun loadSeriesDetail(serialId: String) {
         val requestKey = seriesRequestKey(serialId)
-        viewModelScope.launch {
+        val generation = nextLoadGeneration()
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = DetailUiState.Loading(requestKey)
             try {
-                _uiState.value = DetailUiState.SuccessSeries(requestKey, seriesRepository.getSerialDetail(serialId))
+                val detail = seriesRepository.getSerialDetail(serialId)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.SuccessSeries(requestKey, detail)
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                _uiState.value = DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                updateIfCurrent(requestKey, generation) {
+                    DetailUiState.Error(e.message ?: "Unknown error", requestKey)
+                }
             }
         }
     }
@@ -99,6 +139,17 @@ class DetailViewModel @Inject constructor(
         _uiState.value = DetailUiState.SuccessSeries(requestKey, seriesRepository.getSerialDetail(serialId))
     }
 
+    private fun nextLoadGeneration(): Long {
+        loadGeneration += 1
+        return loadGeneration
+    }
+
+    private inline fun updateIfCurrent(requestKey: String, generation: Long, stateFactory: () -> DetailUiState) {
+        if (loadGeneration == generation && _uiState.value.activeRequestKey == requestKey) {
+            _uiState.value = stateFactory()
+        }
+    }
+
     companion object {
         fun movieRequestKey(movieId: String): String = "movie:$movieId"
         fun cinemaEventRequestKey(eventId: String): String = "cinema-event:$eventId"
@@ -106,3 +157,12 @@ class DetailViewModel @Inject constructor(
         fun seriesRequestKey(serialId: String): String = "series:$serialId"
     }
 }
+
+private val DetailUiState.activeRequestKey: String?
+    get() = when (this) {
+        is DetailUiState.Loading -> requestKey
+        is DetailUiState.SuccessSeries -> requestKey
+        is DetailUiState.SuccessMovie -> requestKey
+        is DetailUiState.SuccessEvent -> requestKey
+        is DetailUiState.Error -> requestKey
+    }
