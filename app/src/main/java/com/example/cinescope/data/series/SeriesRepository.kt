@@ -18,6 +18,8 @@ import com.example.cinescope.presentation.models.SeriesSection
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 
 @Singleton
@@ -25,12 +27,16 @@ class SeriesRepository @Inject constructor(
     private val serialApiService: SerialApiService,
     private val sessionManager: SessionManager
 ) {
-    suspend fun getSeriesSections(): List<SeriesSection> {
-        val popular = serialApiService.getPopularSerials().map(::mapToPoster)
-        val new = serialApiService.getNewSerials().map(::mapToPoster)
-        val all = serialApiService.getSerials().items.map(::mapToPoster)
+    suspend fun getSeriesSections(): List<SeriesSection> = coroutineScope {
+        val popularDeferred = async { serialApiService.getPopularSerials().map(::mapToPoster) }
+        val newDeferred = async { serialApiService.getNewSerials().map(::mapToPoster) }
+        val allDeferred = async { serialApiService.getSerials().items.map(::mapToPoster) }
 
-        return listOf(
+        val popular = popularDeferred.await()
+        val new = newDeferred.await()
+        val all = allDeferred.await()
+
+        listOf(
             SeriesSection("Popular Series", popular),
             SeriesSection("New Releases", new),
             SeriesSection("All Series", all)

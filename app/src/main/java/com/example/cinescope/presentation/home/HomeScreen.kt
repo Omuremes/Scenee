@@ -108,7 +108,7 @@ fun HomeScreen(
             errorMessage != null -> item { HomeErrorBlock(message = errorMessage, onRetry = onRetry) }
             visibleSections.isEmpty() -> item { EmptyPosterBlock() }
             else -> {
-                items(visibleSections) { section ->
+                items(visibleSections, key = { it.title }) { section ->
                     HomeSectionBlock(
                         section = section,
                         onMovieClick = onMovieClick,
@@ -241,7 +241,7 @@ private fun HomeSectionBlock(
         }
         Spacer(Modifier.height(16.dp))
         LazyRow(contentPadding = PaddingValues(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            items(section.items) { poster ->
+            items(section.items, key = { it.id }) { poster ->
                 when (section.title) {
                     "Concerts" -> ConcertCard(poster, onConcertClick)
                     "Stand-Up" -> StandupCard(poster, onStandupClick)
@@ -256,7 +256,7 @@ private fun HomeSectionBlock(
 @Composable
 private fun MovieCard(poster: MediaPoster, onMovieClick: (String) -> Unit) {
     Column(modifier = Modifier
-        .width(180.dp)
+        .width(192.dp)
         .clickable { onMovieClick(poster.id) }) {
         PosterCover(
             poster = poster,
@@ -277,46 +277,69 @@ private fun MovieCard(poster: MediaPoster, onMovieClick: (String) -> Unit) {
 @Composable
 private fun ConcertCard(poster: MediaPoster, onClick: (String) -> Unit) {
     Column(modifier = Modifier
-        .width(300.dp)
+        .width(192.dp)
         .clickable { onClick(poster.id) }) {
         PosterCover(
             poster = poster,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
+                .aspectRatio(2f / 3f)
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
             poster.title,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Text(poster.subtitle, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(6.dp))
-        Text(poster.meta, style = MaterialTheme.typography.labelSmall, color = Crimson)
+        Text(
+            poster.subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            poster.meta,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Crimson,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
 @Composable
 private fun StandupCard(poster: MediaPoster, onClick: (String) -> Unit) {
     Column(modifier = Modifier
-        .width(260.dp)
+        .width(192.dp)
         .clickable { onClick(poster.id) }) {
         PosterCover(
             poster = poster,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(4f / 3f)
+                .aspectRatio(2f / 3f)
         )
-        Spacer(Modifier.height(14.dp))
-        Text(poster.title, style = MaterialTheme.typography.titleLarge)
-        Text(poster.subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(10.dp))
+        Text(
+            poster.title,
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            poster.subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         Text(
             poster.meta,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

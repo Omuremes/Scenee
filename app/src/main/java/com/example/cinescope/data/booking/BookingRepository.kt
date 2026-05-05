@@ -149,11 +149,13 @@ class BookingRepository @Inject constructor(
     ): TicketSummary {
         val session = sessions.firstOrNull { it.id == booking.session_id }
         val seat = seats.firstOrNull { it.id == booking.seat_id }
+        val selectedSeatPrice = seat?.price
         val dateTime = session?.starts_at?.toDateTime()?.format(ticketDateFormatter)
             ?: booking.created_at.toDateTime()?.format(ticketDateFormatter)
             ?: booking.created_at
         val priceRange = when {
-            type.usesSeatPrice() -> seats.priceRangeLabel().orEmpty()
+            type.usesSeatPrice() && selectedSeatPrice != null -> selectedSeatPrice.formatPrice()
+            type.usesSeatPrice() -> booking.total_price.formatPrice()
             session?.base_price != null -> session.base_price.formatPrice()
             else -> booking.total_price.formatPrice()
         }
@@ -168,6 +170,7 @@ class BookingRepository @Inject constructor(
             ).distinct().joinToString(", "),
             accent = type.toAccentColor(),
             posterTheme = type.toPosterTheme(),
+            posterUrl = poster_url ?: image_url,
             id = booking.id,
             bookingReference = booking.booking_reference,
             status = booking.status,

@@ -31,18 +31,20 @@ import kotlinx.coroutines.coroutineScope
 class EventRepository @Inject constructor(
     private val eventApiService: EventApiService
 ) {
-    suspend fun getPosterSections(): List<HomeSection> {
-        return posterTypes.mapNotNull { section ->
-            val events = eventApiService.getEvents(type = section.type, skip = 0, limit = 20)
-            if (events.isEmpty()) {
-                null
-            } else {
-                HomeSection(
-                    title = section.title,
-                    items = events.map(::mapCardToPoster)
-                )
+    suspend fun getPosterSections(): List<HomeSection> = coroutineScope {
+        posterTypes.map { section ->
+            async {
+                val events = eventApiService.getEvents(type = section.type, skip = 0, limit = 20)
+                if (events.isEmpty()) {
+                    null
+                } else {
+                    HomeSection(
+                        title = section.title,
+                        items = events.map(::mapCardToPoster)
+                    )
+                }
             }
-        }
+        }.mapNotNull { it.await() }
     }
 
     suspend fun getCinemaEventDetail(eventId: String): MovieDetailData = coroutineScope {
