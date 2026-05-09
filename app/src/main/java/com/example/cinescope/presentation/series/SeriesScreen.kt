@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -239,15 +241,44 @@ private fun SeriesPosterCard(
 ) {
     Column(modifier = modifier.clickable { onSeriesClick(poster.id) }) {
         if (!poster.posterUrl.isNullOrBlank()) {
-            AsyncImage(
-                model = poster.posterUrl,
-                contentDescription = poster.title,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(2f / 3f)
-                    .clip(RoundedCornerShape(28.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .clip(RoundedCornerShape(28.dp))
+            ) {
+                AsyncImage(
+                    model = poster.posterUrl,
+                    contentDescription = poster.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                
+                // Rating Overlay
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(12.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color.White.copy(alpha = 0.94f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Outlined.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFF59E0B),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = poster.rating,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         } else {
             PosterBox(
                 modifier = Modifier.fillMaxWidth().aspectRatio(2f / 3f),

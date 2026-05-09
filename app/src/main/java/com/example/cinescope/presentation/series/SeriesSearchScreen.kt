@@ -1,5 +1,6 @@
 package com.example.cinescope.presentation.series
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -68,18 +69,11 @@ fun SeriesSearchScreen(
                         disabledIndicatorColor = Color.Transparent
                     )
                 )
-                Text(
-                    text = "Live search runs on every keystroke.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
 
         when (state) {
-            SeriesSearchUiState.Idle -> item {
-                EmptyState("Start typing to search series.")
-            }
+            SeriesSearchUiState.Idle -> {}
             SeriesSearchUiState.Loading -> item {
                 LoadingState()
             }
@@ -128,23 +122,54 @@ private fun SearchResultCard(poster: SeriesPoster, onSeriesClick: (String) -> Un
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.White)
             .clickable { onSeriesClick(poster.id) }
-            .padding(horizontal = 24.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         PosterBox(
             modifier = Modifier
-                .width(88.dp)
+                .width(96.dp)
                 .aspectRatio(2f / 3f),
             theme = poster.theme,
+            posterUrl = poster.posterUrl,
             topBadge = poster.rating,
             compactBadge = true,
             ratingMode = true
         )
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(poster.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(poster.genre, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                poster.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                poster.genre,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Icon(
+                    imageVector = Icons.Outlined.Search, // Using Search icon as placeholder for "View Details" intent
+                    contentDescription = null,
+                    tint = Crimson,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    "View Series",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Crimson,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

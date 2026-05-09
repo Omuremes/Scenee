@@ -34,11 +34,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.PlayArrow
@@ -55,6 +56,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,20 +80,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
-import androidx.media3.common.util.UnstableApi
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun MovieDetailScreen(data: MovieDetailData, onBack: () -> Unit, onBook: (String?) -> Unit) {
@@ -337,6 +340,11 @@ fun SeriesDetailScreen(
     val seasonCount = data.seasons.size
     val episodeCount = data.episodes.size
     var isStorylineExpanded by remember(data.storyline) { mutableStateOf(false) }
+    var showRatingForm by remember { mutableStateOf(false) }
+    var editingReviewId by remember { mutableStateOf<String?>(null) }
+    
+    val ownReview = data.reviews.firstOrNull { it.userId == currentUserId }
+
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
         item {
             HeroTrailerBlock(
@@ -387,7 +395,7 @@ fun SeriesDetailScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Icon(
-                        imageVector = if (isStorylineExpanded) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.KeyboardArrowDown,
+                        imageVector = if (isStorylineExpanded) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown,
                         contentDescription = null,
                         tint = Crimson
                     )
@@ -413,16 +421,49 @@ fun SeriesDetailScreen(
                 }
             }
         }
-        item { RatingSection(data) }
-        item { CastSection(data.cast) }
+        item { CastSection(cast = data.cast) }
+        item { 
+            RatingSection(
+                data = data, 
+                onRateClick = { 
+                    editingReviewId = ownReview?.id
+                    showRatingForm = !showRatingForm 
+                } 
+            ) 
+        }
+
+        if (showRatingForm) {
+            item {
+                val scope = rememberCoroutineScope()
+                RatingFormSection(
+                    initialRating = ownReview?.rating?.toInt() ?: 5,
+                    initialComment = ownReview?.text ?: "",
+                    isEditing = editingReviewId != null,
+                    onDismiss = { showRatingForm = false },
+                    onSubmit = { rating, comment ->
+                        scope.launch {
+                            if (editingReviewId != null) {
+                                onUpdateReview(editingReviewId!!, rating, comment)
+                            } else {
+                                onCreateReview(rating, comment)
+                            }
+                            showRatingForm = false
+                        }
+                    }
+                )
+            }
+        }
+
         item {
             ReviewsSection(
                 reviews = data.reviews,
                 reviewCount = data.reviewCount,
                 isAuthenticated = isAuthenticated,
                 currentUserId = currentUserId,
-                onCreateReview = onCreateReview,
-                onUpdateReview = onUpdateReview,
+                onEditOwnReview = { reviewId ->
+                    editingReviewId = reviewId
+                    showRatingForm = true
+                },
                 onDeleteReview = onDeleteReview
             )
         }
@@ -864,33 +905,99 @@ private fun MovieAboutTab(data: MovieDetailData) {
 }
 
 @Composable
+private fun RatingSection(data: SeriesDetailData, onRateClick: () -> Unit) {
+    Card(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x1A9CC4FF)),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFEAB308))
+                }
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(data.rating, fontWeight = FontWeight.Bold)
+                        repeat(1) { Icon(Icons.Filled.Star, contentDescription = null, tint = Color(0xFFEAB308), modifier = Modifier.size(14.dp)) }
+                    }
+                    Text(data.reviewCount, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            Text(
+                "Rate",
+                modifier = Modifier
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(Color.White)
+                    .clickable { onRateClick() }
+                    .padding(horizontal = 22.dp, vertical = 10.dp),
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun CastSection(cast: List<SeriesCastMember>) {
+    Column(modifier = Modifier.padding(vertical = 20.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Main Cast", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        }
+        Spacer(Modifier.height(16.dp))
+        Row(modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+            cast.forEach { actor ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    ActorAvatar(photoUrl = actor.photoUrl, name = actor.name)
+                    Spacer(Modifier.height(10.dp))
+                    Text(actor.name, modifier = Modifier.width(80.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActorAvatar(photoUrl: String?, name: String) {
+    val fallbackColor = MaterialTheme.colorScheme.surfaceVariant
+
+    Box(
+        modifier = Modifier
+            .size(96.dp)
+            .clip(CircleShape)
+            .background(fallbackColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = name.take(1).uppercase(),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (!photoUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = photoUrl,
+                contentDescription = name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Composable
 private fun ReviewsSection(
     reviews: List<SeriesReviewItem>,
     reviewCount: String,
     isAuthenticated: Boolean,
     currentUserId: String?,
-    onCreateReview: suspend (Float, String) -> Unit,
-    onUpdateReview: suspend (String, Float, String) -> Unit,
+    onEditOwnReview: (String) -> Unit,
     onDeleteReview: suspend (String) -> Unit
 ) {
-    val ownReview = reviews.firstOrNull { it.userId == currentUserId }
-    var rating by remember { mutableIntStateOf(5) }
-    var comment by remember { mutableStateOf("") }
-    var editingReviewId by remember { mutableStateOf<String?>(null) }
-    var isSubmitting by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(ownReview) {
-        if (ownReview != null) {
-            editingReviewId = ownReview.id
-            rating = ownReview.rating.roundToInt().coerceIn(1, 5)
-            comment = ownReview.text
-        } else if (editingReviewId == null) {
-            rating = 5
-            comment = ""
-        }
-    }
 
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -898,78 +1005,9 @@ private fun ReviewsSection(
             Text(reviewCount, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
         }
 
-        if (isAuthenticated) {
-            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(24.dp)) {
-                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(
-                        if (editingReviewId != null) "Edit your review" else "Rate this series",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        repeat(5) { index ->
-                            Icon(
-                                imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
-                                contentDescription = null,
-                                tint = if (index < rating) Color(0xFFEAB308) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .clickable { rating = index + 1 }
-                            )
-                        }
-                    }
-                    OutlinedTextField(
-                        value = comment,
-                        onValueChange = { comment = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Comment") },
-                        minLines = 3,
-                        maxLines = 5
-                    )
-                    if (errorMessage != null) {
-                        Text(errorMessage.orEmpty(), color = Color.Red, style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                isSubmitting = true
-                                errorMessage = null
-                                try {
-                                    if (editingReviewId != null) {
-                                        onUpdateReview(editingReviewId!!, rating.toFloat(), comment)
-                                    } else {
-                                        onCreateReview(rating.toFloat(), comment)
-                                    }
-                                    editingReviewId = null
-                                    comment = ""
-                                    rating = 5
-                                } catch (err: Exception) {
-                                    errorMessage = err.message ?: "Failed to submit review"
-                                } finally {
-                                    isSubmitting = false
-                                }
-                            }
-                        },
-                        enabled = !isSubmitting,
-                        colors = ButtonDefaults.buttonColors(containerColor = Crimson)
-                    ) {
-                        Text(if (isSubmitting) "Submitting..." else if (editingReviewId != null) "Update review" else "Post review")
-                    }
-                }
-            }
-        } else {
-            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)), shape = RoundedCornerShape(24.dp)) {
-                Text(
-                    "Sign in to rate and comment on this series.",
-                    modifier = Modifier.padding(18.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
         if (reviews.isEmpty()) {
             Text(
-                "No comments yet.",
+                "No comments yet. Be the first to share your opinion!",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -979,26 +1017,13 @@ private fun ReviewsSection(
                     ReviewCard(
                         review = review,
                         isOwnReview = review.userId == currentUserId,
-                        onEdit = {
-                            editingReviewId = review.id
-                            rating = review.rating.roundToInt().coerceIn(1, 5)
-                            comment = review.text
-                        },
+                        onEdit = { onEditOwnReview(review.id) },
                         onDelete = {
                             scope.launch {
-                                isSubmitting = true
-                                errorMessage = null
                                 try {
                                     onDeleteReview(review.id)
-                                    if (editingReviewId == review.id) {
-                                        editingReviewId = null
-                                        rating = 5
-                                        comment = ""
-                                    }
-                                } catch (err: Exception) {
-                                    errorMessage = err.message ?: "Failed to delete review"
-                                } finally {
-                                    isSubmitting = false
+                                } catch (e: Exception) {
+                                    // Error handling handled by caller or toast
                                 }
                             }
                         }
@@ -1049,17 +1074,17 @@ private fun ReviewCard(
                     if (isOwnReview) {
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             IconButton(onClick = onEdit) {
-                                Icon(Icons.Outlined.Edit, contentDescription = "Edit review", tint = Crimson)
+                                Icon(Icons.Outlined.Edit, contentDescription = "Edit review", tint = Crimson, modifier = Modifier.size(20.dp))
                             }
                             IconButton(onClick = onDelete) {
-                                Icon(Icons.Outlined.Delete, contentDescription = "Delete review", tint = Crimson)
+                                Icon(Icons.Outlined.Delete, contentDescription = "Delete review", tint = Crimson, modifier = Modifier.size(20.dp))
                             }
                         }
                     }
                 }
             }
             if (review.text.isNotBlank()) {
-                Text(review.text, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(review.text, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
@@ -1116,88 +1141,98 @@ private fun MovieCommentsTab(data: MovieDetailData) {
     }
 }
 
-@Composable private fun RatingSection(data: SeriesDetailData) {
-    Row(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 24.dp, vertical = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Row { repeat(4) { Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFEAB308)) }; Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFEAB308).copy(alpha = 0.4f)) }
-            Spacer(Modifier.height(6.dp))
-            Text("${data.rating} / 5.0", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text(data.reviewCount, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Text("Rate This Series", modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Crimson).padding(horizontal = 18.dp, vertical = 14.dp), color = Color.White, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable private fun CastSection(cast: List<SeriesCastMember>) {
-    Column(modifier = Modifier.padding(vertical = 20.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Main Cast", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("See All", color = Crimson, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(16.dp))
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            cast.forEach { actor ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    ActorAvatar(photoUrl = actor.photoUrl, name = actor.name)
-                    Spacer(Modifier.height(10.dp))
-                    Text(actor.name, modifier = Modifier.width(80.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-    }
-}
-
 @Composable
-private fun ActorAvatar(photoUrl: String?, name: String) {
-    val fallbackColor = MaterialTheme.colorScheme.surfaceVariant
+private fun RatingFormSection(
+    initialRating: Int,
+    initialComment: String,
+    isEditing: Boolean,
+    onDismiss: () -> Unit,
+    onSubmit: (Float, String) -> Unit
+) {
+    var rating by remember { mutableIntStateOf(initialRating) }
+    var comment by remember { mutableStateOf(initialComment) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .size(96.dp)
-            .clip(CircleShape)
-            .background(fallbackColor),
-        contentAlignment = Alignment.Center
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
     ) {
-        Text(
-            text = name.take(1).uppercase(),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (!photoUrl.isNullOrBlank()) {
-            AsyncImage(
-                model = photoUrl,
-                contentDescription = name,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
-    }
-}
-
-@Composable private fun ReviewsSection(reviews: List<String>) {
-    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("User Reviews", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("All", modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 14.dp, vertical = 8.dp), fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(14.dp))
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            reviews.forEach { review ->
-                Card(modifier = Modifier.width(300.dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
-                    Column(modifier = Modifier.padding(18.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant))
-                            Column { Text("Viewer", fontWeight = FontWeight.Bold); Row { repeat(5) { Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFEAB308), modifier = Modifier.size(14.dp)) } } }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Text("\"$review\"", color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 4, overflow = TextOverflow.Ellipsis)
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isEditing) "Edit review" else "New review",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Crimson,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
+                            contentDescription = null,
+                            tint = if (index < rating) Color(0xFFEAB308) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clickable { rating = index + 1 }
+                        )
                     }
                 }
+            }
+
+            androidx.compose.material3.TextField(
+                value = comment,
+                onValueChange = { comment = it },
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)),
+                placeholder = { Text("How was the series?", style = MaterialTheme.typography.bodyMedium) },
+                minLines = 2,
+                maxLines = 4,
+                textStyle = MaterialTheme.typography.bodyMedium,
+                colors = androidx.compose.material3.TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Cancel",
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(999.dp))
+                        .clickable { onDismiss() }
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    if (isSubmitting) "..." else "Submit",
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Crimson)
+                        .clickable(enabled = !isSubmitting) {
+                            isSubmitting = true
+                            onSubmit(rating.toFloat(), comment)
+                        }
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
