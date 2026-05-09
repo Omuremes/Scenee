@@ -1215,7 +1215,16 @@ private fun ActorAvatar(photoUrl: String?, name: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.width(128.dp).height(80.dp).clip(RoundedCornerShape(10.dp))) {
-            PosterBox(modifier = Modifier.fillMaxSize(), theme = episode.theme)
+            if (!episode.posterUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = episode.posterUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                PosterBox(modifier = Modifier.fillMaxSize(), theme = episode.theme)
+            }
             Box(modifier = Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
                 Icon(Icons.Outlined.PlayCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(30.dp))
             }

@@ -120,6 +120,7 @@ data class EpisodeItem(
     val duration: String,
     val description: String = "",
     val videoUrl: String? = null,
+    val posterUrl: String? = null,
     val theme: PosterTheme
 )
 

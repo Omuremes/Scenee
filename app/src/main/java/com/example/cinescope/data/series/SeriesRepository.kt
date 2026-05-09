@@ -161,6 +161,7 @@ class SeriesRepository @Inject constructor(
             duration = dto.duration.toDurationLabel(),
             description = dto.description.orEmpty(),
             videoUrl = dto.episode_file?.video_url,
+            posterUrl = dto.poster_url,
             theme = PosterTheme.VioletPop
         )
     }
