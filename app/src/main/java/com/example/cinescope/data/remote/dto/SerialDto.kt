@@ -80,6 +80,7 @@ data class SerialEpisodeDto(
     val duration: Int = 0,
     val id: String,
     val season_id: String,
+    val poster_url: String? = null,
     val episode_file: SerialEpisodeFileDto? = null
 )
 
