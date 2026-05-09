@@ -11,8 +11,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class TicketFilterTab(
+    val id: String,
+    val label: String
+)
+
 data class TicketsUiState(
-    val tabs: List<String> = emptyList(),
+    val tabs: List<TicketFilterTab> = defaultTicketTabs(),
     val tickets: List<TicketSummary> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -24,7 +29,7 @@ class TicketsViewModel @Inject constructor(
     private val ticketsRepository: TicketsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
-        TicketsUiState(tabs = ticketsRepository.getTicketTabs(), isLoading = true)
+        TicketsUiState(isLoading = true)
     )
     val uiState: StateFlow<TicketsUiState> = _uiState.asStateFlow()
 
@@ -32,8 +37,11 @@ class TicketsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
+                val tickets = ticketsRepository.getTickets()
+                    .filterNot { it.status.equals("cancelled", ignoreCase = true) }
                 _uiState.value = _uiState.value.copy(
-                    tickets = ticketsRepository.getTickets(),
+                    tabs = buildTicketTabs(tickets),
+                    tickets = tickets,
                     isLoading = false
                 )
             } catch (e: Exception) {
@@ -61,3 +69,37 @@ class TicketsViewModel @Inject constructor(
         }
     }
 }
+
+private fun defaultTicketTabs(): List<TicketFilterTab> = listOf(
+    TicketFilterTab(id = "all", label = "All"),
+    TicketFilterTab(id = "cinema", label = "Cinema"),
+    TicketFilterTab(id = "concerts", label = "Concerts"),
+    TicketFilterTab(id = "stand-up", label = "Stand-Up")
+)
+
+private fun buildTicketTabs(tickets: List<TicketSummary>): List<TicketFilterTab> {
+    val existingCategories = tickets
+        .map { it.category.toCategoryId() }
+        .filter { it.isNotBlank() }
+        .toSet()
+
+    val knownTabs = defaultTicketTabs()
+        .filter { tab -> tab.id == "all" || tab.id in existingCategories }
+
+    val customTabs = existingCategories
+        .filterNot { categoryId -> knownTabs.any { it.id == categoryId } }
+        .sorted()
+        .map { categoryId -> TicketFilterTab(id = categoryId, label = categoryId.toTicketLabel()) }
+
+    return (knownTabs + customTabs).ifEmpty { defaultTicketTabs().take(1) }
+}
+
+private fun String.toCategoryId(): String = trim().lowercase()
+
+private fun String.toTicketLabel(): String = split("-", " ")
+    .filter { it.isNotBlank() }
+    .joinToString(" ") { part ->
+        part.replaceFirstChar { char ->
+            if (char.isLowerCase()) char.titlecase() else char.toString()
+        }
+    }

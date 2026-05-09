@@ -16,11 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,7 +53,8 @@ import com.example.cinescope.ui.theme.Crimson
 fun SeriesScreen(
     sections: List<SeriesSection>,
     onSearchClick: () -> Unit,
-    onSeriesClick: (String) -> Unit
+    onSeriesClick: (String) -> Unit,
+    onSeeAllClick: (SeriesSection) -> Unit
 ) {
     var showFilters by remember { mutableStateOf(false) }
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
@@ -114,8 +116,12 @@ fun SeriesScreen(
                 EmptySeriesState()
             }
         } else {
-            items(filteredSections) { section ->
-                SeriesSectionBlock(section, onSeriesClick)
+            items(filteredSections, key = { it.title }) { section ->
+                SeriesSectionBlock(
+                    section = section,
+                    onSeriesClick = onSeriesClick,
+                    onSeeAllClick = { onSeeAllClick(section) }
+                )
             }
         }
     }
@@ -164,22 +170,74 @@ fun SeriesErrorScreen(message: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SeriesSectionBlock(section: SeriesSection, onSeriesClick: (String) -> Unit) {
-    Column(modifier = Modifier.padding(top = 6.dp, bottom = 18.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(section.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text("See All", color = Crimson, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+fun SeriesSectionCatalogScreen(
+    section: SeriesSection,
+    onSeriesClick: (String) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 152.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 24.dp, top = 12.dp, end = 24.dp, bottom = 110.dp),
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+            Text(
+                text = section.title,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
         }
-        Spacer(Modifier.height(14.dp))
-        LazyRow(contentPadding = PaddingValues(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-            items(section.items) { poster -> SeriesPosterCard(poster, onSeriesClick) }
+        if (section.items.isEmpty()) {
+            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                EmptySeriesState()
+            }
+        } else {
+            items(section.items, key = { it.id }) { poster ->
+                SeriesPosterCard(
+                    poster = poster,
+                    onSeriesClick = onSeriesClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun SeriesPosterCard(poster: SeriesPoster, onSeriesClick: (String) -> Unit) {
-    Column(modifier = Modifier.width(192.dp).clickable { onSeriesClick(poster.id) }) {
+private fun SeriesSectionBlock(
+    section: SeriesSection,
+    onSeriesClick: (String) -> Unit,
+    onSeeAllClick: () -> Unit
+) {
+    Column(modifier = Modifier.padding(top = 6.dp, bottom = 18.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(section.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(
+                "See All",
+                modifier = Modifier
+                    .clip(RoundedCornerShape(999.dp))
+                    .clickable { onSeeAllClick() }
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                color = Crimson,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(Modifier.height(14.dp))
+        LazyRow(contentPadding = PaddingValues(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            items(section.items, key = { it.id }) { poster -> SeriesPosterCard(poster, onSeriesClick) }
+        }
+    }
+}
+
+@Composable
+private fun SeriesPosterCard(
+    poster: SeriesPoster,
+    onSeriesClick: (String) -> Unit,
+    modifier: Modifier = Modifier.width(192.dp)
+) {
+    Column(modifier = modifier.clickable { onSeriesClick(poster.id) }) {
         if (!poster.posterUrl.isNullOrBlank()) {
             AsyncImage(
                 model = poster.posterUrl,

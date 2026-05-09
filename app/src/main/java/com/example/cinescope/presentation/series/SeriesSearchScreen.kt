@@ -26,7 +26,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
 import com.example.cinescope.presentation.models.SeriesPoster
 import com.example.cinescope.ui.components.PosterBox
+import com.example.cinescope.ui.components.collectAsLifecycleState
 import com.example.cinescope.ui.theme.Crimson
 
 @Composable
@@ -45,8 +45,8 @@ fun SeriesSearchScreen(
     onSeriesClick: (String) -> Unit,
     viewModel: SeriesSearchViewModel
 ) {
-    val query by viewModel.query.collectAsState()
-    val state by viewModel.uiState.collectAsState()
+    val query by viewModel.query.collectAsLifecycleState()
+    val state by viewModel.uiState.collectAsLifecycleState()
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         item {

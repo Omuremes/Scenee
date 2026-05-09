@@ -31,23 +31,24 @@ import kotlinx.coroutines.coroutineScope
 class EventRepository @Inject constructor(
     private val eventApiService: EventApiService
 ) {
-    suspend fun getPosterSections(): List<HomeSection> {
-        return posterTypes.mapNotNull { section ->
-            val events = eventApiService.getEvents(type = section.type, skip = 0, limit = 20)
-            if (events.isEmpty()) {
-                null
-            } else {
-                HomeSection(
-                    title = section.title,
-                    items = events.map(::mapCardToPoster)
-                )
+    suspend fun getPosterSections(): List<HomeSection> = coroutineScope {
+        posterTypes.map { section ->
+            async {
+                val events = eventApiService.getEvents(type = section.type, skip = 0, limit = 20)
+                if (events.isEmpty()) {
+                    null
+                } else {
+                    HomeSection(
+                        title = section.title,
+                        items = events.map(::mapCardToPoster)
+                    )
+                }
             }
-        }
+        }.mapNotNull { it.await() }
     }
 
     suspend fun getCinemaEventDetail(eventId: String): MovieDetailData = coroutineScope {
         val detail = eventApiService.getEventDetail(eventId)
-        val seatsBySession = loadAvailableSeats(detail.sessions)
         val summaryDeferred = async { loadCinemaReviewsSummary(detail) }
         val reviewsDeferred = async { loadCinemaReviews(detail) }
         val summary = summaryDeferred.await()
@@ -65,7 +66,7 @@ class EventRepository @Inject constructor(
             sessions = detail.sessions.map { session ->
                 session.toMovieSession(
                     eventType = detail.type,
-                    availableSeats = seatsBySession[session.id].orEmpty(),
+                    availableSeats = emptyList(),
                     totalAvailableSeats = detail.available_seats,
                     city = detail.city,
                     venue = detail.venueLabel()
@@ -82,7 +83,6 @@ class EventRepository @Inject constructor(
 
     suspend fun getEventDetail(eventId: String): EventDetailData = coroutineScope {
         val detail = eventApiService.getEventDetail(eventId)
-        val seatsBySession = loadAvailableSeats(detail.sessions)
 
         EventDetailData(
             screenTitle = detail.type.toDisplayType(),
@@ -98,7 +98,7 @@ class EventRepository @Inject constructor(
             sessions = detail.sessions.map { session ->
                 session.toMovieSession(
                     eventType = detail.type,
-                    availableSeats = seatsBySession[session.id].orEmpty(),
+                    availableSeats = emptyList(),
                     totalAvailableSeats = detail.available_seats,
                     city = detail.city,
                     venue = detail.venueLabel()
@@ -106,23 +106,6 @@ class EventRepository @Inject constructor(
             },
             theme = detail.type.toPosterTheme()
         )
-    }
-
-    private suspend fun loadAvailableSeats(
-        sessions: List<EventSessionDto>
-    ): Map<String, List<EventSeatDto>> = coroutineScope {
-        val deferredSeats = sessions.map { session ->
-            session.id to async {
-                runCatching {
-                    eventApiService.getSessionSeats(session.id, onlyAvailable = true)
-                }.getOrDefault(emptyList())
-            }
-        }
-        val result = mutableMapOf<String, List<EventSeatDto>>()
-        for ((sessionId, seats) in deferredSeats) {
-            result[sessionId] = seats.await()
-        }
-        result
     }
 
     private suspend fun loadCinemaReviewsSummary(detail: EventDetailDto): EventReviewsSummaryDto? {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.cinescope.presentation.models.MediaPoster
 import com.example.cinescope.ui.components.PosterBox
 import com.example.cinescope.ui.theme.Crimson
@@ -84,7 +86,7 @@ fun MoviesCatalogScreen(
                     EmptyCatalogBlock()
                 }
             } else {
-                items(filteredItems) { item ->
+                items(filteredItems, key = { it.id }) { item ->
                     MovieGridCard(item = item, onClick = { onMovieClick(item.id) })
                 }
             }
@@ -184,8 +186,7 @@ private fun VerticalCatalogScreen(
         if (filteredItems.isEmpty()) {
             item { EmptyCatalogBlock() }
         } else {
-            items(filteredItems.size) { index ->
-                val item = filteredItems[index]
+            items(filteredItems, key = { it.id }) { item ->
                 VerticalPosterCard(item = item, onClick = { onClick(item.id) })
             }
         }
@@ -239,7 +240,7 @@ private fun CatalogSearchSection(
         }
         if (showFilters) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(chips.size) { index ->
+                items(chips.size, key = { chips[it] }) { index ->
                     val selected = index == selectedChipIndex
                     Text(
                         text = chips[index],
@@ -293,13 +294,10 @@ private fun List<MediaPoster>.filterCatalog(query: String, chip: String): List<M
 @Composable
 private fun MovieGridCard(item: MediaPoster, onClick: () -> Unit) {
     Column(modifier = Modifier.clickable(onClick = onClick)) {
-        PosterBox(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f),
-            theme = item.theme,
+        CatalogPoster(
+            item = item,
+            modifier = Modifier.fillMaxWidth().aspectRatio(2f / 3f),
             topBadge = item.meta,
-            compactBadge = true,
             ratingMode = true
         )
         Spacer(Modifier.height(14.dp))
@@ -329,25 +327,10 @@ private fun VerticalPosterCard(item: MediaPoster, onClick: () -> Unit) {
             .clickable(onClick = onClick)
     ) {
         Box {
-            PosterBox(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f),
-                theme = item.theme
+            CatalogPoster(
+                item = item,
+                modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)
             )
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(Color.White.copy(alpha = 0.95f))
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(14.dp))
-                Text(item.meta, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            }
         }
         Spacer(Modifier.height(16.dp))
         Text(item.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -357,6 +340,59 @@ private fun VerticalPosterCard(item: MediaPoster, onClick: () -> Unit) {
             color = Color(0xFFA1A1AA),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun CatalogPoster(
+    item: MediaPoster,
+    modifier: Modifier,
+    topBadge: String? = null,
+    ratingMode: Boolean = false
+) {
+    if (!item.posterUrl.isNullOrBlank()) {
+        Box(modifier = modifier.clip(RoundedCornerShape(24.dp))) {
+            AsyncImage(
+                model = item.posterUrl,
+                contentDescription = item.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+            if (!topBadge.isNullOrBlank()) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(12.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color.White.copy(alpha = 0.94f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (ratingMode) {
+                        Icon(
+                            Icons.Outlined.Star,
+                            contentDescription = null,
+                            tint = Color(0xFFF59E0B),
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    Text(
+                        topBadge,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    } else {
+        PosterBox(
+            modifier = modifier,
+            theme = item.theme,
+            topBadge = topBadge,
+            compactBadge = true,
+            ratingMode = ratingMode
         )
     }
 }

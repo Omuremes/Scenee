@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cinescope.data.remote.dto.RegisterRequest
+import com.example.cinescope.ui.components.collectAsLifecycleState
 import com.example.cinescope.ui.theme.Crimson
 
 @Composable
@@ -54,7 +54,7 @@ fun AuthScreen(
     onSuccess: (String) -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsLifecycleState()
     
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

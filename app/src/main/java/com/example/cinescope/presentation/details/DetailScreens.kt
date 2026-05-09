@@ -71,8 +71,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -88,9 +86,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import kotlinx.coroutines.Dispatchers
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.components.PosterBox
@@ -340,12 +337,6 @@ fun SeriesDetailScreen(
     val seasonCount = data.seasons.size
     val episodeCount = data.episodes.size
     var isStorylineExpanded by remember(data.storyline) { mutableStateOf(false) }
-    val seriesSummary = buildList {
-        data.meta.firstOrNull()?.takeIf { it.isNotBlank() }?.let(::add)
-        add(pluralizeCount(seasonCount, "Season", "Seasons"))
-        add(pluralizeCount(episodeCount, "Episode", "Episodes"))
-    }.joinToString(" • ")
-
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
         item {
             HeroTrailerBlock(trailerUrl = data.trailerUrl)
@@ -354,12 +345,6 @@ fun SeriesDetailScreen(
             Card(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
                 Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(data.title, style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-                    Spacer(Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        data.genres.forEach {
-                            Text(it, modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 12.dp, vertical = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
                     Spacer(Modifier.height(20.dp))
                     Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(999.dp)).background(Brush.linearGradient(listOf(Color(0xFFB8000B), Color(0xFFE50914)))).clickable { onEpisodesClick() }.padding(vertical = 18.dp), contentAlignment = Alignment.Center) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -369,6 +354,11 @@ fun SeriesDetailScreen(
                         }
                     }
                 }
+            }
+        }
+        if (data.genres.isNotEmpty()) {
+            item {
+                GenreSection(genres = data.genres)
             }
         }
         item {
@@ -436,30 +426,59 @@ fun SeriesDetailScreen(
     }
 }
 
+@Composable
+private fun GenreSection(genres: List<String>) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
+        Text("Genre", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            genres.forEach { genre ->
+                Text(
+                    text = genre,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 14.dp, vertical = 9.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
 @OptIn(UnstableApi::class)
 @Composable
 private fun HeroTrailerBlock(trailerUrl: String?) {
     val context = LocalContext.current
     val canPlayTrailer = !trailerUrl.isNullOrBlank()
+    var isTrailerPlaying by remember(trailerUrl) { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
     ) {
-        if (canPlayTrailer) {
+        if (canPlayTrailer && isTrailerPlaying) {
             val exoPlayer = remember(trailerUrl) {
                 ExoPlayer.Builder(context).build().apply {
                     setMediaItem(MediaItem.fromUri(trailerUrl!!))
                     repeatMode = Player.REPEAT_MODE_ONE
                     prepare()
                     playWhenReady = true
-                    volume = 0f
+                    volume = 1f
                 }
             }
 
             DisposableEffect(exoPlayer) {
                 onDispose {
+                    exoPlayer.playWhenReady = false
+                    exoPlayer.stop()
+                    exoPlayer.clearMediaItems()
                     exoPlayer.release()
                 }
             }
@@ -480,17 +499,42 @@ private fun HeroTrailerBlock(trailerUrl: String?) {
             )
         } else {
             PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
-            Text(
-                "Trailer unavailable",
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(18.dp)
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(Color.Black.copy(alpha = 0.4f))
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                color = Color.White,
-                style = MaterialTheme.typography.labelSmall
-            )
+            if (canPlayTrailer) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(Color.Black.copy(alpha = 0.18f))
+                        .clickable { isTrailerPlaying = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(Crimson),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.PlayArrow,
+                            contentDescription = "Play trailer",
+                            tint = Color.White,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    "Trailer unavailable",
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(18.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color.Black.copy(alpha = 0.4f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
     }
 }
@@ -1087,9 +1131,6 @@ private fun MovieCommentsTab(data: MovieDetailData) {
 @Composable
 private fun ActorAvatar(photoUrl: String?, name: String) {
     val fallbackColor = MaterialTheme.colorScheme.surfaceVariant
-    val bitmapState = androidx.compose.runtime.produceState<ImageBitmap?>(initialValue = null, key1 = photoUrl) {
-        value = loadBitmapFromUrl(photoUrl)
-    }
 
     Box(
         modifier = Modifier
@@ -1098,33 +1139,20 @@ private fun ActorAvatar(photoUrl: String?, name: String) {
             .background(fallbackColor),
         contentAlignment = Alignment.Center
     ) {
-        val bitmap = bitmapState.value
-        if (bitmap != null) {
-            androidx.compose.foundation.Image(
-                bitmap = bitmap,
+        Text(
+            text = name.take(1).uppercase(),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (!photoUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = photoUrl,
                 contentDescription = name,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-        } else {
-            Text(
-                text = name.take(1).uppercase(),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
-    }
-}
-
-private suspend fun loadBitmapFromUrl(photoUrl: String?): ImageBitmap? {
-    if (photoUrl.isNullOrBlank()) return null
-    return withContext(Dispatchers.IO) {
-        runCatching {
-            java.net.URL(photoUrl).openStream().use { input ->
-                android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
-            }
-        }.getOrNull()
     }
 }
 
