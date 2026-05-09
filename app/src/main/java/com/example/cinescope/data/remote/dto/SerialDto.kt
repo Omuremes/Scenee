@@ -100,6 +100,8 @@ data class SerialDetailDto(
     val id: String,
     val poster_key: String? = null,
     val poster_url: String? = null,
+    val trailer_poster_key: String? = null,
+    val trailer_poster_url: String? = null,
     val trailer_video_key: String? = null,
     val trailer_url: String? = null,
     val average_rating: Double = 0.0,

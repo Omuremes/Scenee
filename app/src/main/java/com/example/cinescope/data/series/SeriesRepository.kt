@@ -125,6 +125,8 @@ class SeriesRepository @Inject constructor(
             storyline = description,
             rating = String.format("%.1f", average_rating),
             reviewCount = "${reviews.size} Reviews",
+            posterUrl = poster_url,
+            trailerPosterUrl = trailer_poster_url,
             cast = actors.map { actor ->
                 SeriesCastMember(
                     name = actor.full_name,
