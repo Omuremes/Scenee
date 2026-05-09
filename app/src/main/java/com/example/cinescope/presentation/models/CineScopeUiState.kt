@@ -129,6 +129,8 @@ data class SeriesDetailData(
     val storyline: String,
     val rating: String,
     val reviewCount: String,
+    val posterUrl: String? = null,
+    val trailerPosterUrl: String? = null,
     val cast: List<SeriesCastMember>,
     val reviews: List<SeriesReviewItem>,
     val seasons: List<String>,

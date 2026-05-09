@@ -339,7 +339,10 @@ fun SeriesDetailScreen(
     var isStorylineExpanded by remember(data.storyline) { mutableStateOf(false) }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 90.dp)) {
         item {
-            HeroTrailerBlock(trailerUrl = data.trailerUrl)
+            HeroTrailerBlock(
+                trailerPosterUrl = data.trailerPosterUrl,
+                trailerUrl = data.trailerUrl
+            )
         }
         item {
             Card(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(24.dp)) {
@@ -453,7 +456,7 @@ private fun GenreSection(genres: List<String>) {
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun HeroTrailerBlock(trailerUrl: String?) {
+private fun HeroTrailerBlock(trailerPosterUrl: String?, trailerUrl: String?) {
     val context = LocalContext.current
     val canPlayTrailer = !trailerUrl.isNullOrBlank()
     var isTrailerPlaying by remember(trailerUrl) { mutableStateOf(false) }
@@ -498,7 +501,27 @@ private fun HeroTrailerBlock(trailerUrl: String?) {
                 }
             )
         } else {
-            PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
+            if (!trailerPosterUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = trailerPosterUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                PosterBox(modifier = Modifier.fillMaxSize(), theme = PosterTheme.CrimsonNight)
+            }
+
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.38f))
+                        )
+                    )
+            )
+
             if (canPlayTrailer) {
                 Box(
                     modifier = Modifier
