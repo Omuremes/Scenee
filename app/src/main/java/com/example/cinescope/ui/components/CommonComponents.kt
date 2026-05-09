@@ -43,10 +43,14 @@ import androidx.compose.ui.unit.dp
 import com.example.cinescope.presentation.models.*
 import com.example.cinescope.ui.theme.Crimson
 
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+
 @Composable
 fun PosterBox(
     modifier: Modifier,
     theme: PosterTheme,
+    posterUrl: String? = null,
     topBadge: String? = null,
     compactBadge: Boolean = false,
     ratingMode: Boolean = false
@@ -56,20 +60,20 @@ fun PosterBox(
             .clip(RoundedCornerShape(28.dp))
             .background(Brush.linearGradient(listOf(theme.start, theme.end)))
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Brush.radialGradient(listOf(Color.White.copy(alpha = 0.18f), Color.Transparent)))
-        )
-        Text(
-            "CinePass",
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp),
-            color = Color.White.copy(alpha = 0.92f),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.ExtraBold
-        )
+        if (!posterUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = posterUrl,
+                contentDescription = null,
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Brush.radialGradient(listOf(Color.White.copy(alpha = 0.18f), Color.Transparent)))
+            )
+        }
         if (topBadge != null) {
             Row(
                 modifier = Modifier
