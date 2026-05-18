@@ -569,13 +569,3 @@ private fun TicketSummary.priceLabel(): String = priceRange.ifBlank { totalPrice
 private fun TicketSummary.isCancelled(): Boolean = status.equals("cancelled", ignoreCase = true)
 
 private fun String.toTicketCategoryId(): String = trim().lowercase()
-
-private fun String.toTicketLabel(): String = trim()
-    .lowercase()
-    .split("-", " ")
-    .filter { it.isNotBlank() }
-    .joinToString(" ") { part ->
-        part.replaceFirstChar { char ->
-            if (char.isLowerCase()) char.titlecase() else char.toString()
-        }
-    }

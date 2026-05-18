@@ -18,6 +18,8 @@ data class BookingResponseDto(
     val session_id: String? = null,
     val seat_id: String? = null,
     val seats_count: Int,
+    val poster_url: String? = null,
+    val image_url: String? = null,
     val total_price: Double = 0.0,
     val status: String,
     val booking_reference: String,

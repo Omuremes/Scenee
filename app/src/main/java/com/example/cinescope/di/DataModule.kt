@@ -3,6 +3,7 @@ package com.example.cinescope.di
 import android.content.Context
 import com.example.cinescope.BuildConfig
 import com.example.cinescope.data.local.SessionManager
+import com.example.cinescope.data.remote.AuthInterceptor
 import com.example.cinescope.data.remote.AuthApiService
 import com.example.cinescope.data.remote.BookingApiService
 import com.example.cinescope.data.remote.EventApiService
@@ -26,7 +27,7 @@ import javax.inject.Singleton
 object DataModule {
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             redactHeader("Authorization")
             redactHeader("Cookie")
@@ -39,6 +40,7 @@ object DataModule {
         }
 
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
     }

@@ -16,8 +16,8 @@ class ProfileRepository @Inject constructor(
     private val sessionManager: SessionManager
 ) {
     suspend fun getMe(): UserDto {
-        val token = sessionManager.authToken.first() ?: throw Exception("Not authenticated")
-        return authApiService.getMe("Bearer $token")
+        sessionManager.authToken.first() ?: throw Exception("Not authenticated")
+        return authApiService.getMe()
     }
 
     suspend fun getProfileSummary(): ProfileSummary {

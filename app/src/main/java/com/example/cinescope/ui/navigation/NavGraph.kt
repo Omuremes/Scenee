@@ -119,6 +119,25 @@ fun CineScopeNavGraph(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var pendingAuthRoute by remember { mutableStateOf<String?>(null) }
+
+    fun navigateToLogin(targetRoute: String? = null) {
+        pendingAuthRoute = targetRoute ?: pendingAuthRoute
+        navController.navigate(AppRoute.Login.route)
+    }
+
+    fun completeAuthFlow() {
+        val targetRoute = pendingAuthRoute ?: BottomNavRoute.Home.route
+        pendingAuthRoute = null
+        navController.navigate(targetRoute) {
+            popUpTo(AppRoute.Login.route) { inclusive = true }
+        }
+    }
+
+    fun cancelAuthFlow() {
+        pendingAuthRoute = null
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -218,7 +237,7 @@ fun CineScopeNavGraph(
                 isLoading = ticketsState.isLoading,
                 errorMessage = ticketsState.errorMessage,
                 cancellingBookingId = ticketsState.cancellingBookingId,
-                onLoginClick = { navController.navigate(AppRoute.Login.route) },
+                onLoginClick = { navigateToLogin(BottomNavRoute.Tickets.route) },
                 onRetry = ticketsViewModel::loadTickets,
                 onViewTicket = { ticket ->
                     val ticketKey = ticket.id.ifBlank { ticket.bookingReference }
@@ -254,16 +273,22 @@ fun CineScopeNavGraph(
                     onCancelTicket = ticketsViewModel::cancelTicket
                 )
             } else {
+                LaunchedEffect(ticketId) {
+                    pendingAuthRoute = AppRoute.TicketDetail.createRoute(ticketId)
+                }
                 AuthRequiredDialog(
-                    onDismiss = { navController.popBackStack() },
-                    onLogin = { navController.navigate(AppRoute.Login.route) }
+                    onDismiss = {
+                        cancelAuthFlow()
+                        navController.popBackStack()
+                    },
+                    onLogin = { navigateToLogin() }
                 )
             }
         }
         composable(BottomNavRoute.Profile.route) {
             ProfileScreen(
                 isAuthenticated = appState.isAuthenticated,
-                onLoginClick = { navController.navigate(AppRoute.Login.route) }
+                onLoginClick = { navigateToLogin(BottomNavRoute.Profile.route) }
             )
         }
         composable(AppRoute.Movies.route) {
@@ -317,29 +342,27 @@ fun CineScopeNavGraph(
         composable(AppRoute.Login.route) {
             AuthScreen(
                 isSignup = false,
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    cancelAuthFlow()
+                    navController.popBackStack()
+                },
                 onSwitch = {
                     navController.navigate(AppRoute.Signup.route)
                 },
-                onSuccess = { _ ->
-                    navController.navigate(BottomNavRoute.Home.route) {
-                        popUpTo(AppRoute.Login.route) { inclusive = true }
-                    }
-                }
+                onSuccess = { _ -> completeAuthFlow() }
             )
         }
         composable(AppRoute.Signup.route) {
             AuthScreen(
                 isSignup = true,
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    cancelAuthFlow()
+                    navController.popBackStack()
+                },
                 onSwitch = {
                     navController.navigate(AppRoute.Login.route)
                 },
-                onSuccess = { _ ->
-                    navController.navigate(BottomNavRoute.Home.route) {
-                        popUpTo(AppRoute.Signup.route) { inclusive = true }
-                    }
-                }
+                onSuccess = { _ -> completeAuthFlow() }
             )
         }
         composable(
@@ -368,6 +391,7 @@ fun CineScopeNavGraph(
                             if (appState.isAuthenticated) {
                                 navController.navigate(AppRoute.BookSeats.createRoute(movieId, sessionId))
                             } else {
+                                pendingAuthRoute = AppRoute.BookSeats.createRoute(movieId, sessionId)
                                 showAuthRequired = true
                             }
                         }
@@ -393,6 +417,7 @@ fun CineScopeNavGraph(
                             if (appState.isAuthenticated) {
                                 navController.navigate(AppRoute.BookSeats.createRoute(movieId, sessionId))
                             } else {
+                                pendingAuthRoute = AppRoute.BookSeats.createRoute(movieId, sessionId)
                                 showAuthRequired = true
                             }
                         }
@@ -405,10 +430,13 @@ fun CineScopeNavGraph(
             }
             if (showAuthRequired) {
                 AuthRequiredDialog(
-                    onDismiss = { showAuthRequired = false },
+                    onDismiss = {
+                        cancelAuthFlow()
+                        showAuthRequired = false
+                    },
                     onLogin = {
                         showAuthRequired = false
-                        navController.navigate(AppRoute.Login.route)
+                        navigateToLogin()
                     }
                 )
             }
@@ -486,6 +514,7 @@ fun CineScopeNavGraph(
                             if (appState.isAuthenticated) {
                                 navController.navigate(AppRoute.BookSeats.createRoute(eventId, sessionId))
                             } else {
+                                pendingAuthRoute = AppRoute.BookSeats.createRoute(eventId, sessionId)
                                 showAuthRequired = true
                             }
                         }
@@ -513,10 +542,13 @@ fun CineScopeNavGraph(
             }
             if (showAuthRequired) {
                 AuthRequiredDialog(
-                    onDismiss = { showAuthRequired = false },
+                    onDismiss = {
+                        cancelAuthFlow()
+                        showAuthRequired = false
+                    },
                     onLogin = {
                         showAuthRequired = false
-                        navController.navigate(AppRoute.Login.route)
+                        navigateToLogin()
                     }
                 )
             }
@@ -547,6 +579,7 @@ fun CineScopeNavGraph(
                             if (appState.isAuthenticated) {
                                 navController.navigate(AppRoute.BookSeats.createRoute(eventId, sessionId))
                             } else {
+                                pendingAuthRoute = AppRoute.BookSeats.createRoute(eventId, sessionId)
                                 showAuthRequired = true
                             }
                         }
@@ -574,10 +607,13 @@ fun CineScopeNavGraph(
             }
             if (showAuthRequired) {
                 AuthRequiredDialog(
-                    onDismiss = { showAuthRequired = false },
+                    onDismiss = {
+                        cancelAuthFlow()
+                        showAuthRequired = false
+                    },
                     onLogin = {
                         showAuthRequired = false
-                        navController.navigate(AppRoute.Login.route)
+                        navigateToLogin()
                     }
                 )
             }
@@ -608,6 +644,7 @@ fun CineScopeNavGraph(
                             if (appState.isAuthenticated) {
                                 navController.navigate(AppRoute.BookSeats.createRoute(eventId, sessionId))
                             } else {
+                                pendingAuthRoute = AppRoute.BookSeats.createRoute(eventId, sessionId)
                                 showAuthRequired = true
                             }
                         }
@@ -635,10 +672,13 @@ fun CineScopeNavGraph(
             }
             if (showAuthRequired) {
                 AuthRequiredDialog(
-                    onDismiss = { showAuthRequired = false },
+                    onDismiss = {
+                        cancelAuthFlow()
+                        showAuthRequired = false
+                    },
                     onLogin = {
                         showAuthRequired = false
-                        navController.navigate(AppRoute.Login.route)
+                        navigateToLogin()
                     }
                 )
             }
@@ -654,8 +694,17 @@ fun CineScopeNavGraph(
                 }
             )
         ) {
+            val eventId = it.arguments?.getString("eventId").orEmpty()
+            val sessionId = it.arguments?.getString("sessionId")
             val bookingViewModel: BookingViewModel = hiltViewModel()
             val bookingState by bookingViewModel.uiState.collectAsLifecycleState()
+            val redirectRoute = AppRoute.BookSeats.createRoute(eventId, sessionId)
+
+            LaunchedEffect(eventId, sessionId) {
+                if (!appState.isAuthenticated) {
+                    pendingAuthRoute = redirectRoute
+                }
+            }
 
             if (appState.isAuthenticated) {
                 BookingScreen(
@@ -670,8 +719,11 @@ fun CineScopeNavGraph(
                 )
             } else {
                 AuthRequiredDialog(
-                    onDismiss = { navController.popBackStack() },
-                    onLogin = { navController.navigate(AppRoute.Login.route) }
+                    onDismiss = {
+                        cancelAuthFlow()
+                        navController.popBackStack()
+                    },
+                    onLogin = { navigateToLogin() }
                 )
             }
         }
@@ -724,9 +776,15 @@ fun CineScopeNavGraph(
                     )
                 }
             } else {
+                LaunchedEffect(movieId) {
+                    pendingAuthRoute = AppRoute.WatchSeries.createRoute(movieId)
+                }
                 AuthRequiredDialog(
-                    onDismiss = { navController.popBackStack() },
-                    onLogin = { navController.navigate(AppRoute.Login.route) }
+                    onDismiss = {
+                        cancelAuthFlow()
+                        navController.popBackStack()
+                    },
+                    onLogin = { navigateToLogin() }
                 )
             }
         }

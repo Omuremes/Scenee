@@ -42,12 +42,17 @@ class SeriesSearchViewModel @Inject constructor(
         _query.value = query
     }
 
+    fun clearSearch() {
+        _query.value = ""
+        _uiState.value = SeriesSearchUiState.Idle
+    }
+
     @OptIn(FlowPreview::class)
     private fun observeQuery() {
         viewModelScope.launch {
             _query
                 .debounce(350)
-                .map { it.trim() }
+                .map(::normalizeSeriesSearchQuery)
                 .distinctUntilChanged()
                 .collectLatest(::search)
         }

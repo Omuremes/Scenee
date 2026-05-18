@@ -11,11 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-data class TicketFilterTab(
-    val id: String,
-    val label: String
-)
-
 data class TicketsUiState(
     val tabs: List<TicketFilterTab> = defaultTicketTabs(),
     val tickets: List<TicketSummary> = emptyList(),
@@ -35,20 +30,35 @@ class TicketsViewModel @Inject constructor(
 
     fun loadTickets() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val cachedTickets = ticketsRepository.getCachedTickets().orEmpty()
+                .filterNot { it.status.equals("cancelled", ignoreCase = true) }
+
+            _uiState.value = _uiState.value.copy(
+                isLoading = cachedTickets.isEmpty(),
+                errorMessage = null,
+                tabs = buildTicketTabs(cachedTickets),
+                tickets = cachedTickets,
+                cancellingBookingId = null
+            )
+
             try {
-                val tickets = ticketsRepository.getTickets()
+                val tickets = ticketsRepository.refreshTickets()
                     .filterNot { it.status.equals("cancelled", ignoreCase = true) }
                 _uiState.value = _uiState.value.copy(
                     tabs = buildTicketTabs(tickets),
                     tickets = tickets,
-                    isLoading = false
+                    isLoading = false,
+                    cancellingBookingId = null,
+                    errorMessage = null
                 )
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = e.message ?: "Could not load tickets"
-                )
+                if (cachedTickets.isEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        cancellingBookingId = null,
+                        errorMessage = e.message ?: "Could not load tickets"
+                    )
+                }
             }
         }
     }
@@ -59,6 +69,7 @@ class TicketsViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(cancellingBookingId = bookingId, errorMessage = null)
             try {
                 ticketsRepository.cancelTicket(bookingId)
+                _uiState.value = _uiState.value.copy(cancellingBookingId = null)
                 loadTickets()
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -69,37 +80,3 @@ class TicketsViewModel @Inject constructor(
         }
     }
 }
-
-private fun defaultTicketTabs(): List<TicketFilterTab> = listOf(
-    TicketFilterTab(id = "all", label = "All"),
-    TicketFilterTab(id = "cinema", label = "Cinema"),
-    TicketFilterTab(id = "concerts", label = "Concerts"),
-    TicketFilterTab(id = "stand-up", label = "Stand-Up")
-)
-
-private fun buildTicketTabs(tickets: List<TicketSummary>): List<TicketFilterTab> {
-    val existingCategories = tickets
-        .map { it.category.toCategoryId() }
-        .filter { it.isNotBlank() }
-        .toSet()
-
-    val knownTabs = defaultTicketTabs()
-        .filter { tab -> tab.id == "all" || tab.id in existingCategories }
-
-    val customTabs = existingCategories
-        .filterNot { categoryId -> knownTabs.any { it.id == categoryId } }
-        .sorted()
-        .map { categoryId -> TicketFilterTab(id = categoryId, label = categoryId.toTicketLabel()) }
-
-    return (knownTabs + customTabs).ifEmpty { defaultTicketTabs().take(1) }
-}
-
-private fun String.toCategoryId(): String = trim().lowercase()
-
-private fun String.toTicketLabel(): String = split("-", " ")
-    .filter { it.isNotBlank() }
-    .joinToString(" ") { part ->
-        part.replaceFirstChar { char ->
-            if (char.isLowerCase()) char.titlecase() else char.toString()
-        }
-    }

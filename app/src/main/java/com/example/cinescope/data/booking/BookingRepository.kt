@@ -53,8 +53,8 @@ class BookingRepository @Inject constructor(
         seatId: String?,
         seatsCount: Int
     ): BookingResponseDto {
+        requireAuthToken()
         return bookingApiService.createBooking(
-            token = bearerToken(),
             request = BookingCreateDto(
                 event_id = eventId,
                 session_id = sessionId,
@@ -65,7 +65,8 @@ class BookingRepository @Inject constructor(
     }
 
     suspend fun getMyTicketSummaries(): List<TicketSummary> = coroutineScope {
-        val bookings = bookingApiService.getMyBookings(bearerToken())
+        requireAuthToken()
+        val bookings = bookingApiService.getMyBookings()
         val events = bookings.map { booking ->
             booking to async { runCatching { eventApiService.getEventDetail(booking.event_id) }.getOrNull() }
         }
@@ -81,17 +82,18 @@ class BookingRepository @Inject constructor(
     }
 
     suspend fun cancelBooking(bookingId: String): BookingResponseDto {
-        return bookingApiService.cancelBooking(bearerToken(), bookingId)
+        requireAuthToken()
+        return bookingApiService.cancelBooking(bookingId)
     }
 
     suspend fun getBookingByReference(reference: String): BookingResponseDto {
-        return bookingApiService.getBookingByReference(bearerToken(), reference)
+        requireAuthToken()
+        return bookingApiService.getBookingByReference(reference)
     }
 
-    private suspend fun bearerToken(): String {
+    private suspend fun requireAuthToken() {
         val token = sessionManager.authToken.first()
         require(!token.isNullOrBlank()) { "Authorization required" }
-        return "Bearer $token"
     }
 
     private fun EventDetailDto.toBookingSelection(
@@ -170,7 +172,7 @@ class BookingRepository @Inject constructor(
             ).distinct().joinToString(", "),
             accent = type.toAccentColor(),
             posterTheme = type.toPosterTheme(),
-            posterUrl = poster_url ?: image_url,
+            posterUrl = booking.poster_url ?: booking.image_url ?: poster_url ?: image_url,
             id = booking.id,
             bookingReference = booking.booking_reference,
             status = booking.status,

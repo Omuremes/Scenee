@@ -3,8 +3,8 @@ package com.example.cinescope.presentation.series
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,9 +18,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -52,6 +54,22 @@ fun SeriesSearchScreen(
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         item {
             Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    IconButton(onClick = {
+                        viewModel.clearSearch()
+                        onBack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("Search Series", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Find shows by title, genre, or cast", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
                 TextField(
                     value = query,
                     onValueChange = viewModel::onQueryChange,
@@ -73,7 +91,6 @@ fun SeriesSearchScreen(
         }
 
         when (state) {
-            SeriesSearchUiState.Idle -> {}
             SeriesSearchUiState.Loading -> item {
                 LoadingState()
             }
@@ -83,12 +100,15 @@ fun SeriesSearchScreen(
             is SeriesSearchUiState.Success -> {
                 val success = state as SeriesSearchUiState.Success
                 if (success.results.isEmpty()) {
-                    item { EmptyState("No series found for \"${success.query}\".") }
+                    item { EmptyState(seriesSearchEmptyMessage(success.query)) }
                 } else {
                     items(success.results, key = { it.id }) { poster ->
                         SearchResultCard(poster = poster, onSeriesClick = onSeriesClick)
                     }
                 }
+            }
+            SeriesSearchUiState.Idle -> if (query.isBlank()) {
+                item { EmptyState(seriesSearchEmptyMessage(query)) }
             }
         }
     }

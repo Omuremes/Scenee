@@ -11,7 +11,6 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Header
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -44,20 +43,17 @@ interface SerialApiService {
 
     @POST("v1/reviews/serials")
     suspend fun createSerialReview(
-        @Header("Authorization") token: String,
         @Body request: SerialReviewCreateRequest
     ): SerialReviewDto
 
     @PUT("v1/reviews/serials/{review_id}")
     suspend fun updateSerialReview(
-        @Header("Authorization") token: String,
         @Path("review_id") reviewId: String,
         @Body request: SerialReviewUpdateRequest
     ): SerialReviewDto
 
     @DELETE("v1/reviews/serials/{review_id}")
     suspend fun deleteSerialReview(
-        @Header("Authorization") token: String,
         @Path("review_id") reviewId: String
     )
 }

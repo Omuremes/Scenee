@@ -57,9 +57,9 @@ class SeriesRepository @Inject constructor(
     }
 
     suspend fun submitSerialReview(serialId: String, rating: Float, text: String) {
+        requireAuthToken()
         val normalizedText = text.trim().takeIf { it.isNotBlank() }
         serialApiService.createSerialReview(
-            token = bearerToken(),
             SerialReviewCreateRequest(
                 serial_id = serialId,
                 rating = rating.toDouble(),
@@ -69,9 +69,9 @@ class SeriesRepository @Inject constructor(
     }
 
     suspend fun updateSerialReview(reviewId: String, rating: Float, text: String) {
+        requireAuthToken()
         val normalizedText = text.trim().takeIf { it.isNotBlank() }
         serialApiService.updateSerialReview(
-            token = bearerToken(),
             reviewId = reviewId,
             request = SerialReviewUpdateRequest(
                 rating = rating.toDouble(),
@@ -81,8 +81,8 @@ class SeriesRepository @Inject constructor(
     }
 
     suspend fun deleteSerialReview(reviewId: String) {
+        requireAuthToken()
         serialApiService.deleteSerialReview(
-            token = bearerToken(),
             reviewId = reviewId
         )
     }
@@ -179,9 +179,8 @@ class SeriesRepository @Inject constructor(
         }
     }
 
-    private suspend fun bearerToken(): String {
+    private suspend fun requireAuthToken() {
         val token = sessionManager.authToken.first()
         require(!token.isNullOrBlank()) { "Authorization required" }
-        return "Bearer $token"
     }
 }

@@ -14,12 +14,16 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -29,6 +33,9 @@ import com.example.cinescope.data.auth.AuthRepository
 import com.example.cinescope.data.home.HomeRepository
 import com.example.cinescope.data.profile.ProfileRepository
 import com.example.cinescope.presentation.models.CineScopeUiState
+import com.example.cinescope.presentation.models.HomeCategory
+import com.example.cinescope.presentation.models.HomeSection
+import com.example.cinescope.presentation.models.ProfileSummary
 import com.example.cinescope.ui.components.CineScopeTopBar
 import com.example.cinescope.ui.components.collectAsLifecycleState
 import com.example.cinescope.ui.navigation.AppRoute
@@ -40,7 +47,10 @@ import com.example.cinescope.ui.theme.Crimson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,31 +62,42 @@ class CineScopeViewModel @Inject constructor(
 
     private val authFlow = authRepository.getAuthToken()
     private val refreshTrigger = MutableStateFlow(0)
+    private val homeState = MutableStateFlow(HomeLoadState(isLoading = true))
+    private val profileState = MutableStateFlow<ProfileSummary?>(null)
+
+    init {
+        viewModelScope.launch {
+            authFlow.collectLatest { token ->
+                if (token == null) {
+                    profileState.value = null
+                } else {
+                    profileState.value = runCatching { profileRepository.getProfileSummary() }.getOrNull()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            refreshTrigger.drop(1).collect {
+                loadHome()
+            }
+        }
+
+        loadHome()
+    }
 
     val uiState: StateFlow<CineScopeUiState> = combine(
         authFlow,
-        refreshTrigger
-    ) { token: String?, _: Int ->
-        coroutineScope {
-            val homeDeferred = async { runCatching { homeRepository.getHomeSections() } }
-            val profileDeferred = if (token != null) {
-                async { runCatching { profileRepository.getProfileSummary() }.getOrNull() }
-            } else {
-                null
-            }
-
-            val homeResult = homeDeferred.await()
-            val profileSummary = profileDeferred?.await()
-
-            CineScopeUiState(
-                isAuthenticated = token != null,
-                homeLoading = false,
-                homeErrorMessage = homeResult.exceptionOrNull()?.message,
-                homeSections = homeResult.getOrDefault(emptyList()),
-                categories = homeRepository.getCategories(),
-                profileSummary = profileSummary
-            )
-        }
+        homeState,
+        profileState
+    ) { token: String?, homeLoadState: HomeLoadState, profileSummary: ProfileSummary? ->
+        CineScopeUiState(
+            isAuthenticated = token != null,
+            homeLoading = homeLoadState.isLoading,
+            homeErrorMessage = homeLoadState.errorMessage,
+            homeSections = homeLoadState.sections,
+            categories = homeRepository.getCategories(),
+            profileSummary = profileSummary
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -89,6 +110,40 @@ class CineScopeViewModel @Inject constructor(
     fun refresh() {
         refreshTrigger.value += 1
     }
+
+    private fun loadHome() {
+        viewModelScope.launch {
+            val cachedSections = homeRepository.getCachedHomeSections()
+            homeState.value = HomeLoadState(
+                isLoading = cachedSections.isNullOrEmpty(),
+                errorMessage = null,
+                sections = cachedSections.orEmpty()
+            )
+
+            val homeResult = runCatching { homeRepository.refreshHomeSections() }
+            homeResult.onSuccess { sections ->
+                homeState.value = HomeLoadState(
+                    isLoading = false,
+                    errorMessage = null,
+                    sections = sections
+                )
+            }.onFailure { error ->
+                if (cachedSections.isNullOrEmpty()) {
+                    homeState.value = HomeLoadState(
+                        isLoading = false,
+                        errorMessage = error.message,
+                        sections = emptyList()
+                    )
+                }
+            }
+        }
+    }
+
+    private data class HomeLoadState(
+        val isLoading: Boolean,
+        val errorMessage: String? = null,
+        val sections: List<HomeSection> = emptyList()
+    )
 }
 
 @Composable
@@ -97,6 +152,17 @@ fun CineScopeApp(viewModel: CineScopeViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsLifecycleState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Scaffold(
         topBar = {

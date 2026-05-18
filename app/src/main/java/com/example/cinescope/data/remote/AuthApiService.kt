@@ -6,7 +6,6 @@ import com.example.cinescope.data.remote.dto.RegisterRequest
 import com.example.cinescope.data.remote.dto.UserDto
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthApiService {
@@ -22,7 +21,5 @@ interface AuthApiService {
     ): AuthResponse
 
     @GET("v1/auth/me")
-    suspend fun getMe(
-        @Header("Authorization") token: String
-    ): UserDto
+    suspend fun getMe(): UserDto
 }
